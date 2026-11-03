@@ -22,7 +22,7 @@ uvicorn app.main:app --reload
   1. `POST /auth/login` con `{"usuario": "jefe", "password": "<tu DEMO_PASSWORD>"}`
   2. Copia el `access_token`, aprieta **Authorize** (arriba a la derecha) y pégalo.
   3. Ya puedes probar los demás endpoints.
-- Pruebas: `pytest` (59 pruebas, 32 de ellas de seguridad)
+- Pruebas: `pytest` (60 pruebas, 33 de ellas de seguridad)
 
 ## Datos de ejemplo
 
@@ -84,6 +84,7 @@ Qué está cubierto hoy (cada punto tiene su prueba en `tests/test_seguridad.py`
 - **Permisos por perfil.** El empleado solo ve su ficha, sus turnos y sus solicitudes, y solo puede pedir cambios por sí mismo. Aprobar solicitudes, registrar eventos y ver los datos operativos es solo del jefe de turno.
 - **Contraseñas:** se guardan con hash PBKDF2-SHA256 (600.000 iteraciones y sal aleatoria) y se comparan en tiempo constante. Nunca quedan en el código ni en el repo.
 - **Fuerza bruta:** tras 5 intentos fallidos, ese usuario queda bloqueado 5 minutos (`429`). El error es el mismo si el usuario no existe o si la contraseña está mal, así no se puede adivinar qué usuarios existen.
+- **Ausencias:** el motivo solo dice `personal` o `salud`. El diagnóstico nunca sale de la API.
 - **Entradas:** se rechazan campos que no están en el contrato, para que nadie pueda mandar `"estado": "aprobada"` en su propia solicitud. Los textos tienen largo máximo.
 - **CORS** solo acepta el origen del frontend (`CORS_ORIGINS`), nunca `*`.
 - **Cabeceras:** `nosniff`, `X-Frame-Options: DENY`, `no-referrer` y `Cache-Control: no-store` (que no queden datos del personal en caché). En producción se suma HSTS.

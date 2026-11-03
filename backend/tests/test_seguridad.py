@@ -186,3 +186,11 @@ def test_produccion_exige_secret_key(monkeypatch):
     monkeypatch.setenv("SECRET_KEY", "corta")
     with pytest.raises(ValueError, match="32"):
         Settings(_env_file=None)
+
+
+def test_ausencias_sin_diagnostico(client):
+    """El jefe ve que alguien faltó por salud, nunca el diagnóstico."""
+    motivos = set()
+    for e in client.get("/empleados").json():
+        motivos |= {a["motivo"] for a in client.get(f"/empleados/{e['id']}").json()["ausencias"]}
+    assert motivos <= {"personal", "salud"}

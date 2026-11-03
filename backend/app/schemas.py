@@ -152,7 +152,7 @@ class Turno(BaseModel):
 
 class Ausencia(BaseModel):
     fecha: date
-    motivo: str
+    motivo: Literal["personal", "salud"] = Field(description="Nunca el diagnóstico")
     horas: float
     aviso_corto: bool
 

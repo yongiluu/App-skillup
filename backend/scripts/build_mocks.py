@@ -12,6 +12,7 @@ Notas:
 - Los nombres de empleados son ficticios (el proyecto anterior solo tiene IDs).
 - Se descartan a propósito las variables excluidas en la matriz de variables
   (género, IMC, hijos, tabaquismo, consumo de alcohol, edad) y la biometría.
+- El motivo de ausencia se reduce a "personal" o "salud": nunca se expone el diagnóstico.
 - Los eventos son simulados a partir de `local_event_flag` / `promo_flag`
   [PENDIENTE CERVECERÍA].
 """
@@ -169,7 +170,8 @@ def construir(origen: Path) -> None:
         {
             "empleado_id": r.employee_id,
             "fecha": r.date,
-            "motivo": r.absence_reason,
+            # Nunca el diagnóstico: solo "personal" o "salud" (como una licencia médica).
+            "motivo": "personal" if "personal" in str(r.absence_reason) else "salud",
             "horas": float(r.absence_hours),
             "aviso_corto": _bool(r.is_short_notice),
         }
