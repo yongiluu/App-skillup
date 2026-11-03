@@ -22,7 +22,7 @@ uvicorn app.main:app --reload
   1. `POST /auth/login` con `{"usuario": "jefe", "password": "<tu DEMO_PASSWORD>"}`
   2. Copia el `access_token`, aprieta **Authorize** (arriba a la derecha) y pégalo.
   3. Ya puedes probar los demás endpoints.
-- Pruebas: `pytest` → 80 pruebas con los mocks (incluye seguridad y bienestar), más 29 de integración con Postgres si defines `TEST_DATABASE_URL` (ver abajo).
+- Pruebas: `pytest` → 82 pruebas con los mocks (incluye seguridad y bienestar), más 29 de integración con Postgres si defines `TEST_DATABASE_URL` (ver abajo).
 
 ## Fuente de datos
 
@@ -54,7 +54,7 @@ Los dos modos tienen los mismos métodos (`app/repositorio.py` y `app/repositori
 - La conexión usa el usuario `postgres`, que se salta RLS. Sirve para el prototipo; en producción hay que usar un rol con permisos mínimos (ver pendientes).
 
 ### Pruebas de integración con Postgres
-`tests/test_bd.py` aplica en una base **local y descartable** las migraciones oficiales de Maxi (`database/migrations/*.sql`), carga los mocks con `scripts/cargar_mocks_en_bd.py` y verifica que la API responda **exactamente igual** que en modo mock: las 72 fichas, servicios, sugerencias, fatiga, ausencias, semana y calendario. Los mocks se generan para que coincidan con la base: sin turnos repetidos, `asignados` = turnos programados, dotación con 1 decimal y días seguidos calculados desde los turnos.
+`tests/test_bd.py` aplica en una base **local y descartable** las migraciones oficiales de Maxi (`database/migrations/*.sql`), carga los mocks con `scripts/cargar_mocks_en_bd.py` y verifica que la API responda **exactamente igual** que en modo mock: las 80 fichas, servicios, sugerencias, fatiga, ausencias, semana y calendario. Los mocks se generan para que coincidan con la base: sin turnos repetidos, `asignados` = turnos programados, dotación con 1 decimal y días seguidos calculados desde los turnos.
 
 ```bash
 TEST_DATABASE_URL=postgresql://postgres@localhost:5432/skillup_test pytest
@@ -64,6 +64,8 @@ Si `TEST_DATABASE_URL` no está definida, esas pruebas se saltan. La prueba se n
 `scripts/cargar_mocks_en_bd.py` también se niega a escribir en un host remoto salvo con `--permitir-remoto`. Cargar la semilla en Supabase le toca a base de datos (Maxi).
 
 ## Datos de ejemplo
+
+> **Versión 2 de la simulación** (80 personas, con margen de programación): faltas en el 31,5 % de los servicios y no en el 82,6 %. Detalle y forma de reproducirla en [`docs/simulacion-demo.md`](../docs/simulacion-demo.md).
 
 - Vienen del proyecto anterior (`skillup-dotacion-laboral`, dominio `restaurant`) y están en `app/mocks/*.json`.
 - **Rango:** servicios y turnos del lunes **2025-09-29** al domingo **2025-11-02** (5 semanas). El calendario cubre de julio a diciembre de 2025.
@@ -82,7 +84,7 @@ Todos exigen la cabecera `Authorization: Bearer <token>`, salvo `/auth/login` y 
 
 | Método | Ruta | Quién | Notas |
 |---|---|---|---|
-| `POST` | `/auth/login` | Todos | Usuarios de prueba `jefe` (RST_055, Catalina Flores) y `empleado` (RST_001), con la contraseña de `DEMO_PASSWORD`. Devuelve el token, el perfil, `expira_en` y `hoy` (la fecha de trabajo de la API) |
+| `POST` | `/auth/login` | Todos | Usuarios de prueba `jefe` (RST_055, Catalina Flores) y `empleado` (RST_056, Cristóbal Silva), con la contraseña de `DEMO_PASSWORD`. Devuelve el token, el perfil, `expira_en` y `hoy` (la fecha de trabajo de la API) |
 | `GET` | `/servicios?fecha=` | Jefe | El día con sus 4 servicios |
 | `GET` | `/semana?inicio=` | Jefe | 7 días × 4 servicios. Si se omite `inicio`, usa el lunes de "hoy" |
 | `GET` | `/calendario?mes=YYYY-MM` | Todos | Ventana de pago, feriados, vísperas y eventos por día |
@@ -131,7 +133,7 @@ Los datos son **simulados** y solo incluyen las variables activas de la matriz: 
 | Jefe de turno | Solo el **indicador**: nivel `bajo` / `medio` / `alto` y hasta 2 motivos generales (`descanso`, `carga_fisica`, `jornada`, `autorreporte`). Aparece en la ficha y en `/bienestar/fatiga` |
 | Nadie | Diagnósticos ni datos de quien no dio consentimiento |
 
-- **Consentimiento:** cada persona tiene un registro simulado (`otorgado`, `fecha`, `version_texto`). 13 de las 72 no consintieron (por ejemplo, `RST_011`). Para ellas el estado es `sin_consentimiento` y no existen datos de bienestar, ni siquiera guardados.
+- **Consentimiento:** cada persona tiene un registro simulado (`otorgado`, `fecha`, `version_texto`). 15 de las 80 no consintieron (por ejemplo, `RST_011`). Para ellas el estado es `sin_consentimiento` y no existen datos de bienestar, ni siquiera guardados.
 - **Indicador v0** (`app/bienestar.py`): se calcula con los últimos 3 días. Cada componente va de 0 a 1:
   - descanso: menos de 5,5 h de sueño promedio = 1;
   - carga física: más de 15.000 pasos o pulso medio sobre 93 = 1;

@@ -20,7 +20,7 @@ def test_login_jefe(anonimo):
 
 def test_login_empleado(anonimo):
     r = anonimo.post("/auth/login", json={"usuario": "Empleado ", "password": PASSWORD})
-    assert r.json()["perfil"] == "empleado" and r.json()["empleado_id"] == "RST_001"
+    assert r.json()["perfil"] == "empleado" and r.json()["empleado_id"] == "RST_056"
 
 
 def test_login_invalido(anonimo):
@@ -113,8 +113,14 @@ def test_sugerencias(client):
         assert s["rol_a_cubrir"] == e["rol"] or s["rol_a_cubrir"] in e["puede_cubrir"]
         assert (s["accion"] == "mover") == (s["rol_actual"] is not None)
     # el 21_23 del 17-oct tiene en riesgo los 3 roles críticos: debe haber sugerencias para cada uno
-    roles_21 = {s["rol_a_cubrir"] for s in sug if s["servicio"] == "21_23"}
-    assert roles_21 == {"garzon", "cocinero_linea", "jefe_turno"}
+    # cada rol crítico en riesgo (≥ 0,55) de un servicio en riesgo tiene al menos una sugerencia
+    for s in client.get("/servicios", params={"fecha": HOY}).json()["servicios"]:
+        if s["prob_deficit"] >= 0.55:
+            en_riesgo = {r for r, p in s["prob_por_rol"].items() if p >= 0.55}
+            sugeridos = {x["rol_a_cubrir"] for x in sug if x["servicio"] == s["servicio"]}
+            assert en_riesgo <= sugeridos, s["servicio"]
+    # 17-10, 13-15: falta la jefa programada (RST_008, ausente) → se sugiere otro jefe de turno
+    assert any(x["servicio"] == "13_15" and x["rol_a_cubrir"] == "jefe_turno" for x in sug)
 
 
 def test_sugerencias_no_incluyen_ausentes(client):
@@ -130,7 +136,7 @@ def test_sugerencias_no_incluyen_ausentes(client):
 # ---------- empleados ----------
 def test_empleados(client):
     lista = client.get("/empleados").json()
-    assert len(lista) == 72
+    assert len(lista) == 80
     campos_prohibidos = {"gender", "genero", "bmi", "imc", "children", "hijos", "smoker", "edad", "age"}
     assert not campos_prohibidos & set(lista[0])
 
@@ -141,7 +147,7 @@ def test_empleados_filtro_rol(client):
 
 
 def test_ficha(client):
-    f = client.get("/empleados/RST_001").json()
+    f = client.get("/empleados/RST_056").json()
     assert f["bienestar"]["estado"] == "ok" and f["bienestar"]["tests"]["estado"] == "pendiente"
     assert all(t["fecha"] >= HOY for t in f["proximos_turnos"])
 
@@ -152,12 +158,12 @@ def test_ficha_inexistente(client):
 
 
 def test_turnos_filtrados(client):
-    ts = client.get("/empleados/RST_001/turnos", params={"desde": "2025-10-13", "hasta": "2025-10-19"}).json()
+    ts = client.get("/empleados/RST_056/turnos", params={"desde": "2025-10-13", "hasta": "2025-10-19"}).json()
     assert ts and all("2025-10-13" <= t["fecha"] <= "2025-10-19" for t in ts)
 
 
 # ---------- solicitudes de cambio ----------
-def _turno_de(client, emp="RST_001"):
+def _turno_de(client, emp="RST_056"):
     return client.get(f"/empleados/{emp}/turnos", params={"desde": HOY}).json()[0]
 
 
@@ -165,7 +171,7 @@ def test_flujo_solicitud_aprobada(client):
     t = _turno_de(client)
     r = client.post(
         "/solicitudes-cambio",
-        json={"solicitante_id": "RST_001", "fecha": t["fecha"], "servicio": t["servicio"], "motivo": "Examen"},
+        json={"solicitante_id": "RST_056", "fecha": t["fecha"], "servicio": t["servicio"], "motivo": "Examen"},
     )
     assert r.status_code == 201 and r.json()["estado"] == "pendiente"
     sid = r.json()["id"]
@@ -176,14 +182,14 @@ def test_flujo_solicitud_aprobada(client):
 
 
 def test_solicitud_sin_turno(client):
-    # RST_001 no trabaja el 2025-10-17 en 11_13 (dato fijo de los mocks)
-    r = client.post("/solicitudes-cambio", json={"solicitante_id": "RST_001", "fecha": HOY, "servicio": "11_13"})
+    # RST_056 no trabaja el 2025-10-17 en 11_13 (dato fijo de los mocks)
+    r = client.post("/solicitudes-cambio", json={"solicitante_id": "RST_056", "fecha": HOY, "servicio": "11_13"})
     assert r.status_code == 409
 
 
 def test_listar_solicitudes(client):
     t = _turno_de(client)
-    client.post("/solicitudes-cambio", json={"solicitante_id": "RST_001", "fecha": t["fecha"], "servicio": t["servicio"]})
+    client.post("/solicitudes-cambio", json={"solicitante_id": "RST_056", "fecha": t["fecha"], "servicio": t["servicio"]})
     assert len(client.get("/solicitudes-cambio", params={"estado": "pendiente"}).json()) == 1
     assert client.get("/solicitudes-cambio", params={"estado": "aprobada"}).json() == []
 
@@ -205,7 +211,7 @@ def test_solicitud_inexistente(client):
 # ---------- ausencias del día ----------
 def test_ausencias_del_dia(client):
     aus = client.get("/ausencias", params={"fecha": HOY}).json()
-    assert {a["empleado_id"] for a in aus} == {"RST_006", "RST_008", "RST_063", "RST_068"}  # dato fijo de los mocks
+    assert {a["empleado_id"] for a in aus} == {"RST_003", "RST_008", "RST_051", "RST_068", "RST_074"}  # dato fijo de los mocks
     assert all(a["motivo"] in {"personal", "salud"} for a in aus)
     assert [a["empleado_id"] for a in aus] == sorted(a["empleado_id"] for a in aus)
     # "servicios" = franjas en que esa persona tenía turno ese día

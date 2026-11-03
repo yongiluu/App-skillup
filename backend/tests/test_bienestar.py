@@ -25,7 +25,7 @@ def _claves(obj) -> set[str]:
 # ---------- jefe: solo indicador ----------
 def test_jefe_ve_indicador_sin_datos_crudos(client):
     equipo = client.get("/bienestar/fatiga", params={"fecha": HOY}).json()
-    assert len(equipo) == 72
+    assert len(equipo) == 80
     assert not CRUDOS & _claves(equipo)
     con_dato = [e for e in equipo if e["estado"] == "ok"]
     assert con_dato and all(e["fatiga"]["nivel"] in {"bajo", "medio", "alto"} for e in con_dato)
@@ -34,19 +34,19 @@ def test_jefe_ve_indicador_sin_datos_crudos(client):
 
 
 def test_ficha_del_jefe_sin_datos_crudos(client):
-    ficha = client.get("/empleados/RST_001").json()
+    ficha = client.get("/empleados/RST_056").json()
     assert ficha["bienestar"]["fatiga"]["nivel"] in {"bajo", "medio", "alto"}
     assert not CRUDOS & _claves(ficha["bienestar"])
 
 
 def test_jefe_no_ve_datos_crudos_de_nadie(client):
-    assert client.get("/empleados/RST_001/bienestar").status_code == 403
+    assert client.get("/empleados/RST_056/bienestar").status_code == 403
     assert client.get("/empleados/RST_055/bienestar").status_code == 200  # los suyos sí
 
 
 # ---------- empleado: solo lo suyo ----------
 def test_empleado_ve_sus_datos_crudos(empleado):
-    r = empleado.get("/empleados/RST_001/bienestar", params={"desde": "2025-10-11", "hasta": HOY})
+    r = empleado.get("/empleados/RST_056/bienestar", params={"desde": "2025-10-11", "hasta": HOY})
     assert r.status_code == 200
     d = r.json()
     assert d["estado"] == "ok" and len(d["registros"]) == 7
@@ -59,12 +59,12 @@ def test_empleado_no_ve_bienestar_ajeno(empleado):
 
 
 def test_bienestar_sin_sesion(anonimo):
-    for ruta in ("/bienestar/fatiga", "/bienestar/preguntas", "/empleados/RST_001/bienestar"):
+    for ruta in ("/bienestar/fatiga", "/bienestar/preguntas", "/empleados/RST_056/bienestar"):
         assert anonimo.get(ruta).status_code == 401
 
 
 def test_rango_invertido(empleado):
-    assert empleado.get("/empleados/RST_001/bienestar", params={"desde": HOY, "hasta": "2025-10-01"}).status_code == 422
+    assert empleado.get("/empleados/RST_056/bienestar", params={"desde": HOY, "hasta": "2025-10-01"}).status_code == 422
 
 
 # ---------- consentimiento ----------
@@ -79,7 +79,7 @@ def test_sin_consentimiento_no_hay_nada(client):
 
 def test_sin_datos_fuera_de_rango(client):
     ficha = {e["empleado_id"]: e for e in client.get("/bienestar/fatiga", params={"fecha": "2025-12-15"}).json()}
-    assert ficha["RST_001"]["estado"] == "sin_datos"
+    assert ficha["RST_056"]["estado"] == "sin_datos"
 
 
 def test_sugerencias_dejan_al_final_a_quien_tiene_fatiga_alta(client):
@@ -111,7 +111,7 @@ def test_preguntas_propuestas(empleado):
 
 
 def test_ficha_tests_pendientes(client):
-    assert client.get("/empleados/RST_001").json()["bienestar"]["tests"]["estado"] == "pendiente"
+    assert client.get("/empleados/RST_056").json()["bienestar"]["tests"]["estado"] == "pendiente"
 
 
 # ---------- auditoría ----------

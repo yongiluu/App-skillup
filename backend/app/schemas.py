@@ -246,7 +246,7 @@ class EstadoSolicitud(str, Enum):
 
 
 class SolicitudCambioIn(Entrada):
-    solicitante_id: str = Field(max_length=20, examples=["RST_001"])
+    solicitante_id: str = Field(max_length=20, examples=["RST_056"])
     fecha: date
     servicio: Franja
     reemplazo_id: str | None = Field(default=None, max_length=20, description="Quién cubre, si ya se sabe")

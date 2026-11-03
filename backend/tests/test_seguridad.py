@@ -19,8 +19,8 @@ PROTEGIDOS = [
     ("get", "/sugerencias"),
     ("get", "/ausencias"),
     ("get", "/empleados"),
-    ("get", "/empleados/RST_001"),
-    ("get", "/empleados/RST_001/turnos"),
+    ("get", "/empleados/RST_056"),
+    ("get", "/empleados/RST_056/turnos"),
     ("get", "/solicitudes-cambio"),
     ("post", "/solicitudes-cambio"),
     ("patch", "/solicitudes-cambio/1"),
@@ -92,8 +92,8 @@ def test_empleado_no_aprueba_ni_crea_eventos(empleado):
 
 
 def test_empleado_ve_solo_lo_suyo(empleado):
-    assert empleado.get("/empleados/RST_001").status_code == 200
-    assert empleado.get("/empleados/RST_001/turnos").status_code == 200
+    assert empleado.get("/empleados/RST_056").status_code == 200
+    assert empleado.get("/empleados/RST_056/turnos").status_code == 200
     assert empleado.get("/empleados/RST_002").status_code == 403
     assert empleado.get("/empleados/RST_002/turnos").status_code == 403
 
@@ -108,16 +108,16 @@ def test_empleado_solo_lista_sus_solicitudes(client, empleado):
     otro = next(t for t in client.get("/empleados/RST_002/turnos", params={"desde": HOY}).json())
     client.post("/solicitudes-cambio", json={"solicitante_id": "RST_002", "fecha": otro["fecha"], "servicio": otro["servicio"]})
     # el empleado pide la suya
-    t = empleado.get("/empleados/RST_001/turnos", params={"desde": HOY}).json()[0]
-    empleado.post("/solicitudes-cambio", json={"solicitante_id": "RST_001", "fecha": t["fecha"], "servicio": t["servicio"]})
+    t = empleado.get("/empleados/RST_056/turnos", params={"desde": HOY}).json()[0]
+    empleado.post("/solicitudes-cambio", json={"solicitante_id": "RST_056", "fecha": t["fecha"], "servicio": t["servicio"]})
     assert len(client.get("/solicitudes-cambio").json()) == 2
     propias = empleado.get("/solicitudes-cambio").json()
-    assert [s["solicitante_id"] for s in propias] == ["RST_001"]
+    assert [s["solicitante_id"] for s in propias] == ["RST_056"]
 
 
 def test_jefe_queda_registrado_al_resolver(client):
-    t = client.get("/empleados/RST_001/turnos", params={"desde": HOY}).json()[0]
-    sid = client.post("/solicitudes-cambio", json={"solicitante_id": "RST_001", "fecha": t["fecha"], "servicio": t["servicio"]}).json()["id"]
+    t = client.get("/empleados/RST_056/turnos", params={"desde": HOY}).json()[0]
+    sid = client.post("/solicitudes-cambio", json={"solicitante_id": "RST_056", "fecha": t["fecha"], "servicio": t["servicio"]}).json()["id"]
     assert client.patch(f"/solicitudes-cambio/{sid}", json={"estado": "rechazada"}).json()["resuelta_por"] == "RST_055"
 
 
@@ -142,10 +142,10 @@ def test_mismo_error_si_usuario_no_existe_o_clave_mala(anonimo):
 # ---------- entradas ----------
 def test_campos_extra_rechazados(client):
     """Nadie puede colar campos que no están en el contrato (ej. marcar su solicitud como aprobada)."""
-    t = client.get("/empleados/RST_001/turnos", params={"desde": HOY}).json()[0]
+    t = client.get("/empleados/RST_056/turnos", params={"desde": HOY}).json()[0]
     r = client.post(
         "/solicitudes-cambio",
-        json={"solicitante_id": "RST_001", "fecha": t["fecha"], "servicio": t["servicio"], "estado": "aprobada"},
+        json={"solicitante_id": "RST_056", "fecha": t["fecha"], "servicio": t["servicio"], "estado": "aprobada"},
     )
     assert r.status_code == 422
 
