@@ -11,7 +11,7 @@ describe('bienestar en la ficha (vista del jefe)', () => {
   it('con datos: muestra nivel, motivo y aviso de consentimiento', () => {
     render(<BienestarFicha vista="jefe" bienestar={de('RST_003')} />)
     expect(screen.getByText('Fatiga alta')).toBeInTheDocument()
-    expect(screen.getByText(/Motivo: carga física y poco descanso/i)).toBeInTheDocument()
+    expect(screen.getByText(/Motivo: carga física y cansancio informado/i)).toBeInTheDocument()
     expect(screen.getByText(/Autorizó el uso de datos de bienestar el 15-09-2025/)).toBeInTheDocument()
   })
 

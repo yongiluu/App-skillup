@@ -1,13 +1,15 @@
 [
   {
-    "empleado_id": "RST_006",
-    "nombre": "Sebastián Gutiérrez",
-    "rol": "cajero",
+    "empleado_id": "RST_003",
+    "nombre": "Isidora Silva",
+    "rol": "garzon",
     "fecha": "2025-10-17",
     "motivo": "personal",
-    "horas": 2.0,
-    "aviso_corto": true,
+    "horas": 6.0,
+    "aviso_corto": false,
     "servicios": [
+      "11_13",
+      "13_15",
       "21_23"
     ]
   },
@@ -18,23 +20,22 @@
     "fecha": "2025-10-17",
     "motivo": "salud",
     "horas": 4.0,
-    "aviso_corto": true,
+    "aviso_corto": false,
     "servicios": [
       "11_13",
-      "21_23"
+      "13_15"
     ]
   },
   {
-    "empleado_id": "RST_063",
-    "nombre": "Felipe Castro",
-    "rol": "ayudante_cocina",
+    "empleado_id": "RST_051",
+    "nombre": "Isidora Reyes",
+    "rol": "cocinero_linea",
     "fecha": "2025-10-17",
     "motivo": "personal",
-    "horas": 6.0,
-    "aviso_corto": true,
+    "horas": 4.0,
+    "aviso_corto": false,
     "servicios": [
       "13_15",
-      "19_21",
       "21_23"
     ]
   },
@@ -44,11 +45,22 @@
     "rol": "cocinero_linea",
     "fecha": "2025-10-17",
     "motivo": "salud",
-    "horas": 4.0,
+    "horas": 2.0,
     "aviso_corto": true,
     "servicios": [
-      "19_21",
-      "21_23"
+      "19_21"
+    ]
+  },
+  {
+    "empleado_id": "RST_074",
+    "nombre": "Isidora Pérez",
+    "rol": "cajero",
+    "fecha": "2025-10-17",
+    "motivo": "personal",
+    "horas": 2.0,
+    "aviso_corto": false,
+    "servicios": [
+      "19_21"
     ]
   }
 ]

@@ -53,8 +53,8 @@ export function login(datos: LoginIn): Promise<LoginOut> {
       expira_en: 8 * 60 * 60,
       perfil: usuario === 'jefe' ? 'jefe_turno' : 'empleado',
       // Mismos usuarios de prueba que el backend (USUARIOS_DEMO en backend/app/seguridad.py)
-      empleado_id: usuario === 'jefe' ? 'RST_055' : 'RST_001',
-      nombre: usuario === 'jefe' ? 'Catalina Flores' : 'Agustín Díaz',
+      empleado_id: usuario === 'jefe' ? 'RST_055' : 'RST_056',
+      nombre: usuario === 'jefe' ? 'Catalina Flores' : 'Cristóbal Silva',
       hoy: MOCK_HOY,
     })
   }

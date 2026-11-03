@@ -11,7 +11,10 @@ describe('acciones sugeridas', () => {
   it('agrupa por servicio y rol, en orden de franja', () => {
     render(<AccionesSugeridas sugerencias={sugerencias as Sugerencia[]} />)
     const titulos = screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)
-    expect(titulos[0]).toMatch(/^11:00–13:00/)
+    // Ordenadas por franja (las sugerencias del 17-10 parten en 13:00–15:00)
+    expect(titulos[0]).toMatch(/^13:00–15:00/)
+    const inicios = titulos.map((t) => t!.slice(0, 5))
+    expect(inicios).toEqual([...inicios].sort())
     // Cada sugerencia aparece una vez con su acción
     expect(screen.getAllByText(/^(Mover|Llamar)$/)).toHaveLength(sugerencias.length)
   })
@@ -30,7 +33,7 @@ describe('ausencias del día', () => {
       </MemoryRouter>,
     )
     const fila = screen.getByRole('link', { name: 'Gaspar Espinoza' }).closest('li')!
-    expect(within(fila).getByText(/19:00–21:00, 21:00–23:00/)).toBeInTheDocument()
+    expect(within(fila).getByText("Programado/a en 19:00–21:00")).toBeInTheDocument()
     expect(within(fila).getByText('Salud')).toBeInTheDocument()
     expect(within(fila).getByText('Aviso corto')).toBeInTheDocument()
   })
