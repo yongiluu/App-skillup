@@ -15,7 +15,7 @@ begin
     end if;
 end $$;
 
--- 2481 turnos. Se omitieron 12 repetidos de los mocks
+-- 2481 turnos. Se omitieron 0 repetidos de los mocks
 -- (misma persona dos veces en el mismo servicio).
 insert into public.turno (servicio_id, empleado_id, rol_codigo, horas_programadas, horas_extra)
 select s.id, v.emp, v.rol, v.hp::numeric, v.he::numeric

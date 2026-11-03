@@ -14,7 +14,7 @@ Sigue las mismas decisiones que backend/scripts/cargar_mocks_en_bd.py (Diego):
 - empleado_rol guarda TODOS los roles que la persona sabe hacer (incluido el principal).
 - Los turnos repetidos (misma persona dos veces en un servicio) se omiten: queda el primero.
 - Solo se cargan consentimientos otorgados; bienestar solo de quien dio consentimiento.
-- Usuarios demo 'jefe' (RST_008) y 'empleado' (RST_001) con un hash de relleno que no
+- Usuarios demo 'jefe' (RST_055, Catalina Flores) y 'empleado' (RST_001) con un hash de relleno que no
   sirve para entrar: el login demo usa DEMO_PASSWORD en el backend.
 Solo usa la librería estándar de Python.
 """
@@ -166,7 +166,7 @@ def generar_base() -> str:
              "-- (el login demo del backend usa DEMO_PASSWORD).\n")
     s.append(insert_directo(
         "public.usuario", "empleado_id, nombre_usuario, hash_contrasena, perfil",
-        [("RST_008", "jefe", "sin-uso:login-demo-usa-DEMO_PASSWORD", "jefe_turno"),
+        [("RST_055", "jefe", "sin-uso:login-demo-usa-DEMO_PASSWORD", "jefe_turno"),
          ("RST_001", "empleado", "sin-uso:login-demo-usa-DEMO_PASSWORD", "empleado")]))
     s.append("\ncommit;\n")
     return "".join(s), {"empleados": len(emp), "servicios": len(serv)}
