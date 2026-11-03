@@ -82,11 +82,11 @@ Todos exigen la cabecera `Authorization: Bearer <token>`, salvo `/auth/login` y 
 
 | Método | Ruta | Quién | Notas |
 |---|---|---|---|
-| `POST` | `/auth/login` | Todos | Usuarios de prueba `jefe` (RST_055, Catalina Flores) y `empleado` (RST_001), con la contraseña de `DEMO_PASSWORD`. Devuelve el token, el perfil y `expira_en` |
+| `POST` | `/auth/login` | Todos | Usuarios de prueba `jefe` (RST_055, Catalina Flores) y `empleado` (RST_001), con la contraseña de `DEMO_PASSWORD`. Devuelve el token, el perfil, `expira_en` y `hoy` (la fecha de trabajo de la API) |
 | `GET` | `/servicios?fecha=` | Jefe | El día con sus 4 servicios |
 | `GET` | `/semana?inicio=` | Jefe | 7 días × 4 servicios. Si se omite `inicio`, usa el lunes de "hoy" |
 | `GET` | `/calendario?mes=YYYY-MM` | Todos | Ventana de pago, feriados, vísperas y eventos por día |
-| `GET` | `/sugerencias?fecha=` | Jefe | Acciones "mover" o "llamar" para los roles críticos en riesgo |
+| `GET` | `/sugerencias?fecha=` | Jefe | Acciones "mover" o "llamar" para los roles críticos en riesgo. Nunca sugiere a quien tiene la sesión iniciada |
 | `GET` | `/ausencias?fecha=` | Jefe | **Nuevo.** Quién falta ese día: nombre, rol, motivo (`personal`/`salud`), horas, si avisó con poca anticipación y `servicios` (las franjas en que tenía turno). Ordenado por ID. Lista vacía si nadie falta |
 | `GET` | `/empleados?rol=` | Todos | Solo datos básicos (sirven para elegir reemplazo) |
 | `GET` | `/empleados/{id}` | Jefe, o la misma persona | Ficha completa |

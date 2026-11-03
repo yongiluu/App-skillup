@@ -83,7 +83,7 @@ def armar_dia_servicios(repo: Repositorio, fecha: date) -> dict | None:
     }
 
 
-def sugerencias(repo: Repositorio, fecha: date, max_por_rol: int = 2) -> list[dict]:
+def sugerencias(repo: Repositorio, fecha: date, max_por_rol: int = 2, excluir: str | None = None) -> list[dict]:
     """Regla v0 de cobertura (reemplazable por el modelo en la etapa 4).
 
     Para cada servicio con prob_deficit >= umbral de alerta y cada rol crítico en riesgo:
@@ -92,6 +92,7 @@ def sugerencias(repo: Repositorio, fecha: date, max_por_rol: int = 2) -> list[di
          mismo rol y después quien está entrenado para cubrirlo (en los datos simulados nadie
          respalda a cocinero de línea ni a jefe de turno).
     Se prioriza a quien lleva menos días seguidos trabajados; quien tiene fatiga "alta" va al final.
+    `excluir`: quien mira las sugerencias (el jefe con sesión) nunca se sugiere a sí mismo.
     """
     umbral = get_settings().umbral_alerta
     ausentes = repo.ausentes_en(fecha)
@@ -114,7 +115,8 @@ def sugerencias(repo: Repositorio, fecha: date, max_por_rol: int = 2) -> list[di
             roles = [max(CRITICOS, key=lambda r: s["prob_por_rol"][r])]
 
         asignados = {t["empleado_id"]: t for t in repo.turnos_de_servicio(fecha, s["servicio"])}
-        ya_sugeridos: set[str] = set()  # una persona no se sugiere para dos roles del mismo servicio
+        # una persona no se sugiere para dos roles del mismo servicio, ni a quien está mirando
+        ya_sugeridos: set[str] = {excluir} if excluir else set()
 
         for rol in roles:
             disponibles = [

@@ -15,6 +15,7 @@ def test_login_jefe(anonimo):
     r = anonimo.post("/auth/login", json={"usuario": "jefe", "password": PASSWORD})
     assert r.status_code == 200
     assert r.json()["perfil"] == "jefe_turno" and r.json()["expira_en"] > 0
+    assert r.json()["hoy"] == HOY  # el empleado no puede pedir /servicios: así sabe qué día es
 
 
 def test_login_empleado(anonimo):
@@ -227,3 +228,9 @@ def test_recomendacion_en_lenguaje_normal(client):
 
 def test_jefe_demo_no_esta_ausente_hoy(client):
     assert "RST_055" not in [a["empleado_id"] for a in client.get("/ausencias", params={"fecha": HOY}).json()]
+
+
+def test_sugerencias_no_incluyen_a_quien_mira(client):
+    """El jefe con la sesión iniciada (RST_055) nunca se sugiere a sí mismo."""
+    for fecha in ("2025-10-03", "2025-10-17", "2025-10-24", "2025-10-31"):
+        assert "RST_055" not in {s["empleado_id"] for s in client.get("/sugerencias", params={"fecha": fecha}).json()}

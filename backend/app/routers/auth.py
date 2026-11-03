@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from app.config import get_settings
 from app.repositorio import Repositorio, get_repo
 from app.schemas import Error, LoginIn, LoginOut
 from app.seguridad import (
@@ -51,6 +52,7 @@ def login(datos: LoginIn, repo: Repositorio = Depends(get_repo)) -> LoginOut:
     return LoginOut(
         access_token=token,
         expira_en=expira,
+        hoy=get_settings().mock_hoy,
         perfil=u["perfil"],
         empleado_id=u["empleado_id"],
         nombre=repo.empleados.get(u["empleado_id"], {}).get("nombre", nombre_usuario),
