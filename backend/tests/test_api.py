@@ -113,8 +113,14 @@ def test_sugerencias(client):
         assert s["rol_a_cubrir"] == e["rol"] or s["rol_a_cubrir"] in e["puede_cubrir"]
         assert (s["accion"] == "mover") == (s["rol_actual"] is not None)
     # el 21_23 del 17-oct tiene en riesgo los 3 roles críticos: debe haber sugerencias para cada uno
-    roles_21 = {s["rol_a_cubrir"] for s in sug if s["servicio"] == "21_23"}
-    assert roles_21 == {"garzon", "cocinero_linea", "jefe_turno"}
+    # cada rol crítico en riesgo (≥ 0,55) de un servicio en riesgo tiene al menos una sugerencia
+    for s in client.get("/servicios", params={"fecha": HOY}).json()["servicios"]:
+        if s["prob_deficit"] >= 0.55:
+            en_riesgo = {r for r, p in s["prob_por_rol"].items() if p >= 0.55}
+            sugeridos = {x["rol_a_cubrir"] for x in sug if x["servicio"] == s["servicio"]}
+            assert en_riesgo <= sugeridos, s["servicio"]
+    # 17-10, 13-15: falta la jefa programada (RST_008, ausente) → se sugiere otro jefe de turno
+    assert any(x["servicio"] == "13_15" and x["rol_a_cubrir"] == "jefe_turno" for x in sug)
 
 
 def test_sugerencias_no_incluyen_ausentes(client):
@@ -130,7 +136,7 @@ def test_sugerencias_no_incluyen_ausentes(client):
 # ---------- empleados ----------
 def test_empleados(client):
     lista = client.get("/empleados").json()
-    assert len(lista) == 72
+    assert len(lista) == 80
     campos_prohibidos = {"gender", "genero", "bmi", "imc", "children", "hijos", "smoker", "edad", "age"}
     assert not campos_prohibidos & set(lista[0])
 
@@ -205,7 +211,7 @@ def test_solicitud_inexistente(client):
 # ---------- ausencias del día ----------
 def test_ausencias_del_dia(client):
     aus = client.get("/ausencias", params={"fecha": HOY}).json()
-    assert {a["empleado_id"] for a in aus} == {"RST_006", "RST_008", "RST_063", "RST_068"}  # dato fijo de los mocks
+    assert {a["empleado_id"] for a in aus} == {"RST_003", "RST_008", "RST_051", "RST_068", "RST_074"}  # dato fijo de los mocks
     assert all(a["motivo"] in {"personal", "salud"} for a in aus)
     assert [a["empleado_id"] for a in aus] == sorted(a["empleado_id"] for a in aus)
     # "servicios" = franjas en que esa persona tenía turno ese día

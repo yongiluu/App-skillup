@@ -1,0 +1,24 @@
+--- a/src/restaurant/generate.py
++++ b/src/restaurant/generate.py
+@@ -225,6 +225,10 @@
+     return True
+ 
+ 
++import os
++MARGEN_CRITICOS = int(os.environ.get('MARGEN_CRITICOS', '0'))
++
++
+ def generate_restaurant_work_records(employees_df: pd.DataFrame, demand_df: pd.DataFrame, calendar_df: pd.DataFrame, seed: int = 42) -> pd.DataFrame:
+     logger.info("[restaurant] Generando registros de trabajo")
+     rng = np.random.default_rng(seed)
+@@ -253,7 +257,9 @@
+             )
+ 
+             for role, needed in required.items():
+-                buffer = 1 if role in {"garzon", "cocinero_linea"} and demand_row["service_period"] == "19_21" else 0
++                # Margen de programación (SkillUp, demo): +MARGEN en roles críticos de salón y cocina en todos los
++                # servicios, para absorber ausencias como haría un restaurante real. El original solo sumaba 1 en 19_21.
++                buffer = (MARGEN_CRITICOS if role in {"garzon", "cocinero_linea"} else 0) + (1 if role in {"garzon", "cocinero_linea"} and demand_row["service_period"] == "19_21" else 0)
+                 target_count = needed + buffer
+                 primary_candidates = employees_df[employees_df["role"] == role]["employee_id"].tolist()
+                 backup_candidates = employees_df[(employees_df["backup_role"] == role) & (employees_df["cross_trained"])]["employee_id"].tolist()

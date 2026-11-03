@@ -144,7 +144,7 @@ def test_dias_seguidos_razonables(jefe_bd):
 def test_sin_consentimiento_en_bd(jefe_bd):
     equipo = {e["empleado_id"]: e for e in jefe_bd.get("/bienestar/fatiga", params={"fecha": HOY}).json()}
     assert equipo["RST_011"]["estado"] == "sin_consentimiento" and equipo["RST_011"]["fatiga"] is None
-    assert sum(e["estado"] == "sin_consentimiento" for e in equipo.values()) == 13
+    assert sum(e["estado"] == "sin_consentimiento" for e in equipo.values()) == 15
 
 
 def test_sugerencias_en_bd(jefe_bd):
