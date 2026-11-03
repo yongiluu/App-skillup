@@ -11,7 +11,7 @@ Seguro: se niega a conectarse a un host que no sea local, salvo con --permitir-r
 Adaptaciones a las reglas del esquema:
 - turno tiene UNIQUE (servicio_id, empleado_id): los 12 duplicados de los mocks se omiten.
 - bienestar_diario exige consentimiento vigente (trigger): primero se cargan los consentimientos.
-- solicitud_cambio.resuelta_por apunta a usuario: se crean los usuarios demo (jefe, empleado)
+- solicitud_cambio.resuelta_por apunta a usuario: se crean los usuarios demo (jefe = RST_055, empleado = RST_001)
   con un hash de relleno que no sirve para entrar (el login demo usa DEMO_PASSWORD).
 """
 
@@ -135,7 +135,7 @@ def cargar(con: psycopg.Connection) -> dict:
         )
     n["bienestar_diario"] = len(bien)
 
-    for usuario, perfil, emp in (("jefe", "jefe_turno", "RST_008"), ("empleado", "empleado", "RST_001")):
+    for usuario, perfil, emp in (("jefe", "jefe_turno", "RST_055"), ("empleado", "empleado", "RST_001")):
         cur.execute(
             "insert into public.usuario (empleado_id, nombre_usuario, hash_contrasena, perfil) values (%s,%s,%s,%s)",
             (emp, usuario, "sin-uso:login-demo-usa-DEMO_PASSWORD", perfil),

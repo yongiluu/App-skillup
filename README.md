@@ -96,6 +96,7 @@ Todos los endpoints, salvo `/auth/login` y `/health`, exigen la cabecera `Author
 | `GET` | `/semana?inicio=YYYY-MM-DD` | Grilla de 7 días × 4 servicios |
 | `GET` | `/calendario?mes=YYYY-MM` | Días de pago, quincenas, feriados y eventos |
 | `GET` | `/sugerencias?fecha=YYYY-MM-DD` | Acciones sugeridas de cobertura |
+| `GET` | `/ausencias?fecha=YYYY-MM-DD` | Ausencias del día con los servicios afectados (jefe de turno) |
 | `GET` | `/empleados` · `/empleados/{id}` | Lista y ficha |
 | `GET` | `/empleados/{id}/turnos` | Turnos de una persona |
 | `GET` | `/solicitudes-cambio?estado=` | Listar solicitudes (jefe: todas; empleado: las suyas) |

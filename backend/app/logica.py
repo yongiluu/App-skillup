@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import date, timedelta
 
 from app import bienestar
@@ -26,8 +27,34 @@ def nivel_riesgo(prob: float) -> str:
     return "bajo"
 
 
+_REGLAS_RECOMENDACION = [
+    (re.compile(r"^Activar reemplazo inmediato y reforzar (\w+) para la franja (\w+)$"),
+     lambda m: f"Riesgo alto: busca reemplazo ya y refuerza {NOMBRE_ROL.get(m[1], m[1])} de {HORARIOS.get(m[2], m[2])}."),
+    (re.compile(r"^Mover personal cross-trained y preparar backup en (\w+)$"),
+     lambda m: f"Mueve a alguien entrenado como {NOMBRE_ROL.get(m[1], m[1])} y deja un respaldo listo."),
+    (re.compile(r"^Monitorear ausentismo corto aviso y confirmar cobertura de (\w+)$"),
+     lambda m: f"Atento a ausencias de último minuto: confirma quién cubre {NOMBRE_ROL.get(m[1], m[1])}."),
+    (re.compile(r"^Cobertura estable; mantener monitoreo operativo$"),
+     lambda m: "Dotación suficiente: no hace falta hacer nada por ahora."),
+]
+
+
+def recomendacion_natural(texto: str) -> str:
+    """Traduce el texto técnico del modelo a lenguaje normal. Si no lo reconoce, lo deja igual."""
+    for patron, frase in _REGLAS_RECOMENDACION:
+        m = patron.match(texto.strip())
+        if m:
+            return frase(m)
+    return texto
+
+
 def armar_servicio(s: dict) -> dict:
-    return {**s, "horario": HORARIOS[s["servicio"]], "nivel_riesgo": nivel_riesgo(s["prob_deficit"])}
+    return {
+        **s,
+        "horario": HORARIOS[s["servicio"]],
+        "nivel_riesgo": nivel_riesgo(s["prob_deficit"]),
+        "recomendacion": recomendacion_natural(s["recomendacion"]),
+    }
 
 
 def armar_dia_calendario(repo: Repositorio, fecha: date) -> dict:

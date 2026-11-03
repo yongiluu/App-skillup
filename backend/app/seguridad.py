@@ -29,7 +29,7 @@ _ITERACIONES = 600_000
 
 # Usuarios de prueba (etapa 1–2). En la etapa 3 salen de la tabla de usuarios en Supabase.
 USUARIOS_DEMO = {
-    "jefe": {"perfil": "jefe_turno", "empleado_id": "RST_008"},
+    "jefe": {"perfil": "jefe_turno", "empleado_id": "RST_055"},  # Catalina Flores: no está ausente el 17-10
     "empleado": {"perfil": "empleado", "empleado_id": "RST_001"},
 }
 

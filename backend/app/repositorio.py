@@ -110,7 +110,21 @@ class RepositorioMock:
         return self.solicitudes.get(solicitud_id)
 
     def consentimiento_de(self, empleado_id: str) -> dict | None:
-        return self.consentimientos.get(empleado_id)
+        """Solo el consentimiento vigente; quien no consintió no tiene registro (igual que en la base)."""
+        c = self.consentimientos.get(empleado_id)
+        return c if c and c["otorgado"] else None
+
+    def ausencias_del_dia(self, fecha: date) -> list[dict]:
+        """Ausencias del día con nombre, rol y las franjas en que la persona tenía turno."""
+        f = fecha.isoformat()
+        filas = []
+        for a in self.ausencias:
+            if a["fecha"] != f or a["empleado_id"] not in self.empleados:
+                continue
+            e = self.empleados[a["empleado_id"]]
+            franjas = sorted({t["servicio"] for t in self.turnos_de_empleado(e["id"]) if t["fecha"] == f})
+            filas.append({**a, "nombre": e["nombre"], "rol": e["rol"], "servicios": franjas})
+        return sorted(filas, key=lambda x: x["empleado_id"])  # orden estable en mocks y en la base
 
     def registrar_acceso(self, usuario: str, accion: str, empleado_id: str | None) -> None:
         """En mock solo queda el log (ver app/bienestar.py); en la BD se guarda en sensible.registro_acceso."""
@@ -144,7 +158,7 @@ class RepositorioMock:
     def actualizar_solicitud(self, solicitud_id: int, cambios: dict) -> dict:
         with self._lock:
             s = self.solicitudes[solicitud_id]
-            s.update(cambios, actualizada_en=datetime.now(timezone.utc))
+            s.update({k: v for k, v in cambios.items() if k != "usuario"}, actualizada_en=datetime.now(timezone.utc))
             return s
 
 

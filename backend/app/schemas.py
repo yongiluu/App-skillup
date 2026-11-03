@@ -181,6 +181,19 @@ class TestsEstado(BaseModel):
     nota: str = "Tests aún no definidos. Ver GET /bienestar/preguntas (propuestas)."
 
 
+class AusenciaDia(BaseModel):
+    """Ausencia de un día con los servicios afectados (para la vista Hoy del jefe de turno)."""
+
+    empleado_id: str
+    nombre: str
+    rol: Rol
+    fecha: date
+    motivo: Literal["personal", "salud"] = Field(description="Nunca el diagnóstico")
+    horas: float
+    aviso_corto: bool
+    servicios: list[Franja] = Field(description="Franjas en que la persona tenía turno ese día")
+
+
 class Bienestar(BaseModel):
     """Resumen de bienestar que aparece en la ficha (lo ve el jefe y la propia persona)."""
 

@@ -10,6 +10,8 @@ Uso:
 Notas:
 - Ventana de datos: 5 semanas completas (lunes 2025-09-29 a domingo 2025-11-02).
 - Los nombres de empleados son ficticios (el proyecto anterior solo tiene IDs).
+- Los mocks responden igual que la base: "asignados" = turnos programados, dotación con 1
+  decimal, días seguidos calculados desde los turnos y sin turnos repetidos.
 - Se descartan a propósito las variables excluidas en la matriz de variables
   (género, IMC, hijos, tabaquismo, consumo de alcohol, edad) y la biometría.
 - El motivo de ausencia se reduce a "personal" o "salud": nunca se expone el diagnóstico.
@@ -73,8 +75,8 @@ def construir(origen: Path) -> None:
                 "fecha": r.date,
                 "servicio": r.service_period,
                 "requeridos": int(r.required_headcount_total),
-                "asignados": int(r.actual_headcount_total),
-                "dotacion_predicha": round(float(r.predicted_headcount_total), 2),
+                "asignados": 0,  # se completa abajo: turnos programados (igual que la base)
+                "dotacion_predicha": round(float(r.predicted_headcount_total), 1),  # numeric(5,1) en la base
                 "cubiertos_previstos": int(r.forecast_covers),
                 "reservas": int(r.reservation_count),
                 "pedidos_delivery": int(r.delivery_order_volume),
@@ -153,6 +155,21 @@ def construir(origen: Path) -> None:
 
     # --- turnos y ausencias --------------------------------------------------------
     w = en_rango(wr).sort_values(["date", "service_period", "employee_id"])
+    # Una persona aparece una sola vez por servicio (la base lo exige): se omite la 2ª fila de los
+    # 12 casos repetidos del proyecto anterior.
+    w = w.drop_duplicates(["date", "service_period", "employee_id"], keep="first")
+    # Días seguidos: racha de días con turno que termina ese día (igual que la API con la base).
+    fechas_emp: dict[str, set] = {}
+    for r in w.itertuples():
+        fechas_emp.setdefault(r.employee_id, set()).add(pd.Timestamp(r.date).date())
+
+    def racha(emp: str, dia) -> int:
+        n, d = 0, dia
+        while d in fechas_emp[emp]:
+            n += 1
+            d -= pd.Timedelta(days=1).to_pytimedelta()
+        return n
+
     turnos = [
         {
             "empleado_id": r.employee_id,
@@ -161,10 +178,15 @@ def construir(origen: Path) -> None:
             "rol": r.role_assigned,
             "horas_programadas": float(r.scheduled_hours),
             "horas_extra": float(r.overtime_hours),
-            "dias_seguidos": int(r.consecutive_work_days),
+            "dias_seguidos": racha(r.employee_id, pd.Timestamp(r.date).date()),
         }
         for r in w.itertuples()
     ]
+    por_servicio: dict[tuple, int] = {}
+    for t in turnos:
+        por_servicio[(t["fecha"], t["servicio"])] = por_servicio.get((t["fecha"], t["servicio"]), 0) + 1
+    for s in servicios:
+        s["asignados"] = por_servicio.get((s["fecha"], s["servicio"]), 0)
     a = en_rango(aus).sort_values(["date", "employee_id"])
     ausencias = [
         {

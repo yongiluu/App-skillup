@@ -1,4 +1,4 @@
-"""Pruebas de integración contra Postgres con el esquema de Maxi (copia en tests/fixtures).
+"""Pruebas de integración contra Postgres con el esquema oficial de Maxi (database/migrations).
 
 Solo corren si existe TEST_DATABASE_URL apuntando a una base LOCAL descartable:
 la prueba borra y recrea los esquemas public y sensible.
@@ -26,7 +26,8 @@ from scripts.cargar_mocks_en_bd import cargar
 from tests.conftest import PASSWORD
 
 URL = os.environ.get("TEST_DATABASE_URL", "")
-ESQUEMA = Path(__file__).parent / "fixtures" / "esquema_supabase.sql"
+# Esquema oficial de Maxi (database/migrations), el mismo que está en Supabase.
+MIGRACIONES = Path(__file__).resolve().parents[2] / "database" / "migrations"
 HOY = "2025-10-17"
 
 pytestmark = pytest.mark.skipif(not URL, reason="sin TEST_DATABASE_URL (pruebas de integración con Postgres)")
@@ -36,7 +37,8 @@ def _recrear_base(vacia: bool = False) -> None:
     assert urlparse(URL).hostname in {"localhost", "127.0.0.1"}, "TEST_DATABASE_URL debe ser local"
     with psycopg.connect(URL, autocommit=True) as con:
         con.execute("drop schema if exists sensible cascade; drop schema if exists public cascade; create schema public;")
-        con.execute(ESQUEMA.read_text(encoding="utf-8"))
+        for archivo in sorted(MIGRACIONES.glob("*.sql")):
+            con.execute(archivo.read_text(encoding="utf-8"))
         if not vacia:
             with con.transaction():
                 cargar(con)
@@ -90,30 +92,24 @@ def _sin(d: dict, *claves) -> dict:
     return {k: v for k, v in d.items() if k not in claves}
 
 
-# ---------- misma respuesta que los mocks ----------
-@pytest.mark.parametrize("fecha", ["2025-09-29", "2025-10-13", HOY, "2025-11-02"])
-def test_servicios_iguales_a_mock(jefe_bd, fecha):
-    bd = jefe_bd.get("/servicios", params={"fecha": fecha}).json()
-    mk = _mock("/servicios", fecha=fecha)
-    assert bd["calendario"] == mk["calendario"]
-    # Diferencias conocidas: "asignados" en BD = turnos programados (en mocks = dotación real del CSV),
-    # y la BD guarda dotacion_predicha con 1 decimal (numeric(5,1)).
-    for s in mk["servicios"]:
-        s["dotacion_predicha"] = round(s["dotacion_predicha"] + 1e-9, 1)
-    assert [_sin(s, "asignados") for s in bd["servicios"]] == [_sin(s, "asignados") for s in mk["servicios"]]
+# ---------- misma respuesta que los mocks (sin excepciones) ----------
+FECHAS = ["2025-09-29", "2025-10-13", HOY, "2025-11-02"]
+
+
+@pytest.mark.parametrize("fecha", FECHAS)
+@pytest.mark.parametrize("ruta", ["/servicios", "/sugerencias", "/bienestar/fatiga", "/ausencias"])
+def test_dia_igual_a_mock(jefe_bd, ruta, fecha):
+    assert jefe_bd.get(ruta, params={"fecha": fecha}).json() == _mock(ruta, fecha=fecha)
 
 
 def test_asignados_son_turnos_programados(jefe_bd):
-    ruta = "/empleados"
     total = sum(len(jefe_bd.get(f"/empleados/{e['id']}/turnos", params={"desde": HOY, "hasta": HOY}).json())
-                for e in jefe_bd.get(ruta).json())
+                for e in jefe_bd.get("/empleados").json())
     assert sum(s["asignados"] for s in jefe_bd.get("/servicios", params={"fecha": HOY}).json()["servicios"]) == total
 
 
 def test_semana_y_calendario_iguales_a_mock(jefe_bd):
-    sem_bd = jefe_bd.get("/semana", params={"inicio": "2025-10-13"}).json()
-    sem_mk = _mock("/semana", inicio="2025-10-13")
-    assert [d["calendario"] for d in sem_bd["dias"]] == [d["calendario"] for d in sem_mk["dias"]]
+    assert jefe_bd.get("/semana", params={"inicio": "2025-10-13"}).json() == _mock("/semana", inicio="2025-10-13")
     assert jefe_bd.get("/calendario", params={"mes": "2025-10"}).json() == _mock("/calendario", mes="2025-10")
 
 
@@ -121,19 +117,10 @@ def test_empleados_iguales_a_mock(jefe_bd):
     assert jefe_bd.get("/empleados").json() == _mock("/empleados")
 
 
-def test_ficha_igual_a_mock(jefe_bd):
-    for emp in ("RST_001", "RST_011", "RST_040"):
-        bd, mk = jefe_bd.get(f"/empleados/{emp}").json(), _mock(f"/empleados/{emp}")
-        # Diferencias conocidas: días seguidos se calculan desde las fechas de turno (en mocks venían
-        # del CSV) y eso mueve un poco el indicador de fatiga; los turnos duplicados se omitieron.
-        ignorar = ("dias_seguidos_trabajados", "bienestar", "proximos_turnos")
-        assert _sin(bd, *ignorar) == _sin(mk, *ignorar)
-        assert bd["bienestar"]["estado"] == mk["bienestar"]["estado"]
-        cb, cm = bd["bienestar"]["consentimiento"], mk["bienestar"]["consentimiento"]
-        assert (cb["otorgado"], cb["fecha"]) == (cm["otorgado"], cm["fecha"])
-        # Quien nunca consintió no tiene fila en sensible.consentimiento → version_texto "sin-registro".
-        if cm["otorgado"]:
-            assert cb["version_texto"] == cm["version_texto"]
+def test_todas_las_fichas_iguales_a_mock(jefe_bd):
+    for e in jefe_bd.get("/empleados").json():
+        ruta = f"/empleados/{e['id']}"
+        assert jefe_bd.get(ruta).json() == _mock(ruta), e["id"]
 
 
 def test_bienestar_propio_igual_a_mock(empleado_bd):
@@ -195,7 +182,7 @@ def test_flujo_solicitud_en_bd(jefe_bd, empleado_bd):
     assert [s["id"] for s in empleado_bd.get("/solicitudes-cambio").json()] == [sid]
     r = jefe_bd.patch(f"/solicitudes-cambio/{sid}", json={"estado": "aprobada", "comentario": "ok"})
     assert r.status_code == 200
-    assert r.json()["estado"] == "aprobada" and r.json()["resuelta_por"] == "RST_008"
+    assert r.json()["estado"] == "aprobada" and r.json()["resuelta_por"] == "RST_055"
     assert jefe_bd.patch(f"/solicitudes-cambio/{sid}", json={"estado": "rechazada"}).status_code == 409
 
 

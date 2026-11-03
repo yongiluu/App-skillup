@@ -16,6 +16,7 @@ Traducciones entre la API y las tablas:
 from __future__ import annotations
 
 import json
+import logging
 from collections import defaultdict
 from contextlib import contextmanager
 from datetime import date, timedelta
@@ -24,11 +25,14 @@ from functools import lru_cache
 from pathlib import Path
 from threading import Lock
 
+from fastapi import HTTPException
+from psycopg import OperationalError
 from psycopg.rows import dict_row
-from psycopg_pool import ConnectionPool
+from psycopg_pool import ConnectionPool, PoolTimeout
 
 from app.config import get_settings
 
+log = logging.getLogger("skillup")
 _pool: ConnectionPool | None = None
 _pool_lock = Lock()
 
@@ -41,9 +45,10 @@ def _get_pool() -> ConnectionPool:
                 get_settings().database_url,
                 min_size=1,
                 max_size=5,
-                kwargs={"row_factory": dict_row, "autocommit": True, "connect_timeout": 10},
+                kwargs={"row_factory": dict_row, "autocommit": True, "connect_timeout": 5},
                 open=True,
                 name="skillup",
+                timeout=get_settings().db_timeout_segundos,
             )
     return _pool
 
@@ -56,10 +61,27 @@ def cerrar_pool() -> None:
             _pool = None
 
 
+_SIN_BASE = (
+    "No se pudo conectar a la base de datos. Revisa DATABASE_URL en backend/.env "
+    "(usa la conexión 'Session pooler' de Supabase) y tu conexión a internet."
+)
+
+
 @contextmanager
 def abrir_repo():
-    with _get_pool().connection() as con:
+    try:
+        conexion = _get_pool().connection()
+        con = conexion.__enter__()
+    except (PoolTimeout, OperationalError):
+        log.error("Sin conexión a la base de datos (pool de %s s agotado)", get_settings().db_timeout_segundos)
+        raise HTTPException(503, _SIN_BASE) from None
+    try:
         yield RepositorioDB(con)
+    except BaseException as e:
+        if not conexion.__exit__(type(e), e, e.__traceback__):
+            raise
+    else:
+        conexion.__exit__(None, None, None)
 
 
 @lru_cache
@@ -340,6 +362,24 @@ class RepositorioDB:
             lambda: {f["empleado_id"] for f in self._q("select empleado_id from public.ausencia where fecha = %s", (fecha,))},
         )
 
+    def ausencias_del_dia(self, fecha: date) -> list[dict]:
+        # Consulta propuesta por Maxi (probada con la semilla), ordenada por ID para que sea estable.
+        filas = self._q(
+            """
+            select a.empleado_id, e.nombre, e.rol_principal as rol, a.fecha, a.motivo, a.horas, a.aviso_corto,
+                   coalesce((select array_agg(s.franja order by s.franja)
+                             from public.turno t join public.servicio s on s.id = t.servicio_id
+                             where t.empleado_id = a.empleado_id and s.fecha = a.fecha), '{}') as servicios
+            from public.ausencia a
+            join public.empleado e on e.id = a.empleado_id
+            where a.fecha = %s and e.local_id = %s
+            order by a.empleado_id
+            """,
+            (fecha, self.local_id),
+        )
+        return [{**f, "fecha": _iso(f["fecha"]), "horas": _num(f["horas"]) or 0.0, "servicios": list(f["servicios"])}
+                for f in filas]
+
     # ---------- solicitudes de cambio ----------
     _SQL_SOLICITUD = """
         select sc.id, sc.solicitante_id, sc.fecha, sc.franja as servicio, sc.reemplazo_id, sc.motivo,
@@ -368,10 +408,10 @@ class RepositorioDB:
         return self.obtener_solicitud(f["id"])
 
     def actualizar_solicitud(self, solicitud_id: int, cambios: dict) -> dict:
-        # resuelta_por llega como empleado_id; en la tabla es el id del usuario (si existe).
+        # En la tabla, resuelta_por es el id del usuario que aprobó (se busca por su nombre de usuario).
         usuario = None
-        if cambios.get("resuelta_por"):
-            fila = self._una("select id from public.usuario where empleado_id = %s", (cambios["resuelta_por"],))
+        if cambios.get("usuario"):
+            fila = self._una("select id from public.usuario where nombre_usuario = %s", (cambios["usuario"],))
             usuario = fila["id"] if fila else None
         self._q(
             """update public.solicitud_cambio
