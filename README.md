@@ -59,9 +59,9 @@ Cada persona es **dueña** de una capa: la decide, la construye y revisa los PRs
 
 | Rol | Responsable | Carpeta |
 |---|---|---|
-| Frontend (UI/UX) | [Nombre] | `frontend/` |
-| Backend (API e integraciones) | [Nombre] | `backend/` |
-| Base de datos | [Nombre] | `database/` |
+| Frontend (UI/UX) | Manuel | `frontend/` |
+| Backend (API e integraciones) | Diego | `backend/` |
+| Base de datos | Maximiliano | `database/` |
 
 ### Frontend (UI/UX)
 - Llevar el diseño de referencia a componentes: vistas Hoy, Planificador y Equipo (desktop), y Empleado y Jefe de turno (móvil).
@@ -90,7 +90,7 @@ Lo acordamos **antes** de programar, así frontend y backend avanzan en paralelo
 | Método | Ruta | Para qué |
 |---|---|---|
 | `POST` | `/auth/login` | Iniciar sesión (devuelve token y perfil) |
-| `GET` | `/servicios?fecha=YYYY-MM-DD` | Servicios del día con dotación, demanda y probabilidad de déficit |
+| `GET` | `/servicios?fecha=YYYY-MM-DD` | El día con sus 4 servicios: dotación, demanda, probabilidad de déficit y nivel de riesgo |
 | `GET` | `/semana?inicio=YYYY-MM-DD` | Grilla de 7 días × 4 servicios |
 | `GET` | `/calendario?mes=YYYY-MM` | Días de pago, quincenas, feriados y eventos |
 | `GET` | `/sugerencias?fecha=YYYY-MM-DD` | Acciones sugeridas de cobertura |
@@ -100,20 +100,34 @@ Lo acordamos **antes** de programar, así frontend y backend avanzan en paralelo
 | `PATCH` | `/solicitudes-cambio/{id}` | Aprobar o rechazar (jefe de turno) |
 | `POST` | `/eventos` | Registrar un evento de la cervecería |
 
-Ejemplo de respuesta de `GET /servicios`:
+Ejemplo de respuesta de `GET /servicios` (se muestra 1 de los 4 servicios del día):
 
 ```json
 {
   "fecha": "2025-10-17",
-  "servicio": "13_15",
-  "requeridos": 23,
-  "asignados": 21,
-  "cubiertos_previstos": 91,
-  "prob_deficit": 0.97,
-  "prob_por_rol": { "garzon": 0.23, "cocinero_linea": 0.32, "jefe_turno": 0.01 },
-  "recomendacion": "Activar reemplazo inmediato y reforzar cocinero de línea"
+  "calendario": { "dia_semana": "viernes", "es_viernes": true, "es_fin_de_semana": false,
+                  "es_ventana_pago": false, "feriado": null, "es_vispera_feriado": false, "eventos": [] },
+  "servicios": [
+    {
+      "fecha": "2025-10-17",
+      "servicio": "13_15",
+      "horario": "13:00–15:00",
+      "requeridos": 23,
+      "asignados": 21,
+      "dotacion_predicha": 20.83,
+      "cubiertos_previstos": 91,
+      "reservas": 37,
+      "pedidos_delivery": 14,
+      "prob_deficit": 0.968,
+      "nivel_riesgo": "alto",
+      "prob_por_rol": { "garzon": 0.232, "cocinero_linea": 0.318, "jefe_turno": 0.005 },
+      "recomendacion": "Activar reemplazo inmediato y reforzar cocinero_linea para la franja 13_15"
+    }
+  ]
 }
 ```
+
+`nivel_riesgo` usa los umbrales acordados: `bajo` < 0,55 ≤ `alerta` < 0,75 ≤ `alto`. El detalle de todos los endpoints está en `backend/README.md` y en `/docs` con la API levantada.
 
 ## Modelo de datos (borrador)
 
