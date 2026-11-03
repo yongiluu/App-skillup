@@ -56,9 +56,13 @@ describe('navegación', () => {
     expect(within(servicios).getAllByText(/refuerza|mantén|monitoreo|reemplazo/i, { selector: 'p' }).length).toBeGreaterThan(0)
   })
 
-  it('el empleado entra a su bienestar y no a las vistas del jefe', async () => {
+  it('el empleado entra a sus turnos y tiene su propia navegación', async () => {
     montar('/')
-    await ingresar('empleado')
+    const u = await ingresar('empleado')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Hola, Agustín' })).toBeInTheDocument()
+    const nav = screen.getByRole('navigation', { name: 'Principal' })
+    expect(within(nav).getAllByRole('link').map((l) => l.textContent)).toEqual(['Mis turnos', 'Solicitudes', 'Bienestar'])
+    await u.click(within(nav).getByRole('link', { name: 'Bienestar' }))
     expect(await screen.findByRole('table', { name: /Tus últimos 7 días/ })).toBeInTheDocument()
   })
 
@@ -72,9 +76,18 @@ describe('navegación', () => {
     expect(screen.getByText('Sin consentimiento')).toBeInTheDocument()
   })
 
-  it('el empleado que entra a /hoy ve "Sin permiso"', async () => {
+  it('si el empleado venía de una vista del jefe, al entrar va a su propio inicio', async () => {
     montar('/hoy')
     await ingresar('empleado')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Hola, Agustín' })).toBeInTheDocument()
+  })
+
+  it('el empleado con sesión que abre /hoy ve "Sin permiso"', async () => {
+    const { unmount } = montar('/')
+    await ingresar('empleado')
+    await screen.findByRole('heading', { level: 1, name: 'Hola, Agustín' })
+    unmount() // la sesión queda guardada en sessionStorage
+    montar('/hoy')
     expect(await screen.findByRole('heading', { name: 'Sin permiso' })).toBeInTheDocument()
   })
 

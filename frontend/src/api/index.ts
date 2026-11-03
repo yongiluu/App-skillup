@@ -16,7 +16,10 @@ import type {
   LoginIn,
   LoginOut,
   Semana,
+  SolicitudCambio,
+  SolicitudCambioIn,
   Sugerencia,
+  Turno,
 } from './tipos'
 import mockServicios from './mocks/servicios.json'
 import mockSemanas from './mocks/semanas.json'
@@ -27,6 +30,7 @@ import mockFatiga from './mocks/fatiga.json'
 import mockFichas from './mocks/fichas.json'
 import mockBienestarPropio from './mocks/bienestar-propio.json'
 import mockAusencias from './mocks/ausencias.json'
+import mockTurnosPropios from './mocks/turnos-propios.json'
 
 export const USAR_MOCKS = import.meta.env.VITE_USAR_MOCKS === 'true'
 
@@ -51,6 +55,7 @@ export function login(datos: LoginIn): Promise<LoginOut> {
       // Mismos usuarios de prueba que el backend (USUARIOS_DEMO en backend/app/seguridad.py)
       empleado_id: usuario === 'jefe' ? 'RST_055' : 'RST_001',
       nombre: usuario === 'jefe' ? 'Catalina Flores' : 'Agustín Díaz',
+      hoy: MOCK_HOY,
     })
   }
   return pedir<LoginOut>('/auth/login', { method: 'POST', body: JSON.stringify(datos) })
@@ -140,4 +145,93 @@ export async function getAusencias(fecha?: string): Promise<AusenciaDia[] | null
     if (e instanceof ErrorApi && e.estado === 404 && e.message === 'Not Found') return null
     throw e
   }
+}
+
+// ---------- Turnos y solicitudes de cambio ----------
+
+/** Turnos de una persona (el empleado solo los suyos; el jefe, los de cualquiera). */
+export function getTurnos(empleadoId: string, desde?: string): Promise<Turno[]> {
+  if (USAR_MOCKS) {
+    const turnos = (mockTurnosPropios as Turno[]).filter(
+      (t) => t.empleado_id === empleadoId && (!desde || t.fecha >= desde),
+    )
+    return simularRed(turnos)
+  }
+  const q = desde ? `?desde=${encodeURIComponent(desde)}` : ''
+  return pedir<Turno[]>(`/empleados/${encodeURIComponent(empleadoId)}/turnos${q}`)
+}
+
+/*
+ * En modo simulado las solicitudes viven en memoria, igual que en el backend con FUENTE_DATOS=mock:
+ * parten vacías y se pierden al recargar la página.
+ */
+let solicitudesMock: SolicitudCambio[] = []
+let siguienteId = 1
+
+/** Solo para las pruebas: vuelve a dejar las solicitudes simuladas vacías. */
+export function reiniciarSolicitudesMock() {
+  solicitudesMock = []
+  siguienteId = 1
+}
+
+/** El jefe ve todas; el empleado, las que pidió o en las que lo proponen como reemplazo. */
+export function getSolicitudes(): Promise<SolicitudCambio[]> {
+  if (USAR_MOCKS) return simularRed(solicitudesMock)
+  return pedir<SolicitudCambio[]>('/solicitudes-cambio')
+}
+
+export function crearSolicitud(datos: SolicitudCambioIn): Promise<SolicitudCambio> {
+  if (USAR_MOCKS) {
+    const tiene = (mockTurnosPropios as Turno[]).some(
+      (t) => t.empleado_id === datos.solicitante_id && t.fecha === datos.fecha && t.servicio === datos.servicio,
+    )
+    if (!tiene) {
+      return Promise.reject(
+        new ErrorApi(409, `${datos.solicitante_id} no tiene turno el ${datos.fecha} en ${datos.servicio}`),
+      )
+    }
+    const ahora = new Date().toISOString()
+    const nueva: SolicitudCambio = {
+      id: siguienteId++,
+      solicitante_id: datos.solicitante_id,
+      fecha: datos.fecha,
+      servicio: datos.servicio,
+      reemplazo_id: datos.reemplazo_id ?? null,
+      motivo: datos.motivo ?? null,
+      estado: 'pendiente',
+      comentario: null,
+      resuelta_por: null,
+      creada_en: ahora,
+      actualizada_en: ahora,
+    }
+    solicitudesMock = [...solicitudesMock, nueva]
+    return simularRed(nueva)
+  }
+  return pedir<SolicitudCambio>('/solicitudes-cambio', { method: 'POST', body: JSON.stringify(datos) })
+}
+
+/** Solo jefe de turno. Solo se pueden resolver solicitudes pendientes. */
+export function resolverSolicitud(
+  id: number,
+  estado: 'aprobada' | 'rechazada',
+  comentario?: string,
+): Promise<SolicitudCambio> {
+  if (USAR_MOCKS) {
+    const s = solicitudesMock.find((x) => x.id === id)
+    if (!s) return Promise.reject(new ErrorApi(404, `No existe la solicitud ${id}`))
+    if (s.estado !== 'pendiente') return Promise.reject(new ErrorApi(409, `La solicitud ya está ${s.estado}`))
+    const actualizada: SolicitudCambio = {
+      ...s,
+      estado,
+      comentario: comentario || null,
+      resuelta_por: 'RST_055',
+      actualizada_en: new Date().toISOString(),
+    }
+    solicitudesMock = solicitudesMock.map((x) => (x.id === id ? actualizada : x))
+    return simularRed(actualizada)
+  }
+  return pedir<SolicitudCambio>(`/solicitudes-cambio/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ estado, comentario: comentario || null }),
+  })
 }

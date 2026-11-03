@@ -6,6 +6,7 @@ import { USAR_MOCKS } from '../api'
 import Boton from '../components/ui/Boton'
 import Aviso from '../components/ui/Aviso'
 import Icono from '../components/ui/Icono'
+import { SECCIONES } from '../components/layout/secciones'
 import estilos from './Login.module.css'
 
 export default function Login() {
@@ -22,8 +23,10 @@ export default function Login() {
 
   if (sesion) {
     const desde = (ubicacion.state as { desde?: string } | null)?.desde
-    const inicio = sesion.perfil === 'jefe_turno' ? '/hoy' : '/mi-turno'
-    return <Navigate to={desde && desde !== '/login' ? desde : inicio} replace />
+    const secciones = SECCIONES[sesion.perfil]
+    // Volver a donde estaba solo si esa vista es de su perfil (si entra otra persona, va a su inicio).
+    const permitida = desde && secciones.some((s) => desde === s.ruta || desde.startsWith(`${s.ruta}/`))
+    return <Navigate to={permitida ? desde : secciones[0].ruta} replace />
   }
 
   async function enviar(e: FormEvent) {

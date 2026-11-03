@@ -1,8 +1,26 @@
 import type { NombreIcono } from '../ui/Icono'
+import type { Perfil } from '../../api/tipos'
 
-/** Las 3 vistas desktop del jefe de turno. Para agregar una vista: sumarla aquí y en App.tsx. */
-export const SECCIONES: { ruta: string; nombre: string; icono: NombreIcono }[] = [
-  { ruta: '/hoy', nombre: 'Hoy', icono: 'hoy' },
-  { ruta: '/planificador', nombre: 'Planificador', icono: 'planificador' },
-  { ruta: '/equipo', nombre: 'Equipo', icono: 'equipo' },
-]
+export interface Seccion {
+  ruta: string
+  nombre: string
+  icono: NombreIcono
+}
+
+/**
+ * Secciones de la navegación según el perfil. Para agregar una vista: sumarla aquí y en App.tsx.
+ * El jefe de turno trabaja en el computador; el empleado, en el celular.
+ */
+export const SECCIONES: Record<Perfil, Seccion[]> = {
+  jefe_turno: [
+    { ruta: '/hoy', nombre: 'Hoy', icono: 'hoy' },
+    { ruta: '/planificador', nombre: 'Planificador', icono: 'planificador' },
+    { ruta: '/equipo', nombre: 'Equipo', icono: 'equipo' },
+    { ruta: '/solicitudes', nombre: 'Solicitudes', icono: 'solicitudes' },
+  ],
+  empleado: [
+    { ruta: '/mi-turno', nombre: 'Mis turnos', icono: 'planificador' },
+    { ruta: '/mis-solicitudes', nombre: 'Solicitudes', icono: 'cambio' },
+    { ruta: '/mi-bienestar', nombre: 'Bienestar', icono: 'bienestar' },
+  ],
+}

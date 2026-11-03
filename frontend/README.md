@@ -63,7 +63,10 @@ src/
 | `/hoy`, `/planificador`, `/equipo` | jefe de turno | 1 (estructura) → 2 y 3 |
 | `/planificador?inicio=YYYY-MM-DD` | jefe de turno | 2 (grilla semanal + calendario; la semana va en la URL) |
 | `/equipo/:id` (ficha) | jefe de turno | 1 (bienestar) → 3 |
-| `/mi-turno` | empleado | 1 (bienestar propio) → 3 |
+| `/solicitudes` | jefe de turno | 3 (aprobar o rechazar cambios de turno) |
+| `/mi-turno` | empleado | 3 (mis turnos desde hoy + pedir cambio) |
+| `/mis-solicitudes` | empleado | 3 (estado de lo que pidió y donde lo proponen como reemplazo) |
+| `/mi-bienestar` | empleado | 1 (bienestar propio) |
 
 En pantallas ≥ 900 px las secciones van en la cabecera; en celular, como pestañas abajo.
 La protección por perfil en el frontend es solo de experiencia de uso: la seguridad real la hace el backend.

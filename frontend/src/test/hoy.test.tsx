@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import AccionesSugeridas from '../components/hoy/AccionesSugeridas'
@@ -37,6 +37,8 @@ describe('ausencias del día', () => {
 })
 
 describe('getAusencias contra la API', () => {
+  // El módulo de la API lee VITE_USAR_MOCKS al cargarse: hay que cargarlo de nuevo en cada prueba.
+  beforeEach(() => vi.resetModules())
   afterEach(() => {
     vi.unstubAllEnvs()
     vi.unstubAllGlobals()

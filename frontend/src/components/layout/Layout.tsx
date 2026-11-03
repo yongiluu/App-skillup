@@ -1,3 +1,4 @@
+import type React from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useSesion } from '../../auth/sesion'
 import { USAR_MOCKS } from '../../api'
@@ -36,8 +37,8 @@ export default function Layout() {
           </div>
 
           <nav aria-label="Principal" className={estilos.nav}>
-            <ul>
-              {SECCIONES.map((s) => (
+            <ul style={{ '--secciones': SECCIONES[sesion?.perfil ?? 'empleado'].length } as React.CSSProperties}>
+              {SECCIONES[sesion?.perfil ?? 'empleado'].map((s) => (
                 <li key={s.ruta}>
                   <NavLink to={s.ruta} className={claseEnlace}>
                     <span className={estilos.icono}>

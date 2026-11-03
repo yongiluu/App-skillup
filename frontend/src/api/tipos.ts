@@ -29,6 +29,11 @@ export interface LoginOut {
   perfil: Perfil
   empleado_id: string | null
   nombre: string
+  /**
+   * [PROPUESTA para Diego] Fecha de "hoy" según la API (MOCK_HOY en modo mock). El empleado no puede
+   * llamar a /servicios, así que no tiene otra forma de saberla. Si no viene, se usa MOCK_HOY.
+   */
+  hoy?: string
 }
 
 // ---------- Calendario y eventos ----------
@@ -216,4 +221,32 @@ export interface AusenciaDia {
   aviso_corto: boolean
   /** Servicios del día en que esa persona estaba programada */
   servicios: Franja[]
+}
+
+// ---------- Solicitudes de cambio de turno ----------
+export type EstadoSolicitud = 'pendiente' | 'aprobada' | 'rechazada'
+
+export interface SolicitudCambioIn {
+  solicitante_id: string
+  fecha: string
+  servicio: Franja
+  /** Quién cubre, si ya se sabe */
+  reemplazo_id?: string | null
+  /** Máximo 300 caracteres */
+  motivo?: string | null
+}
+
+export interface SolicitudCambio {
+  id: number
+  solicitante_id: string
+  fecha: string
+  servicio: Franja
+  reemplazo_id: string | null
+  motivo: string | null
+  estado: EstadoSolicitud
+  comentario: string | null
+  /** Jefe de turno que la resolvió */
+  resuelta_por: string | null
+  creada_en: string
+  actualizada_en: string
 }

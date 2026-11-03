@@ -8,6 +8,8 @@ export interface Sesion {
   empleadoId: string | null
   /** Momento (ms) en que vence el token */
   expiraEn: number
+  /** "Hoy" de la API (YYYY-MM-DD) */
+  hoy: string
 }
 
 export interface ValorSesion {
