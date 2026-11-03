@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { alRecibir401, fijarToken } from '../api/cliente'
-import { login as loginApi } from '../api'
+import { MOCK_HOY, login as loginApi } from '../api'
 import { SesionContext } from './sesion'
 import type { Sesion } from './sesion'
 
@@ -17,7 +17,7 @@ function leerGuardada(): Sesion | null {
     const crudo = sessionStorage.getItem(CLAVE)
     if (!crudo) return null
     const s = JSON.parse(crudo) as Sesion
-    if (s.expiraEn <= Date.now()) return null
+    if (s.expiraEn <= Date.now() || !s.hoy) return null
     fijarToken(s.token)
     return s
   } catch {
@@ -48,6 +48,8 @@ export function SesionProvider({ children }: { children: ReactNode }) {
       nombre: r.nombre,
       empleadoId: r.empleado_id,
       expiraEn: Date.now() + r.expira_en * 1000,
+      // [PENDIENTE Diego] la API todavía no manda "hoy" en el login; mientras, el mismo MOCK_HOY del backend.
+      hoy: r.hoy ?? MOCK_HOY,
     }
     fijarToken(nueva.token)
     try {

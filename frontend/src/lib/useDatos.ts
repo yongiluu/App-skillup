@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ErrorApi } from '../api/cliente'
 
 export type EstadoDatos<T> =
@@ -9,9 +9,13 @@ export type EstadoDatos<T> =
 /**
  * Carga datos al montar la vista y expone cargando / listo / error.
  * `cargar` debe ser estable (definida fuera del componente o con useCallback).
+ * `recargar()` vuelve a pedir los datos (por ejemplo, después de crear o aprobar algo);
+ * mientras llegan, se siguen mostrando los anteriores.
  */
-export function useDatos<T>(cargar: () => Promise<T>): EstadoDatos<T> {
+export function useDatos<T>(cargar: () => Promise<T>): EstadoDatos<T> & { recargar: () => void } {
   const [estado, setEstado] = useState<EstadoDatos<T>>({ estado: 'cargando' })
+  const [vuelta, setVuelta] = useState(0)
+  const recargar = useCallback(() => setVuelta((v) => v + 1), [])
 
   useEffect(() => {
     let vigente = true
@@ -25,7 +29,7 @@ export function useDatos<T>(cargar: () => Promise<T>): EstadoDatos<T> {
     return () => {
       vigente = false
     }
-  }, [cargar])
+  }, [cargar, vuelta])
 
-  return estado
+  return { ...estado, recargar }
 }

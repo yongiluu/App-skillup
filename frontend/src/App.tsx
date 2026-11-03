@@ -7,7 +7,10 @@ import Hoy from './pages/Hoy'
 import Planificador from './pages/Planificador'
 import Equipo from './pages/Equipo'
 import Ficha from './pages/Ficha'
-import MiTurno from './pages/MiTurno'
+import MisTurnos from './pages/MisTurnos'
+import MisSolicitudes from './pages/MisSolicitudes'
+import MiBienestar from './pages/MiBienestar'
+import Solicitudes from './pages/Solicitudes'
 import NoEncontrado from './pages/NoEncontrado'
 import SistemaVisual from './pages/SistemaVisual'
 
@@ -31,12 +34,17 @@ export default function App() {
           <Route path="/planificador" element={<Planificador />} />
           <Route path="/equipo" element={<Equipo />} />
           <Route path="/equipo/:id" element={<Ficha />} />
+          <Route path="/solicitudes" element={<Solicitudes />} />
         </Route>
       </Route>
 
-      {/* Inicio del empleado (vistas móviles en la etapa 3) */}
+      {/* Vistas del empleado (pensadas para el celular) */}
       <Route element={<RutaProtegida perfiles={['empleado']} />}>
-        <Route path="/mi-turno" element={<MiTurno />} />
+        <Route element={<Layout />}>
+          <Route path="/mi-turno" element={<MisTurnos />} />
+          <Route path="/mis-solicitudes" element={<MisSolicitudes />} />
+          <Route path="/mi-bienestar" element={<MiBienestar />} />
+        </Route>
       </Route>
 
       {import.meta.env.DEV && <Route path="/sistema-visual" element={<SistemaVisual />} />}
