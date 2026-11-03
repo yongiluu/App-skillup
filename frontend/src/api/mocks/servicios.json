@@ -16,8 +16,8 @@
       "servicio": "11_13",
       "horario": "11:00–13:00",
       "requeridos": 10,
-      "asignados": 9,
-      "dotacion_predicha": 8.62,
+      "asignados": 10,
+      "dotacion_predicha": 8.6,
       "cubiertos_previstos": 30,
       "reservas": 4,
       "pedidos_delivery": 9,
@@ -28,15 +28,15 @@
         "cocinero_linea": 0.067,
         "jefe_turno": 0.684
       },
-      "recomendacion": "Activar reemplazo inmediato y reforzar jefe_turno para la franja 11_13"
+      "recomendacion": "Riesgo alto: busca reemplazo ya y refuerza jefe de turno de 11:00–13:00."
     },
     {
       "fecha": "2025-10-17",
       "servicio": "13_15",
       "horario": "13:00–15:00",
       "requeridos": 23,
-      "asignados": 21,
-      "dotacion_predicha": 20.83,
+      "asignados": 22,
+      "dotacion_predicha": 20.8,
       "cubiertos_previstos": 91,
       "reservas": 37,
       "pedidos_delivery": 14,
@@ -47,15 +47,15 @@
         "cocinero_linea": 0.318,
         "jefe_turno": 0.005
       },
-      "recomendacion": "Activar reemplazo inmediato y reforzar cocinero_linea para la franja 13_15"
+      "recomendacion": "Riesgo alto: busca reemplazo ya y refuerza cocinero de línea de 13:00–15:00."
     },
     {
       "fecha": "2025-10-17",
       "servicio": "19_21",
       "horario": "19:00–21:00",
       "requeridos": 22,
-      "asignados": 22,
-      "dotacion_predicha": 21.86,
+      "asignados": 24,
+      "dotacion_predicha": 21.9,
       "cubiertos_previstos": 79,
       "reservas": 39,
       "pedidos_delivery": 22,
@@ -66,14 +66,14 @@
         "cocinero_linea": 0.06,
         "jefe_turno": 0.001
       },
-      "recomendacion": "Cobertura estable; mantener monitoreo operativo"
+      "recomendacion": "Dotación suficiente: no hace falta hacer nada por ahora."
     },
     {
       "fecha": "2025-10-17",
       "servicio": "21_23",
       "horario": "21:00–23:00",
       "requeridos": 12,
-      "asignados": 7,
+      "asignados": 11,
       "dotacion_predicha": 7.8,
       "cubiertos_previstos": 40,
       "reservas": 18,
@@ -85,7 +85,7 @@
         "cocinero_linea": 0.679,
         "jefe_turno": 0.797
       },
-      "recomendacion": "Activar reemplazo inmediato y reforzar jefe_turno para la franja 21_23"
+      "recomendacion": "Riesgo alto: busca reemplazo ya y refuerza jefe de turno de 21:00–23:00."
     }
   ]
 }

@@ -46,8 +46,9 @@ export function login(datos: LoginIn): Promise<LoginOut> {
       token_type: 'bearer',
       expira_en: 8 * 60 * 60,
       perfil: usuario === 'jefe' ? 'jefe_turno' : 'empleado',
-      empleado_id: usuario === 'jefe' ? 'RST_008' : 'RST_001',
-      nombre: usuario === 'jefe' ? 'Javiera Espinoza' : 'Agustín Díaz',
+      // Mismos usuarios de prueba que el backend (USUARIOS_DEMO en backend/app/seguridad.py)
+      empleado_id: usuario === 'jefe' ? 'RST_055' : 'RST_001',
+      nombre: usuario === 'jefe' ? 'Catalina Flores' : 'Agustín Díaz',
     })
   }
   return pedir<LoginOut>('/auth/login', { method: 'POST', body: JSON.stringify(datos) })
@@ -101,11 +102,11 @@ export function getBienestarPropio(id: string): Promise<BienestarPropio> {
   return pedir<BienestarPropio>(`/empleados/${encodeURIComponent(id)}/bienestar`)
 }
 
-// ---------- Ausencias del día [PROPUESTA: endpoint aún no existe en el backend] ----------
+// ---------- Ausencias del día ----------
 
 /**
- * Ausencias de un día, con los servicios afectados. Propuesta para Diego: GET /ausencias?fecha=
- * (solo jefe). Devuelve null mientras el endpoint no exista, para que la vista lo indique.
+ * Ausencias de un día, con los servicios afectados: GET /ausencias?fecha= (solo jefe; PR #16 de Diego).
+ * Devuelve null si la API que se usa es anterior y no tiene ese endpoint, para que la vista lo indique.
  */
 export async function getAusencias(fecha?: string): Promise<AusenciaDia[] | null> {
   if (USAR_MOCKS) return simularRed(mockAusencias as AusenciaDia[])

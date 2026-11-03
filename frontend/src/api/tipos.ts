@@ -198,7 +198,7 @@ export interface EmpleadoFicha extends Empleado {
   bienestar: Bienestar
 }
 
-// ---------- Ausencias del día [PROPUESTA para GET /ausencias?fecha=, aún no existe] ----------
+// ---------- Ausencias del día (GET /ausencias?fecha=) ----------
 export interface AusenciaDia {
   empleado_id: string
   nombre: string

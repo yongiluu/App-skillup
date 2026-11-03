@@ -5,7 +5,7 @@ import estilos from './Hoy.module.css'
 
 /**
  * Quién falta hoy y en qué servicios. Motivo solo "personal" o "salud", nunca el diagnóstico.
- * Fuente: GET /ausencias?fecha= [PROPUESTA; mientras tanto, datos simulados].
+ * Fuente: GET /ausencias?fecha= (solo jefe de turno).
  */
 export default function AusenciasDia({ ausencias }: { ausencias: AusenciaDia[] }) {
   if (ausencias.length === 0) {
