@@ -87,3 +87,35 @@
   gap: var(--esp-4);
   justify-items: center;
 }
+
+/* Marcas del día (viernes, pago, feriado, eventos) */
+.marcas {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+  margin: calc(-1 * var(--esp-3)) 0 var(--esp-5);
+}
+
+.marcas li {
+  padding: 3px var(--esp-3);
+  border-radius: var(--radio-pildora);
+  background: var(--riesgo-alerta-fondo);
+  color: var(--riesgo-alerta-texto);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+}
+
+.dosColumnas {
+  display: grid;
+  gap: var(--esp-4);
+  margin-top: var(--esp-5);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .dosColumnas {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: var(--esp-5);
+  }
+}

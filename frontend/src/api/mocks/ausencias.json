@@ -1,0 +1,54 @@
+[
+ {
+  "empleado_id": "RST_006",
+  "nombre": "Sebastián Gutiérrez",
+  "rol": "cajero",
+  "fecha": "2025-10-17",
+  "motivo": "personal",
+  "horas": 2.0,
+  "aviso_corto": true,
+  "servicios": [
+   "21_23"
+  ]
+ },
+ {
+  "empleado_id": "RST_008",
+  "nombre": "Javiera Espinoza",
+  "rol": "jefe_turno",
+  "fecha": "2025-10-17",
+  "motivo": "salud",
+  "horas": 4.0,
+  "aviso_corto": true,
+  "servicios": [
+   "11_13",
+   "21_23"
+  ]
+ },
+ {
+  "empleado_id": "RST_063",
+  "nombre": "Felipe Castro",
+  "rol": "ayudante_cocina",
+  "fecha": "2025-10-17",
+  "motivo": "personal",
+  "horas": 6.0,
+  "aviso_corto": true,
+  "servicios": [
+   "13_15",
+   "19_21",
+   "21_23"
+  ]
+ },
+ {
+  "empleado_id": "RST_068",
+  "nombre": "Gaspar Espinoza",
+  "rol": "cocinero_linea",
+  "fecha": "2025-10-17",
+  "motivo": "salud",
+  "horas": 4.0,
+  "aviso_corto": true,
+  "servicios": [
+   "19_21",
+   "21_23"
+  ]
+ }
+]

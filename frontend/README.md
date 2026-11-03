@@ -11,8 +11,8 @@ cp .env.example .env.local   # por defecto usa datos simulados
 npm run dev                  # http://localhost:5173
 ```
 
-- **Con datos simulados** (`VITE_USAR_MOCKS=true`): no necesita backend. Ingresa con `jefe` o `empleado` y cualquier contraseña.
-- **Con la API de Diego** (`VITE_USAR_MOCKS=false`): levanta el backend (`backend/README.md`) y usa la contraseña de `DEMO_PASSWORD`, que se comparte por un canal privado.
+- **Con la API de Diego** (por defecto, `VITE_USAR_MOCKS=false`): levanta el backend (`backend/README.md`, con `FUENTE_DATOS=mock` o `supabase`) y usa la contraseña de `DEMO_PASSWORD`, que se comparte por un canal privado.
+- **Con datos simulados** (`VITE_USAR_MOCKS=true`): no necesita backend. Ingresa con `jefe` o `empleado` y cualquier contraseña. Las pruebas automáticas usan siempre este modo.
 - Catálogo del sistema visual (solo en desarrollo): http://localhost:5173/sistema-visual
 
 | Comando | Qué hace |

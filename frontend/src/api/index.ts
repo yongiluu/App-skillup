@@ -1,11 +1,12 @@
 /**
  * Punto de entrada a los datos. Las vistas llaman SOLO a estas funciones.
- * Con VITE_USAR_MOCKS=true responden los JSON de ./mocks (capturados de la API real de las
- * ramas backend/etapa-1-api-mock y backend/biometria-simulada; ver mocks/LEEME.md).
- * Con false llaman a la API. Para pasar a la API en la etapa 2 no hay que tocar las vistas.
+ * Por defecto llaman a la API de Diego (VITE_API_URL). Con VITE_USAR_MOCKS=true responden los
+ * JSON de ./mocks (respuestas reales capturadas de la API; ver mocks/LEEME.md): sirven para las
+ * pruebas automáticas y para trabajar sin el backend corriendo.
  */
 import { ErrorApi, pedir } from './cliente'
 import type {
+  AusenciaDia,
   BienestarPropio,
   DiaServicios,
   Empleado,
@@ -23,8 +24,9 @@ import mockEmpleados from './mocks/empleados.json'
 import mockFatiga from './mocks/fatiga.json'
 import mockFichas from './mocks/fichas.json'
 import mockBienestarPropio from './mocks/bienestar-propio.json'
+import mockAusencias from './mocks/ausencias.json'
 
-export const USAR_MOCKS = import.meta.env.VITE_USAR_MOCKS !== 'false'
+export const USAR_MOCKS = import.meta.env.VITE_USAR_MOCKS === 'true'
 
 /** "Hoy" de los datos simulados (igual que MOCK_HOY del backend). */
 export const MOCK_HOY = '2025-10-17'
@@ -97,4 +99,21 @@ export function getBienestarPropio(id: string): Promise<BienestarPropio> {
     return simularRed(mockBienestarPropio as BienestarPropio)
   }
   return pedir<BienestarPropio>(`/empleados/${encodeURIComponent(id)}/bienestar`)
+}
+
+// ---------- Ausencias del día [PROPUESTA: endpoint aún no existe en el backend] ----------
+
+/**
+ * Ausencias de un día, con los servicios afectados. Propuesta para Diego: GET /ausencias?fecha=
+ * (solo jefe). Devuelve null mientras el endpoint no exista, para que la vista lo indique.
+ */
+export async function getAusencias(fecha?: string): Promise<AusenciaDia[] | null> {
+  if (USAR_MOCKS) return simularRed(mockAusencias as AusenciaDia[])
+  try {
+    return await pedir<AusenciaDia[]>(`/ausencias${fecha ? `?fecha=${encodeURIComponent(fecha)}` : ''}`)
+  } catch (e) {
+    // FastAPI responde {"detail": "Not Found"} cuando la ruta no existe.
+    if (e instanceof ErrorApi && e.estado === 404 && e.message === 'Not Found') return null
+    throw e
+  }
 }
