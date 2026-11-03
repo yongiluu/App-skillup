@@ -87,6 +87,8 @@ Cada persona es **dueña** de una capa: la decide, la construye y revisa los PRs
 
 Lo acordamos **antes** de programar, así frontend y backend avanzan en paralelo. Cualquier cambio se hace por PR y se avisa a los otros dos.
 
+Todos los endpoints, salvo `/auth/login` y `/health`, exigen la cabecera `Authorization: Bearer <token>`, y algunos son solo para el perfil `jefe_turno`. El detalle de permisos está en `backend/README.md`.
+
 | Método | Ruta | Para qué |
 |---|---|---|
 | `POST` | `/auth/login` | Iniciar sesión (devuelve token y perfil) |
@@ -96,6 +98,7 @@ Lo acordamos **antes** de programar, así frontend y backend avanzan en paralelo
 | `GET` | `/sugerencias?fecha=YYYY-MM-DD` | Acciones sugeridas de cobertura |
 | `GET` | `/empleados` · `/empleados/{id}` | Lista y ficha |
 | `GET` | `/empleados/{id}/turnos` | Turnos de una persona |
+| `GET` | `/solicitudes-cambio?estado=` | Listar solicitudes (jefe: todas; empleado: las suyas) |
 | `POST` | `/solicitudes-cambio` | Pedir un cambio de turno |
 | `PATCH` | `/solicitudes-cambio/{id}` | Aprobar o rechazar (jefe de turno) |
 | `POST` | `/eventos` | Registrar un evento de la cervecería |

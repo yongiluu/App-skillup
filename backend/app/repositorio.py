@@ -85,6 +85,7 @@ class RepositorioMock:
                 **datos,
                 "estado": "pendiente",
                 "comentario": None,
+                "resuelta_por": None,
                 "creada_en": ahora,
                 "actualizada_en": ahora,
             }

@@ -10,9 +10,12 @@ from app import logica
 from app.config import get_settings
 from app.repositorio import RepositorioMock, get_repo
 from app.schemas import Calendario, DiaServicios, Error, Evento, EventoIn, Semana, Sugerencia
+from app.seguridad import solo_jefe, usuario_actual
 
-router = APIRouter(tags=["operación"])
+# Todo exige sesión iniciada; los datos operativos son solo para el jefe de turno.
+router = APIRouter(tags=["operación"], dependencies=[Depends(usuario_actual)])
 NO_ENCONTRADO = {404: {"model": Error}}
+SOLO_JEFE = [Depends(solo_jefe)]
 
 
 def _sin_datos(repo: RepositorioMock, que: str) -> HTTPException:
@@ -20,7 +23,7 @@ def _sin_datos(repo: RepositorioMock, que: str) -> HTTPException:
     return HTTPException(404, f"Sin datos de ejemplo para {que}. Rango disponible: {ini} a {fin}.")
 
 
-@router.get("/servicios", response_model=DiaServicios, responses=NO_ENCONTRADO)
+@router.get("/servicios", response_model=DiaServicios, responses=NO_ENCONTRADO, dependencies=SOLO_JEFE)
 def servicios_del_dia(
     fecha: date | None = Query(None, description="YYYY-MM-DD. Si se omite, usa el 'hoy' de los mocks."),
     repo: RepositorioMock = Depends(get_repo),
@@ -33,7 +36,7 @@ def servicios_del_dia(
     return dia
 
 
-@router.get("/semana", response_model=Semana, responses=NO_ENCONTRADO)
+@router.get("/semana", response_model=Semana, responses=NO_ENCONTRADO, dependencies=SOLO_JEFE)
 def semana(
     inicio: date | None = Query(None, description="Primer día (YYYY-MM-DD). Si se omite, el lunes de 'hoy'."),
     repo: RepositorioMock = Depends(get_repo),
@@ -66,7 +69,7 @@ def calendario(
     return {"mes": mes, "dias": [logica.armar_dia_calendario(repo, f) for f in fechas]}
 
 
-@router.get("/sugerencias", response_model=list[Sugerencia], responses=NO_ENCONTRADO)
+@router.get("/sugerencias", response_model=list[Sugerencia], responses=NO_ENCONTRADO, dependencies=SOLO_JEFE)
 def sugerencias(
     fecha: date | None = Query(None, description="YYYY-MM-DD. Si se omite, usa el 'hoy' de los mocks."),
     repo: RepositorioMock = Depends(get_repo),
@@ -78,7 +81,7 @@ def sugerencias(
     return logica.sugerencias(repo, fecha)
 
 
-@router.post("/eventos", response_model=Evento, status_code=201)
+@router.post("/eventos", response_model=Evento, status_code=201, dependencies=SOLO_JEFE)
 def crear_evento(evento: EventoIn, repo: RepositorioMock = Depends(get_repo)):
     """Registra un evento de la cervecería. **Mock**: se guarda en memoria y se pierde al reiniciar."""
     return repo.crear_evento(evento.model_dump(mode="json"))

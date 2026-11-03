@@ -9,7 +9,7 @@ from datetime import date, datetime
 from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 Franja = Literal["11_13", "13_15", "19_21", "21_23"]
 RolCritico = Literal["garzon", "cocinero_linea", "jefe_turno"]
@@ -20,15 +20,22 @@ NivelRiesgo = Literal["bajo", "alerta", "alto"]
 Perfil = Literal["jefe_turno", "empleado"]
 
 
+class Entrada(BaseModel):
+    """Base de todo lo que llega del cliente: rechaza campos que no estén en el contrato."""
+
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+
 # ---------- Auth ----------
-class LoginIn(BaseModel):
-    usuario: str = Field(examples=["jefe"])
-    password: str = Field(min_length=1, examples=["cualquiera"])
+class LoginIn(Entrada):
+    usuario: str = Field(min_length=1, max_length=64, examples=["jefe"])
+    password: str = Field(min_length=1, max_length=128)
 
 
 class LoginOut(BaseModel):
     access_token: str
     token_type: Literal["bearer"] = "bearer"
+    expira_en: int = Field(description="Segundos de validez del token")
     perfil: Perfil
     empleado_id: str | None
     nombre: str
@@ -45,16 +52,17 @@ class TipoEvento(str, Enum):
     otro = "otro"
 
 
-class EventoIn(BaseModel):
+class EventoIn(Entrada):
     fecha: date
     nombre: str = Field(min_length=1, max_length=120, examples=["Partido Chile vs Perú"])
     tipo: TipoEvento = TipoEvento.otro
     servicios: list[Franja] = Field(default_factory=list, description="Franjas afectadas; vacío = todo el día")
     impacto_esperado: Literal["bajo", "medio", "alto"] = "medio"
-    notas: str | None = None
+    notas: str | None = Field(default=None, max_length=500)
 
 
 class Evento(EventoIn):
+    model_config = ConfigDict(extra="ignore")
     id: int
 
 
@@ -173,23 +181,26 @@ class EstadoSolicitud(str, Enum):
     rechazada = "rechazada"
 
 
-class SolicitudCambioIn(BaseModel):
-    solicitante_id: str = Field(examples=["RST_001"])
+class SolicitudCambioIn(Entrada):
+    solicitante_id: str = Field(max_length=20, examples=["RST_001"])
     fecha: date
     servicio: Franja
-    reemplazo_id: str | None = Field(default=None, description="Quién cubre, si ya se sabe")
-    motivo: str | None = None
+    reemplazo_id: str | None = Field(default=None, max_length=20, description="Quién cubre, si ya se sabe")
+    motivo: str | None = Field(default=None, max_length=300)
 
 
-class SolicitudCambioPatch(BaseModel):
+class SolicitudCambioPatch(Entrada):
     estado: Literal["aprobada", "rechazada"]
-    comentario: str | None = None
+    comentario: str | None = Field(default=None, max_length=300)
 
 
 class SolicitudCambio(SolicitudCambioIn):
+    model_config = ConfigDict(extra="ignore")
+
     id: int
     estado: EstadoSolicitud
     comentario: str | None = None
+    resuelta_por: str | None = Field(default=None, description="Jefe de turno que la resolvió")
     creada_en: datetime
     actualizada_en: datetime
 

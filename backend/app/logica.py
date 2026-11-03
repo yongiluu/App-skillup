@@ -67,6 +67,7 @@ def sugerencias(repo: RepositorioMock, fecha: date, max_por_rol: int = 2) -> lis
     """
     umbral = get_settings().umbral_alerta
     ausentes = repo.ausentes_en(fecha)
+    dias_seguidos = _dias_seguidos_hasta(repo, fecha)
     resultado: list[dict] = []
 
     for s in repo.servicios_de(fecha):
@@ -77,10 +78,12 @@ def sugerencias(repo: RepositorioMock, fecha: date, max_por_rol: int = 2) -> lis
             roles = [max(CRITICOS, key=lambda r: s["prob_por_rol"][r])]
 
         asignados = {t["empleado_id"]: t for t in repo.turnos_de_servicio(fecha, s["servicio"])}
-        dias_seguidos = _dias_seguidos_hasta(repo, fecha)
+        ya_sugeridos: set[str] = set()  # una persona no se sugiere para dos roles del mismo servicio
 
         for rol in roles:
-            disponibles = [e for e in repo.empleados.values() if e["id"] not in ausentes]
+            disponibles = [
+                e for e in repo.empleados.values() if e["id"] not in ausentes and e["id"] not in ya_sugeridos
+            ]
             # mover: ya está en el servicio con otro rol y está entrenado para cubrir `rol`
             mover = [
                 e for e in disponibles
@@ -94,6 +97,7 @@ def sugerencias(repo: RepositorioMock, fecha: date, max_por_rol: int = 2) -> lis
             )
             candidatos = [("mover", e) for e in sorted(mover, key=orden)] + [("llamar", e) for e in llamar]
             for accion, e in candidatos[:max_por_rol]:
+                ya_sugeridos.add(e["id"])
                 rol_actual = asignados[e["id"]]["rol"] if accion == "mover" else None
                 if accion == "mover":
                     msg = f"Mover a {e['nombre']} ({NOMBRE_ROL[rol_actual]}) a {NOMBRE_ROL[rol]} en {HORARIOS[s['servicio']]}"

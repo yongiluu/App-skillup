@@ -1,39 +1,31 @@
-"""Pruebas de la API con datos de ejemplo. Correr con:  pytest"""
+"""Pruebas funcionales de la API con datos de ejemplo. Correr con:  pytest
+(Las fixtures `client`, `empleado` y `anonimo` están en conftest.py.)"""
 
-import pytest
-from fastapi.testclient import TestClient
-
-from app.main import app
-from app.repositorio import get_repo
+from tests.conftest import PASSWORD
 
 HOY = "2025-10-17"
 
 
-@pytest.fixture()
-def client():
-    get_repo.cache_clear()  # cada test parte con los mocks limpios
-    return TestClient(app)
-
-
-def test_health(client):
-    assert client.get("/health").json()["estado"] == "ok"
+def test_health(anonimo):
+    assert anonimo.get("/health").json()["estado"] == "ok"
 
 
 # ---------- auth ----------
-def test_login_jefe(client):
-    r = client.post("/auth/login", json={"usuario": "jefe", "password": "x"})
+def test_login_jefe(anonimo):
+    r = anonimo.post("/auth/login", json={"usuario": "jefe", "password": PASSWORD})
     assert r.status_code == 200
-    assert r.json()["perfil"] == "jefe_turno"
+    assert r.json()["perfil"] == "jefe_turno" and r.json()["expira_en"] > 0
 
 
-def test_login_empleado(client):
-    r = client.post("/auth/login", json={"usuario": "empleado", "password": "x"})
+def test_login_empleado(anonimo):
+    r = anonimo.post("/auth/login", json={"usuario": "Empleado ", "password": PASSWORD})
     assert r.json()["perfil"] == "empleado" and r.json()["empleado_id"] == "RST_001"
 
 
-def test_login_invalido(client):
-    assert client.post("/auth/login", json={"usuario": "nadie", "password": "x"}).status_code == 401
-    assert client.post("/auth/login", json={"usuario": "jefe", "password": ""}).status_code == 422
+def test_login_invalido(anonimo):
+    assert anonimo.post("/auth/login", json={"usuario": "nadie", "password": PASSWORD}).status_code == 401
+    assert anonimo.post("/auth/login", json={"usuario": "jefe", "password": "mala"}).status_code == 401
+    assert anonimo.post("/auth/login", json={"usuario": "jefe", "password": ""}).status_code == 422
 
 
 # ---------- servicios / semana ----------
@@ -183,13 +175,25 @@ def test_flujo_solicitud_aprobada(client):
 
 
 def test_solicitud_sin_turno(client):
-    r = client.post("/solicitudes-cambio", json={"solicitante_id": "RST_001", "fecha": "2025-10-17", "servicio": "11_13"})
-    # puede o no tener turno ese servicio; si no lo tiene debe ser 409
-    asignado = any(
-        t["fecha"] == "2025-10-17" and t["servicio"] == "11_13"
-        for t in client.get("/empleados/RST_001/turnos").json()
-    )
-    assert r.status_code == (201 if asignado else 409)
+    # RST_001 no trabaja el 2025-10-17 en 11_13 (dato fijo de los mocks)
+    r = client.post("/solicitudes-cambio", json={"solicitante_id": "RST_001", "fecha": HOY, "servicio": "11_13"})
+    assert r.status_code == 409
+
+
+def test_listar_solicitudes(client):
+    t = _turno_de(client)
+    client.post("/solicitudes-cambio", json={"solicitante_id": "RST_001", "fecha": t["fecha"], "servicio": t["servicio"]})
+    assert len(client.get("/solicitudes-cambio", params={"estado": "pendiente"}).json()) == 1
+    assert client.get("/solicitudes-cambio", params={"estado": "aprobada"}).json() == []
+
+
+def test_sugerencias_sin_persona_repetida_en_un_servicio(client):
+    for fecha in ("2025-10-03", "2025-10-17", "2025-10-24", "2025-10-31"):
+        vistos = set()
+        for s in client.get("/sugerencias", params={"fecha": fecha}).json():
+            clave = (s["servicio"], s["empleado_id"])
+            assert clave not in vistos
+            vistos.add(clave)
 
 
 def test_solicitud_inexistente(client):
