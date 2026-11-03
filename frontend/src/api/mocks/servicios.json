@@ -16,55 +16,55 @@
       "servicio": "11_13",
       "horario": "11:00–13:00",
       "requeridos": 10,
-      "asignados": 10,
-      "dotacion_predicha": 8.6,
+      "asignados": 12,
+      "dotacion_predicha": 10.3,
       "cubiertos_previstos": 30,
       "reservas": 4,
       "pedidos_delivery": 9,
-      "prob_deficit": 0.968,
-      "nivel_riesgo": "alto",
+      "prob_deficit": 0.283,
+      "nivel_riesgo": "bajo",
       "prob_por_rol": {
-        "garzon": 0.129,
-        "cocinero_linea": 0.067,
-        "jefe_turno": 0.684
+        "garzon": 0.012,
+        "cocinero_linea": 0.016,
+        "jefe_turno": 0.384
       },
-      "recomendacion": "Riesgo alto: busca reemplazo ya y refuerza jefe de turno de 11:00–13:00."
+      "recomendacion": "Dotación suficiente: no hace falta hacer nada por ahora."
     },
     {
       "fecha": "2025-10-17",
       "servicio": "13_15",
       "horario": "13:00–15:00",
       "requeridos": 23,
-      "asignados": 22,
-      "dotacion_predicha": 20.8,
+      "asignados": 25,
+      "dotacion_predicha": 21.4,
       "cubiertos_previstos": 91,
       "reservas": 37,
       "pedidos_delivery": 14,
-      "prob_deficit": 0.968,
+      "prob_deficit": 0.867,
       "nivel_riesgo": "alto",
       "prob_por_rol": {
-        "garzon": 0.232,
-        "cocinero_linea": 0.318,
-        "jefe_turno": 0.005
+        "garzon": 0.329,
+        "cocinero_linea": 0.076,
+        "jefe_turno": 0.751
       },
-      "recomendacion": "Riesgo alto: busca reemplazo ya y refuerza cocinero de línea de 13:00–15:00."
+      "recomendacion": "Riesgo alto: busca reemplazo ya y refuerza jefe de turno de 13:00–15:00."
     },
     {
       "fecha": "2025-10-17",
       "servicio": "19_21",
       "horario": "19:00–21:00",
       "requeridos": 22,
-      "asignados": 24,
-      "dotacion_predicha": 21.9,
+      "asignados": 26,
+      "dotacion_predicha": 24.1,
       "cubiertos_previstos": 79,
       "reservas": 39,
       "pedidos_delivery": 22,
-      "prob_deficit": 0.414,
+      "prob_deficit": 0.314,
       "nivel_riesgo": "bajo",
       "prob_por_rol": {
-        "garzon": 0.181,
-        "cocinero_linea": 0.06,
-        "jefe_turno": 0.001
+        "garzon": 0.048,
+        "cocinero_linea": 0.038,
+        "jefe_turno": 0.058
       },
       "recomendacion": "Dotación suficiente: no hace falta hacer nada por ahora."
     },
@@ -73,19 +73,19 @@
       "servicio": "21_23",
       "horario": "21:00–23:00",
       "requeridos": 12,
-      "asignados": 11,
-      "dotacion_predicha": 7.8,
+      "asignados": 13,
+      "dotacion_predicha": 10.9,
       "cubiertos_previstos": 40,
       "reservas": 18,
       "pedidos_delivery": 8,
-      "prob_deficit": 0.929,
+      "prob_deficit": 0.867,
       "nivel_riesgo": "alto",
       "prob_por_rol": {
-        "garzon": 0.775,
-        "cocinero_linea": 0.679,
-        "jefe_turno": 0.797
+        "garzon": 0.713,
+        "cocinero_linea": 0.018,
+        "jefe_turno": 0.079
       },
-      "recomendacion": "Riesgo alto: busca reemplazo ya y refuerza jefe de turno de 21:00–23:00."
+      "recomendacion": "Riesgo alto: busca reemplazo ya y refuerza garzón de 21:00–23:00."
     }
   ]
 }

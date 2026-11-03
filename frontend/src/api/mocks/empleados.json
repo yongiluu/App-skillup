@@ -782,5 +782,91 @@
     "puede_cubrir": [],
     "tipo_contrato": "part_time",
     "preferencia_turno": "mixed"
+  },
+  {
+    "id": "RST_073",
+    "nombre": "Florencia Pérez",
+    "rol": "cocinero_linea",
+    "rol_respaldo": null,
+    "polivalente": false,
+    "puede_cubrir": [],
+    "tipo_contrato": "full_time",
+    "preferencia_turno": "midday"
+  },
+  {
+    "id": "RST_074",
+    "nombre": "Isidora Pérez",
+    "rol": "cajero",
+    "rol_respaldo": "host",
+    "polivalente": true,
+    "puede_cubrir": [
+      "host"
+    ],
+    "tipo_contrato": "full_time",
+    "preferencia_turno": "evening"
+  },
+  {
+    "id": "RST_075",
+    "nombre": "Antonia Gutiérrez",
+    "rol": "runner",
+    "rol_respaldo": "garzon",
+    "polivalente": true,
+    "puede_cubrir": [
+      "garzon"
+    ],
+    "tipo_contrato": "full_time",
+    "preferencia_turno": "mixed"
+  },
+  {
+    "id": "RST_076",
+    "nombre": "Vicente Flores",
+    "rol": "garzon",
+    "rol_respaldo": null,
+    "polivalente": false,
+    "puede_cubrir": [],
+    "tipo_contrato": "part_time",
+    "preferencia_turno": "evening"
+  },
+  {
+    "id": "RST_077",
+    "nombre": "Isidora Gutiérrez",
+    "rol": "ayudante_cocina",
+    "rol_respaldo": null,
+    "polivalente": false,
+    "puede_cubrir": [],
+    "tipo_contrato": "full_time",
+    "preferencia_turno": "midday"
+  },
+  {
+    "id": "RST_078",
+    "nombre": "Tomás Fuentes",
+    "rol": "cocinero_linea",
+    "rol_respaldo": null,
+    "polivalente": false,
+    "puede_cubrir": [],
+    "tipo_contrato": "full_time",
+    "preferencia_turno": "evening"
+  },
+  {
+    "id": "RST_079",
+    "nombre": "Lucas Espinoza",
+    "rol": "ayudante_cocina",
+    "rol_respaldo": "cocinero_linea",
+    "polivalente": true,
+    "puede_cubrir": [
+      "cocinero_linea"
+    ],
+    "tipo_contrato": "full_time",
+    "preferencia_turno": "midday"
+  },
+  {
+    "id": "RST_080",
+    "nombre": "Martina Rodríguez",
+    "rol": "host",
+    "rol_respaldo": null,
+    "polivalente": false,
+    "puede_cubrir": [],
+    "tipo_contrato": "full_time",
+    "preferencia_turno": "midday"
   }
 ]

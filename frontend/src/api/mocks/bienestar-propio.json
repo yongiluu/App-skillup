@@ -6,8 +6,10 @@
   "version_texto": "borrador-v0"
  },
  "fatiga": {
-  "nivel": "bajo",
-  "motivos": [],
+  "nivel": "medio",
+  "motivos": [
+   "descanso"
+  ],
   "calculado_al": "2025-10-17",
   "dias_considerados": 3
  },
@@ -15,119 +17,119 @@
   "estado": "pendiente",
   "nota": "Tests aún no definidos. Ver GET /bienestar/preguntas (propuestas)."
  },
- "empleado_id": "RST_001",
+ "empleado_id": "RST_056",
  "registros": [
   {
    "fecha": "2025-10-04",
-   "pasos": 9085,
-   "sueno_horas": 6.9,
-   "pulso_medio_bpm": 79.1,
-   "encuesta_fatiga_inicio": 1,
-   "encuesta_fatiga_fin": 2
+   "pasos": null,
+   "sueno_horas": null,
+   "pulso_medio_bpm": null,
+   "encuesta_fatiga_inicio": 4,
+   "encuesta_fatiga_fin": 6
   },
   {
    "fecha": "2025-10-05",
-   "pasos": 12944,
+   "pasos": 15096,
    "sueno_horas": 6.8,
-   "pulso_medio_bpm": 80.2,
-   "encuesta_fatiga_inicio": 1,
-   "encuesta_fatiga_fin": 2
+   "pulso_medio_bpm": 76.1,
+   "encuesta_fatiga_inicio": 4,
+   "encuesta_fatiga_fin": 5
   },
   {
    "fecha": "2025-10-06",
-   "pasos": 13828,
-   "sueno_horas": 6.6,
-   "pulso_medio_bpm": 79.2,
+   "pasos": 9646,
+   "sueno_horas": 7.3,
+   "pulso_medio_bpm": 74.9,
    "encuesta_fatiga_inicio": 2,
-   "encuesta_fatiga_fin": 3
+   "encuesta_fatiga_fin": 2
   },
   {
    "fecha": "2025-10-07",
-   "pasos": 14180,
-   "sueno_horas": 6.6,
-   "pulso_medio_bpm": 79.4,
-   "encuesta_fatiga_inicio": 1,
+   "pasos": 7196,
+   "sueno_horas": 7.3,
+   "pulso_medio_bpm": 73.1,
+   "encuesta_fatiga_inicio": 2,
    "encuesta_fatiga_fin": 2
   },
   {
    "fecha": "2025-10-08",
-   "pasos": 8669,
-   "sueno_horas": 7.0,
-   "pulso_medio_bpm": 79.7,
+   "pasos": 10733,
+   "sueno_horas": 6.6,
+   "pulso_medio_bpm": 76.7,
    "encuesta_fatiga_inicio": 1,
-   "encuesta_fatiga_fin": 2
+   "encuesta_fatiga_fin": 3
   },
   {
    "fecha": "2025-10-09",
-   "pasos": 6567,
-   "sueno_horas": 6.9,
-   "pulso_medio_bpm": 77.1,
+   "pasos": 11152,
+   "sueno_horas": 6.5,
+   "pulso_medio_bpm": 76.3,
    "encuesta_fatiga_inicio": 1,
-   "encuesta_fatiga_fin": 2
+   "encuesta_fatiga_fin": 3
   },
   {
    "fecha": "2025-10-10",
-   "pasos": 5661,
-   "sueno_horas": 7.0,
-   "pulso_medio_bpm": 75.2,
+   "pasos": 7571,
+   "sueno_horas": 6.8,
+   "pulso_medio_bpm": 74.9,
    "encuesta_fatiga_inicio": 1,
    "encuesta_fatiga_fin": 2
   },
   {
    "fecha": "2025-10-11",
-   "pasos": null,
-   "sueno_horas": null,
-   "pulso_medio_bpm": null,
-   "encuesta_fatiga_inicio": 2,
+   "pasos": 10705,
+   "sueno_horas": 6.6,
+   "pulso_medio_bpm": 74.5,
+   "encuesta_fatiga_inicio": 1,
    "encuesta_fatiga_fin": 3
   },
   {
    "fecha": "2025-10-12",
-   "pasos": 14302,
-   "sueno_horas": 6.5,
-   "pulso_medio_bpm": 80.6,
-   "encuesta_fatiga_inicio": 3,
-   "encuesta_fatiga_fin": 3
+   "pasos": 11621,
+   "sueno_horas": 6.8,
+   "pulso_medio_bpm": 75.9,
+   "encuesta_fatiga_inicio": 2,
+   "encuesta_fatiga_fin": 4
   },
   {
    "fecha": "2025-10-13",
-   "pasos": 9374,
-   "sueno_horas": 7.1,
-   "pulso_medio_bpm": 79.6,
-   "encuesta_fatiga_inicio": 2,
-   "encuesta_fatiga_fin": 3
+   "pasos": 8696,
+   "sueno_horas": 6.0,
+   "pulso_medio_bpm": 82.1,
+   "encuesta_fatiga_inicio": 4,
+   "encuesta_fatiga_fin": 4
   },
   {
    "fecha": "2025-10-14",
-   "pasos": 12402,
-   "sueno_horas": 7.0,
-   "pulso_medio_bpm": 77.3,
-   "encuesta_fatiga_inicio": 1,
-   "encuesta_fatiga_fin": 2
+   "pasos": 7480,
+   "sueno_horas": 5.3,
+   "pulso_medio_bpm": 84.5,
+   "encuesta_fatiga_inicio": 3,
+   "encuesta_fatiga_fin": 4
   },
   {
    "fecha": "2025-10-15",
-   "pasos": 13844,
-   "sueno_horas": 6.9,
-   "pulso_medio_bpm": 76.2,
+   "pasos": 7190,
+   "sueno_horas": 5.2,
+   "pulso_medio_bpm": 85.5,
+   "encuesta_fatiga_inicio": 4,
+   "encuesta_fatiga_fin": 5
+  },
+  {
+   "fecha": "2025-10-16",
+   "pasos": 5254,
+   "sueno_horas": 6.3,
+   "pulso_medio_bpm": 78.7,
    "encuesta_fatiga_inicio": 1,
    "encuesta_fatiga_fin": 3
   },
   {
-   "fecha": "2025-10-16",
-   "pasos": 9255,
-   "sueno_horas": 7.1,
-   "pulso_medio_bpm": 75.4,
-   "encuesta_fatiga_inicio": 1,
-   "encuesta_fatiga_fin": 2
-  },
-  {
    "fecha": "2025-10-17",
-   "pasos": 11204,
-   "sueno_horas": 7.0,
-   "pulso_medio_bpm": 76.2,
-   "encuesta_fatiga_inicio": 1,
-   "encuesta_fatiga_fin": 2
+   "pasos": 10909,
+   "sueno_horas": 6.3,
+   "pulso_medio_bpm": 78.5,
+   "encuesta_fatiga_inicio": 3,
+   "encuesta_fatiga_fin": 4
   }
  ]
 }

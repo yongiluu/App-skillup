@@ -59,7 +59,7 @@ describe('navegación', () => {
   it('el empleado entra a sus turnos y tiene su propia navegación', async () => {
     montar('/')
     const u = await ingresar('empleado')
-    expect(await screen.findByRole('heading', { level: 1, name: 'Hola, Agustín' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Hola, Cristóbal' })).toBeInTheDocument()
     const nav = screen.getByRole('navigation', { name: 'Principal' })
     expect(within(nav).getAllByRole('link').map((l) => l.textContent)).toEqual(['Mis turnos', 'Solicitudes', 'Bienestar'])
     await u.click(within(nav).getByRole('link', { name: 'Bienestar' }))
@@ -79,13 +79,13 @@ describe('navegación', () => {
   it('si el empleado venía de una vista del jefe, al entrar va a su propio inicio', async () => {
     montar('/hoy')
     await ingresar('empleado')
-    expect(await screen.findByRole('heading', { level: 1, name: 'Hola, Agustín' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Hola, Cristóbal' })).toBeInTheDocument()
   })
 
   it('el empleado con sesión que abre /hoy ve "Sin permiso"', async () => {
     const { unmount } = montar('/')
     await ingresar('empleado')
-    await screen.findByRole('heading', { level: 1, name: 'Hola, Agustín' })
+    await screen.findByRole('heading', { level: 1, name: 'Hola, Cristóbal' })
     unmount() // la sesión queda guardada en sessionStorage
     montar('/hoy')
     expect(await screen.findByRole('heading', { name: 'Sin permiso' })).toBeInTheDocument()
