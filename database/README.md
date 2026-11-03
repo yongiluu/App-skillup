@@ -32,7 +32,7 @@ Los nombres y valores coinciden con la API de Diego (`backend/app/schemas.py` y 
 - Bienestar en una sola hoja `bienestar_diario`, una fila por persona y día, con los mismos nombres de columnas que el backend (encuesta de fatiga en escala 1 a 7).
 - Eventos con varias franjas, impacto esperado y notas.
 
-Se probó cargando todos los datos de ejemplo del backend (72 empleados, 140 servicios, 2.493 turnos, 2.065 días de bienestar) y entran sin problemas, salvo 12 turnos simulados donde una persona tiene dos roles en el mismo servicio (ver Pendientes).
+Se probó cargando todos los datos de ejemplo del backend (72 empleados, 140 servicios, 2.481 turnos, 2.065 días de bienestar) y entran sin problemas.
 
 ## Cómo crear la base desde cero (una sola vez)
 
@@ -51,10 +51,10 @@ Para la demo, la base se llena con los datos de ejemplo del backend (nombres fic
 3. Se carga sobre el esquema recién creado (`migrations/0001_esquema_inicial.sql`).
 
 Decisiones (las mismas que `backend/scripts/cargar_mocks_en_bd.py`, por lo que ambos cargan exactamente lo mismo):
-- Se omiten los 12 turnos repetidos de los mocks (queda el primero).
+- Si los mocks traen turnos repetidos (misma persona dos veces en un servicio), se omiten y queda el primero.
 - `fecha_ingreso` se calcula desde la antigüedad en años de los mocks.
 - Solo hay bienestar de quien dio consentimiento.
-- Usuarios demo `jefe` (RST_008) y `empleado` (RST_001) con un hash de relleno que no sirve para entrar: el login demo usa `DEMO_PASSWORD` en el backend.
+- Usuarios demo `jefe` (RST_055, Catalina Flores) y `empleado` (RST_001) con un hash de relleno que no sirve para entrar: el login demo usa `DEMO_PASSWORD` en el backend.
 
 Si cambian los mocks: desde la raíz del repo, `python database/seed/generar_semilla.py` (solo usa la librería estándar) y se suben los archivos nuevos.
 
@@ -120,7 +120,6 @@ IMC/peso, género, número de hijos, tabaquismo, nivel educacional y sensores co
 
 ## Pendientes
 
-- **Para Diego:** 12 turnos de `mocks/turnos.json` tienen a la misma persona en dos roles en el mismo servicio (ej: RST_039 como garzón y host el 2025-09-29, 13–15). La base no lo acepta; hay que corregir esos datos simulados.
 - [PENDIENTE CERVECERÍA] Roles reales del local y requerimientos por rol (los datos de ejemplo solo traen el total).
 - [PENDIENTE CERVECERÍA] Texto del consentimiento y su revisión legal antes de usar datos reales.
 - Escala de fatiga 1 a 7 preliminar. Si cambia, se agrega una versión nueva en `escala_fatiga`.
