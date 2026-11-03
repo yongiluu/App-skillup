@@ -1,0 +1,59 @@
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2);
+  min-height: var(--toque-min);
+  padding: 0 var(--esp-4);
+  border: 1px solid transparent;
+  border-radius: var(--radio-sm);
+  font-size: 0.9375rem;
+  font-weight: var(--peso-medio);
+  line-height: 1.2;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.boton:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.primario {
+  background: var(--color-primario);
+  border-color: var(--color-primario);
+  color: var(--color-sobre-primario);
+  box-shadow: 0 2px 8px -3px color-mix(in srgb, var(--color-primario) 70%, transparent);
+}
+
+.primario:hover:not(:disabled) {
+  background: var(--color-primario-claro);
+  border-color: var(--color-primario-claro);
+}
+
+.secundario {
+  background: var(--color-superficie);
+  border-color: var(--color-borde);
+  color: var(--color-texto);
+}
+
+.secundario:hover:not(:disabled) {
+  background: var(--color-hundido);
+}
+
+.fantasma {
+  background: transparent;
+  color: var(--color-primario);
+}
+
+.fantasma:hover:not(:disabled) {
+  background: var(--color-hundido);
+}
+
+.completo {
+  width: 100%;
+}

@@ -1,0 +1,691 @@
+{
+  "inicio": "2025-10-13",
+  "fin": "2025-10-19",
+  "dias": [
+    {
+      "fecha": "2025-10-13",
+      "calendario": {
+        "fecha": "2025-10-13",
+        "dia_semana": "lunes",
+        "es_viernes": false,
+        "es_fin_de_semana": false,
+        "es_ventana_pago": false,
+        "feriado": "Encuentro de Dos Mundos",
+        "es_vispera_feriado": false,
+        "eventos": []
+      },
+      "servicios": [
+        {
+          "fecha": "2025-10-13",
+          "servicio": "11_13",
+          "horario": "11:00–13:00",
+          "requeridos": 11,
+          "asignados": 8,
+          "dotacion_predicha": 8.26,
+          "cubiertos_previstos": 43,
+          "reservas": 6,
+          "pedidos_delivery": 8,
+          "prob_deficit": 0.848,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.159,
+            "cocinero_linea": 0.078,
+            "jefe_turno": 0.006
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar garzon para la franja 11_13"
+        },
+        {
+          "fecha": "2025-10-13",
+          "servicio": "13_15",
+          "horario": "13:00–15:00",
+          "requeridos": 27,
+          "asignados": 17,
+          "dotacion_predicha": 17.44,
+          "cubiertos_previstos": 83,
+          "reservas": 25,
+          "pedidos_delivery": 20,
+          "prob_deficit": 0.991,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.845,
+            "cocinero_linea": 0.543,
+            "jefe_turno": 0.004
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar garzon para la franja 13_15"
+        },
+        {
+          "fecha": "2025-10-13",
+          "servicio": "19_21",
+          "horario": "19:00–21:00",
+          "requeridos": 24,
+          "asignados": 19,
+          "dotacion_predicha": 19.57,
+          "cubiertos_previstos": 84,
+          "reservas": 35,
+          "pedidos_delivery": 25,
+          "prob_deficit": 0.836,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.73,
+            "cocinero_linea": 0.031,
+            "jefe_turno": 0.002
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar garzon para la franja 19_21"
+        },
+        {
+          "fecha": "2025-10-13",
+          "servicio": "21_23",
+          "horario": "21:00–23:00",
+          "requeridos": 13,
+          "asignados": 10,
+          "dotacion_predicha": 10.04,
+          "cubiertos_previstos": 45,
+          "reservas": 10,
+          "pedidos_delivery": 13,
+          "prob_deficit": 0.968,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.336,
+            "cocinero_linea": 0.718,
+            "jefe_turno": 0.008
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar cocinero_linea para la franja 21_23"
+        }
+      ]
+    },
+    {
+      "fecha": "2025-10-14",
+      "calendario": {
+        "fecha": "2025-10-14",
+        "dia_semana": "martes",
+        "es_viernes": false,
+        "es_fin_de_semana": false,
+        "es_ventana_pago": true,
+        "feriado": null,
+        "es_vispera_feriado": false,
+        "eventos": [
+          {
+            "fecha": "2025-10-14",
+            "nombre": "Promoción / Happy Hour (simulado)",
+            "tipo": "promocion",
+            "servicios": [
+              "13_15"
+            ],
+            "impacto_esperado": "medio",
+            "notas": "[PENDIENTE CERVECERÍA] Evento simulado a partir de los datos de ejemplo.",
+            "id": 11
+          }
+        ]
+      },
+      "servicios": [
+        {
+          "fecha": "2025-10-14",
+          "servicio": "11_13",
+          "horario": "11:00–13:00",
+          "requeridos": 10,
+          "asignados": 8,
+          "dotacion_predicha": 8.06,
+          "cubiertos_previstos": 31,
+          "reservas": 12,
+          "pedidos_delivery": 9,
+          "prob_deficit": 0.991,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.199,
+            "cocinero_linea": 0.339,
+            "jefe_turno": 0.003
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar cocinero_linea para la franja 11_13"
+        },
+        {
+          "fecha": "2025-10-14",
+          "servicio": "13_15",
+          "horario": "13:00–15:00",
+          "requeridos": 20,
+          "asignados": 18,
+          "dotacion_predicha": 18.56,
+          "cubiertos_previstos": 87,
+          "reservas": 38,
+          "pedidos_delivery": 16,
+          "prob_deficit": 0.968,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.386,
+            "cocinero_linea": 0.316,
+            "jefe_turno": 0.001
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar garzon para la franja 13_15"
+        },
+        {
+          "fecha": "2025-10-14",
+          "servicio": "19_21",
+          "horario": "19:00–21:00",
+          "requeridos": 25,
+          "asignados": 20,
+          "dotacion_predicha": 20.21,
+          "cubiertos_previstos": 83,
+          "reservas": 37,
+          "pedidos_delivery": 21,
+          "prob_deficit": 0.816,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.692,
+            "cocinero_linea": 0.037,
+            "jefe_turno": 0.004
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar garzon para la franja 19_21"
+        },
+        {
+          "fecha": "2025-10-14",
+          "servicio": "21_23",
+          "horario": "21:00–23:00",
+          "requeridos": 10,
+          "asignados": 8,
+          "dotacion_predicha": 8.19,
+          "cubiertos_previstos": 31,
+          "reservas": 14,
+          "pedidos_delivery": 9,
+          "prob_deficit": 0.991,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.585,
+            "cocinero_linea": 0.083,
+            "jefe_turno": 0.003
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar garzon para la franja 21_23"
+        }
+      ]
+    },
+    {
+      "fecha": "2025-10-15",
+      "calendario": {
+        "fecha": "2025-10-15",
+        "dia_semana": "miércoles",
+        "es_viernes": false,
+        "es_fin_de_semana": false,
+        "es_ventana_pago": true,
+        "feriado": null,
+        "es_vispera_feriado": false,
+        "eventos": [
+          {
+            "fecha": "2025-10-15",
+            "nombre": "Promoción / Happy Hour (simulado)",
+            "tipo": "promocion",
+            "servicios": [
+              "13_15"
+            ],
+            "impacto_esperado": "medio",
+            "notas": "[PENDIENTE CERVECERÍA] Evento simulado a partir de los datos de ejemplo.",
+            "id": 12
+          }
+        ]
+      },
+      "servicios": [
+        {
+          "fecha": "2025-10-15",
+          "servicio": "11_13",
+          "horario": "11:00–13:00",
+          "requeridos": 10,
+          "asignados": 7,
+          "dotacion_predicha": 7.39,
+          "cubiertos_previstos": 28,
+          "reservas": 11,
+          "pedidos_delivery": 2,
+          "prob_deficit": 0.952,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.05,
+            "cocinero_linea": 0.349,
+            "jefe_turno": 0.007
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar cocinero_linea para la franja 11_13"
+        },
+        {
+          "fecha": "2025-10-15",
+          "servicio": "13_15",
+          "horario": "13:00–15:00",
+          "requeridos": 23,
+          "asignados": 18,
+          "dotacion_predicha": 18.27,
+          "cubiertos_previstos": 87,
+          "reservas": 33,
+          "pedidos_delivery": 21,
+          "prob_deficit": 0.968,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.662,
+            "cocinero_linea": 0.281,
+            "jefe_turno": 0.001
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar garzon para la franja 13_15"
+        },
+        {
+          "fecha": "2025-10-15",
+          "servicio": "19_21",
+          "horario": "19:00–21:00",
+          "requeridos": 23,
+          "asignados": 18,
+          "dotacion_predicha": 18.97,
+          "cubiertos_previstos": 88,
+          "reservas": 35,
+          "pedidos_delivery": 24,
+          "prob_deficit": 0.908,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.742,
+            "cocinero_linea": 0.027,
+            "jefe_turno": 0.003
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar garzon para la franja 19_21"
+        },
+        {
+          "fecha": "2025-10-15",
+          "servicio": "21_23",
+          "horario": "21:00–23:00",
+          "requeridos": 11,
+          "asignados": 11,
+          "dotacion_predicha": 10.38,
+          "cubiertos_previstos": 37,
+          "reservas": 25,
+          "pedidos_delivery": 13,
+          "prob_deficit": 0.579,
+          "nivel_riesgo": "alerta",
+          "prob_por_rol": {
+            "garzon": 0.279,
+            "cocinero_linea": 0.186,
+            "jefe_turno": 0.004
+          },
+          "recomendacion": "Monitorear ausentismo corto aviso y confirmar cobertura de garzon"
+        }
+      ]
+    },
+    {
+      "fecha": "2025-10-16",
+      "calendario": {
+        "fecha": "2025-10-16",
+        "dia_semana": "jueves",
+        "es_viernes": false,
+        "es_fin_de_semana": false,
+        "es_ventana_pago": false,
+        "feriado": null,
+        "es_vispera_feriado": false,
+        "eventos": [
+          {
+            "fecha": "2025-10-16",
+            "nombre": "Evento local cercano (simulado)",
+            "tipo": "evento_local",
+            "servicios": [
+              "21_23"
+            ],
+            "impacto_esperado": "medio",
+            "notas": "[PENDIENTE CERVECERÍA] Evento simulado a partir de los datos de ejemplo.",
+            "id": 13
+          }
+        ]
+      },
+      "servicios": [
+        {
+          "fecha": "2025-10-16",
+          "servicio": "11_13",
+          "horario": "11:00–13:00",
+          "requeridos": 10,
+          "asignados": 7,
+          "dotacion_predicha": 7.53,
+          "cubiertos_previstos": 26,
+          "reservas": 4,
+          "pedidos_delivery": 7,
+          "prob_deficit": 0.991,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.101,
+            "cocinero_linea": 0.031,
+            "jefe_turno": 0.396
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar jefe_turno para la franja 11_13"
+        },
+        {
+          "fecha": "2025-10-16",
+          "servicio": "13_15",
+          "horario": "13:00–15:00",
+          "requeridos": 23,
+          "asignados": 19,
+          "dotacion_predicha": 19.24,
+          "cubiertos_previstos": 88,
+          "reservas": 27,
+          "pedidos_delivery": 20,
+          "prob_deficit": 0.968,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.607,
+            "cocinero_linea": 0.704,
+            "jefe_turno": 0.004
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar cocinero_linea para la franja 13_15"
+        },
+        {
+          "fecha": "2025-10-16",
+          "servicio": "19_21",
+          "horario": "19:00–21:00",
+          "requeridos": 22,
+          "asignados": 20,
+          "dotacion_predicha": 20.19,
+          "cubiertos_previstos": 69,
+          "reservas": 29,
+          "pedidos_delivery": 29,
+          "prob_deficit": 0.733,
+          "nivel_riesgo": "alerta",
+          "prob_por_rol": {
+            "garzon": 0.123,
+            "cocinero_linea": 0.025,
+            "jefe_turno": 0.003
+          },
+          "recomendacion": "Mover personal cross-trained y preparar backup en garzon"
+        },
+        {
+          "fecha": "2025-10-16",
+          "servicio": "21_23",
+          "horario": "21:00–23:00",
+          "requeridos": 13,
+          "asignados": 11,
+          "dotacion_predicha": 10.97,
+          "cubiertos_previstos": 40,
+          "reservas": 22,
+          "pedidos_delivery": 17,
+          "prob_deficit": 0.777,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.143,
+            "cocinero_linea": 0.42,
+            "jefe_turno": 0.003
+          },
+          "recomendacion": "Mover personal cross-trained y preparar backup en cocinero_linea"
+        }
+      ]
+    },
+    {
+      "fecha": "2025-10-17",
+      "calendario": {
+        "fecha": "2025-10-17",
+        "dia_semana": "viernes",
+        "es_viernes": true,
+        "es_fin_de_semana": false,
+        "es_ventana_pago": false,
+        "feriado": null,
+        "es_vispera_feriado": false,
+        "eventos": []
+      },
+      "servicios": [
+        {
+          "fecha": "2025-10-17",
+          "servicio": "11_13",
+          "horario": "11:00–13:00",
+          "requeridos": 10,
+          "asignados": 9,
+          "dotacion_predicha": 8.62,
+          "cubiertos_previstos": 30,
+          "reservas": 4,
+          "pedidos_delivery": 9,
+          "prob_deficit": 0.968,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.129,
+            "cocinero_linea": 0.067,
+            "jefe_turno": 0.684
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar jefe_turno para la franja 11_13"
+        },
+        {
+          "fecha": "2025-10-17",
+          "servicio": "13_15",
+          "horario": "13:00–15:00",
+          "requeridos": 23,
+          "asignados": 21,
+          "dotacion_predicha": 20.83,
+          "cubiertos_previstos": 91,
+          "reservas": 37,
+          "pedidos_delivery": 14,
+          "prob_deficit": 0.968,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.232,
+            "cocinero_linea": 0.318,
+            "jefe_turno": 0.005
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar cocinero_linea para la franja 13_15"
+        },
+        {
+          "fecha": "2025-10-17",
+          "servicio": "19_21",
+          "horario": "19:00–21:00",
+          "requeridos": 22,
+          "asignados": 22,
+          "dotacion_predicha": 21.86,
+          "cubiertos_previstos": 79,
+          "reservas": 39,
+          "pedidos_delivery": 22,
+          "prob_deficit": 0.414,
+          "nivel_riesgo": "bajo",
+          "prob_por_rol": {
+            "garzon": 0.181,
+            "cocinero_linea": 0.06,
+            "jefe_turno": 0.001
+          },
+          "recomendacion": "Cobertura estable; mantener monitoreo operativo"
+        },
+        {
+          "fecha": "2025-10-17",
+          "servicio": "21_23",
+          "horario": "21:00–23:00",
+          "requeridos": 12,
+          "asignados": 7,
+          "dotacion_predicha": 7.8,
+          "cubiertos_previstos": 40,
+          "reservas": 18,
+          "pedidos_delivery": 8,
+          "prob_deficit": 0.929,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.775,
+            "cocinero_linea": 0.679,
+            "jefe_turno": 0.797
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar jefe_turno para la franja 21_23"
+        }
+      ]
+    },
+    {
+      "fecha": "2025-10-18",
+      "calendario": {
+        "fecha": "2025-10-18",
+        "dia_semana": "sábado",
+        "es_viernes": false,
+        "es_fin_de_semana": true,
+        "es_ventana_pago": false,
+        "feriado": null,
+        "es_vispera_feriado": false,
+        "eventos": [
+          {
+            "fecha": "2025-10-18",
+            "nombre": "Evento local cercano (simulado)",
+            "tipo": "evento_local",
+            "servicios": [
+              "19_21"
+            ],
+            "impacto_esperado": "medio",
+            "notas": "[PENDIENTE CERVECERÍA] Evento simulado a partir de los datos de ejemplo.",
+            "id": 14
+          }
+        ]
+      },
+      "servicios": [
+        {
+          "fecha": "2025-10-18",
+          "servicio": "11_13",
+          "horario": "11:00–13:00",
+          "requeridos": 10,
+          "asignados": 10,
+          "dotacion_predicha": 9.87,
+          "cubiertos_previstos": 43,
+          "reservas": 6,
+          "pedidos_delivery": 4,
+          "prob_deficit": 0.397,
+          "nivel_riesgo": "bajo",
+          "prob_por_rol": {
+            "garzon": 0.129,
+            "cocinero_linea": 0.045,
+            "jefe_turno": 0.007
+          },
+          "recomendacion": "Cobertura estable; mantener monitoreo operativo"
+        },
+        {
+          "fecha": "2025-10-18",
+          "servicio": "13_15",
+          "horario": "13:00–15:00",
+          "requeridos": 27,
+          "asignados": 22,
+          "dotacion_predicha": 21.8,
+          "cubiertos_previstos": 105,
+          "reservas": 37,
+          "pedidos_delivery": 14,
+          "prob_deficit": 1.0,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.767,
+            "cocinero_linea": 0.762,
+            "jefe_turno": 0.002
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar garzon para la franja 13_15"
+        },
+        {
+          "fecha": "2025-10-18",
+          "servicio": "19_21",
+          "horario": "19:00–21:00",
+          "requeridos": 27,
+          "asignados": 26,
+          "dotacion_predicha": 25.19,
+          "cubiertos_previstos": 96,
+          "reservas": 39,
+          "pedidos_delivery": 29,
+          "prob_deficit": 0.821,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.293,
+            "cocinero_linea": 0.093,
+            "jefe_turno": 0.009
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar garzon para la franja 19_21"
+        },
+        {
+          "fecha": "2025-10-18",
+          "servicio": "21_23",
+          "horario": "21:00–23:00",
+          "requeridos": 14,
+          "asignados": 12,
+          "dotacion_predicha": 11.83,
+          "cubiertos_previstos": 53,
+          "reservas": 27,
+          "pedidos_delivery": 13,
+          "prob_deficit": 0.977,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.36,
+            "cocinero_linea": 0.743,
+            "jefe_turno": 0.004
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar cocinero_linea para la franja 21_23"
+        }
+      ]
+    },
+    {
+      "fecha": "2025-10-19",
+      "calendario": {
+        "fecha": "2025-10-19",
+        "dia_semana": "domingo",
+        "es_viernes": false,
+        "es_fin_de_semana": true,
+        "es_ventana_pago": false,
+        "feriado": null,
+        "es_vispera_feriado": false,
+        "eventos": []
+      },
+      "servicios": [
+        {
+          "fecha": "2025-10-19",
+          "servicio": "11_13",
+          "horario": "11:00–13:00",
+          "requeridos": 10,
+          "asignados": 8,
+          "dotacion_predicha": 8.23,
+          "cubiertos_previstos": 22,
+          "reservas": 8,
+          "pedidos_delivery": 7,
+          "prob_deficit": 0.801,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.159,
+            "cocinero_linea": 0.033,
+            "jefe_turno": 0.005
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar garzon para la franja 11_13"
+        },
+        {
+          "fecha": "2025-10-19",
+          "servicio": "13_15",
+          "horario": "13:00–15:00",
+          "requeridos": 23,
+          "asignados": 19,
+          "dotacion_predicha": 19.29,
+          "cubiertos_previstos": 84,
+          "reservas": 39,
+          "pedidos_delivery": 16,
+          "prob_deficit": 0.991,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.736,
+            "cocinero_linea": 0.771,
+            "jefe_turno": 0.003
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar cocinero_linea para la franja 13_15"
+        },
+        {
+          "fecha": "2025-10-19",
+          "servicio": "19_21",
+          "horario": "19:00–21:00",
+          "requeridos": 23,
+          "asignados": 21,
+          "dotacion_predicha": 20.9,
+          "cubiertos_previstos": 81,
+          "reservas": 33,
+          "pedidos_delivery": 22,
+          "prob_deficit": 0.74,
+          "nivel_riesgo": "alerta",
+          "prob_por_rol": {
+            "garzon": 0.376,
+            "cocinero_linea": 0.032,
+            "jefe_turno": 0.004
+          },
+          "recomendacion": "Mover personal cross-trained y preparar backup en garzon"
+        },
+        {
+          "fecha": "2025-10-19",
+          "servicio": "21_23",
+          "horario": "21:00–23:00",
+          "requeridos": 12,
+          "asignados": 10,
+          "dotacion_predicha": 10.11,
+          "cubiertos_previstos": 40,
+          "reservas": 18,
+          "pedidos_delivery": 15,
+          "prob_deficit": 0.965,
+          "nivel_riesgo": "alto",
+          "prob_por_rol": {
+            "garzon": 0.453,
+            "cocinero_linea": 0.586,
+            "jefe_turno": 0.045
+          },
+          "recomendacion": "Activar reemplazo inmediato y reforzar cocinero_linea para la franja 21_23"
+        }
+      ]
+    }
+  ]
+}

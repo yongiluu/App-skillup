@@ -1,0 +1,90 @@
+.bienestar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+}
+
+.indicador,
+.vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--esp-2);
+}
+
+.motivos {
+  font-size: 0.9375rem;
+}
+
+.motivos::first-letter {
+  text-transform: uppercase;
+}
+
+.nota,
+.tests {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+}
+
+/* Estados sin datos: neutros, sin color de riesgo (no son "buenos" ni "malos") */
+.estado {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px var(--esp-3);
+  border-radius: var(--radio-pildora);
+  border: 1px dashed var(--color-borde-campo);
+  background: var(--color-hundido);
+  color: var(--color-texto-suave);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+}
+
+.tablaCaja {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--texto-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.tabla caption {
+  text-align: left;
+  font-weight: var(--peso-fuerte);
+  margin-bottom: var(--esp-2);
+}
+
+.tabla th,
+.tabla td {
+  padding: var(--esp-2) 6px;
+  border-top: 1px solid var(--color-borde);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tabla th:first-child {
+  text-align: left;
+  font-weight: var(--peso-medio);
+}
+
+.tabla thead th {
+  border-top: 0;
+  color: var(--color-texto-suave);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-medio);
+}
+
+.leyenda {
+  margin-top: var(--esp-2);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+}
+
+@media (max-width: 420px) {
+  .tabla {
+    font-size: var(--texto-xs);
+  }
+}

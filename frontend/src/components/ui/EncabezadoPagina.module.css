@@ -1,0 +1,39 @@
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--esp-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--esp-5);
+}
+
+.titulo {
+  font-size: 1.6875rem;
+  line-height: 1.15;
+}
+
+.titulo:focus {
+  outline: none;
+}
+
+.bajada {
+  margin-top: var(--esp-1);
+  color: var(--color-texto-suave);
+  font-size: 0.9375rem;
+}
+
+.bajada::first-letter {
+  text-transform: uppercase;
+}
+
+.acciones {
+  display: flex;
+  gap: var(--esp-2);
+  flex-wrap: wrap;
+}
+
+@media (min-width: 900px) {
+  .titulo {
+    font-size: var(--texto-xl);
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "fecha": "2025-10-17",
+  "calendario": {
+    "fecha": "2025-10-17",
+    "dia_semana": "viernes",
+    "es_viernes": true,
+    "es_fin_de_semana": false,
+    "es_ventana_pago": false,
+    "feriado": null,
+    "es_vispera_feriado": false,
+    "eventos": []
+  },
+  "servicios": [
+    {
+      "fecha": "2025-10-17",
+      "servicio": "11_13",
+      "horario": "11:00–13:00",
+      "requeridos": 10,
+      "asignados": 9,
+      "dotacion_predicha": 8.62,
+      "cubiertos_previstos": 30,
+      "reservas": 4,
+      "pedidos_delivery": 9,
+      "prob_deficit": 0.968,
+      "nivel_riesgo": "alto",
+      "prob_por_rol": {
+        "garzon": 0.129,
+        "cocinero_linea": 0.067,
+        "jefe_turno": 0.684
+      },
+      "recomendacion": "Activar reemplazo inmediato y reforzar jefe_turno para la franja 11_13"
+    },
+    {
+      "fecha": "2025-10-17",
+      "servicio": "13_15",
+      "horario": "13:00–15:00",
+      "requeridos": 23,
+      "asignados": 21,
+      "dotacion_predicha": 20.83,
+      "cubiertos_previstos": 91,
+      "reservas": 37,
+      "pedidos_delivery": 14,
+      "prob_deficit": 0.968,
+      "nivel_riesgo": "alto",
+      "prob_por_rol": {
+        "garzon": 0.232,
+        "cocinero_linea": 0.318,
+        "jefe_turno": 0.005
+      },
+      "recomendacion": "Activar reemplazo inmediato y reforzar cocinero_linea para la franja 13_15"
+    },
+    {
+      "fecha": "2025-10-17",
+      "servicio": "19_21",
+      "horario": "19:00–21:00",
+      "requeridos": 22,
+      "asignados": 22,
+      "dotacion_predicha": 21.86,
+      "cubiertos_previstos": 79,
+      "reservas": 39,
+      "pedidos_delivery": 22,
+      "prob_deficit": 0.414,
+      "nivel_riesgo": "bajo",
+      "prob_por_rol": {
+        "garzon": 0.181,
+        "cocinero_linea": 0.06,
+        "jefe_turno": 0.001
+      },
+      "recomendacion": "Cobertura estable; mantener monitoreo operativo"
+    },
+    {
+      "fecha": "2025-10-17",
+      "servicio": "21_23",
+      "horario": "21:00–23:00",
+      "requeridos": 12,
+      "asignados": 7,
+      "dotacion_predicha": 7.8,
+      "cubiertos_previstos": 40,
+      "reservas": 18,
+      "pedidos_delivery": 8,
+      "prob_deficit": 0.929,
+      "nivel_riesgo": "alto",
+      "prob_por_rol": {
+        "garzon": 0.775,
+        "cocinero_linea": 0.679,
+        "jefe_turno": 0.797
+      },
+      "recomendacion": "Activar reemplazo inmediato y reforzar jefe_turno para la franja 21_23"
+    }
+  ]
+}
