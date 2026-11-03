@@ -1,6 +1,6 @@
 # Prompt de inicio para el proyecto compartido (Cowork)
 
-Pega el texto de abajo en las **instrucciones del proyecto** en Cowork. Así, cada conversación de cualquiera de los 3 parte con el mismo contexto. Reemplaza los `[Nombre]` antes de pegarlo.
+Pega el texto de abajo en las **instrucciones del proyecto** en Cowork. Así, cada conversación de cualquiera de los 3 parte con el mismo contexto.
 
 ---
 
@@ -18,9 +18,9 @@ y jefe de turno. Umbrales de riesgo: alerta ≥ 0,55 y alto ≥ 0,75.
 
 ## Equipo
 Somos 3 personas y cada una es dueña de una capa:
-- Frontend (UI/UX), carpeta frontend/: [Nombre]. React + Vite + TypeScript.
-- Backend (API e integraciones), carpeta backend/: [Nombre]. Python + FastAPI.
-- Base de datos, carpeta database/: [Nombre]. PostgreSQL en Supabase.
+- Frontend (UI/UX), carpeta frontend/: Manuel. React + Vite + TypeScript.
+- Backend (API e integraciones), carpeta backend/: Diego. Python + FastAPI.
+- Base de datos, carpeta database/: Maximiliano. PostgreSQL en Supabase.
 
 ## Cómo quiero que trabajes
 1. Al empezar una conversación, si no sabes quién te habla, pregúntale qué rol tiene y en qué tarea está.
@@ -33,8 +33,11 @@ Somos 3 personas y cada una es dueña de una capa:
 4. Trabaja en ramas (frontend/..., backend/..., database/...) y entrega por pull request con:
    qué cambia, cómo probarlo y capturas si toca la UI. Nunca hagas push directo a main.
 5. No pongas claves ni contraseñas en el código: usa .env y mantén actualizado .env.example.
-6. Los datos de salud, biometría o tests psicológicos son sensibles: van separados, con acceso
-   restringido y consentimiento registrado. Por ahora quedan como "pendiente".
+6. Los datos de salud, biometría y tests son sensibles: van separados, con acceso restringido y
+   consentimiento registrado. Por ahora se usan datos simulados (pasos, sueño, pulso y encuesta de
+   fatiga). Sin consentimiento no se usa ni se muestra nada de esa persona. La persona ve sus propios
+   datos; el jefe de turno solo ve un indicador de fatiga (nivel y motivo general), nunca los datos
+   crudos ni diagnósticos. Los tests psicológicos siguen "pendiente": solo hay preguntas propuestas.
 7. Si algo depende de información que aún no tenemos de la cervecería (eventos, días hábiles,
    dotación real), usa los datos simulados y márcalo como [PENDIENTE CERVECERÍA].
 8. Responde en español, de forma clara, y explica tus decisiones técnicas para que todo el
@@ -49,10 +52,10 @@ Resume en pocas líneas qué hiciste, qué quedó pendiente y si algo afecta a o
 ## Primer mensaje sugerido para cada persona
 
 **Frontend**
-> Soy [Nombre], responsable del frontend. Quiero empezar la etapa 1: crear el proyecto con Vite y armar el sistema visual y la navegación entre Hoy, Planificador y Equipo. Hazme las preguntas que necesites antes de empezar.
+> Soy Manuel, responsable del frontend. Quiero empezar la etapa 1: crear el proyecto con Vite y armar el sistema visual y la navegación entre Hoy, Planificador y Equipo. Hazme las preguntas que necesites antes de empezar.
 
 **Backend**
-> Soy [Nombre], responsable del backend. Quiero empezar la etapa 1: crear el proyecto FastAPI con los endpoints del contrato respondiendo datos de ejemplo. Hazme las preguntas que necesites antes de empezar.
+> Soy Diego, responsable del backend. Quiero empezar la etapa 1: crear el proyecto FastAPI con los endpoints del contrato respondiendo datos de ejemplo. Hazme las preguntas que necesites antes de empezar.
 
 **Base de datos**
-> Soy [Nombre], responsable de la base de datos. Quiero empezar la etapa 1: diseñar el esquema inicial a partir del modelo de datos del README y dejarlo listo en Supabase. Hazme las preguntas que necesites antes de empezar.
+> Soy Maximiliano, responsable de la base de datos. Quiero empezar la etapa 1: diseñar el esquema inicial a partir del modelo de datos del README y dejarlo listo en Supabase. Hazme las preguntas que necesites antes de empezar.

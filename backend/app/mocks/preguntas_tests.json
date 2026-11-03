@@ -1,0 +1,70 @@
+{
+  "estado": "pendiente",
+  "nota": "[PENDIENTE CERVECERÍA] Preguntas de ejemplo para discutir. No son tests clínicos ni diagnósticos: antes de usarlas deben revisarlas un profesional (psicología laboral o prevención de riesgos) y la cervecería, y se aplican solo con consentimiento. Todas son voluntarias.",
+  "excluido": "No se proponen preguntas sobre salud mental (ansiedad, depresión u otras), consumo de sustancias ni vida privada: serían datos de salud o personales que no corresponden a la gestión de turnos.",
+  "instrumentos": [
+    {
+      "id": "fatiga_turno",
+      "nombre": "Encuesta de fatiga (inicio y fin de turno)",
+      "estado": "activa en la matriz de variables (simulada)",
+      "basado_en": "Escala de fatiga de 7 puntos, del tipo Samn-Perelli",
+      "cuando": "Al marcar entrada y al marcar salida",
+      "preguntas": [
+        {
+          "id": "fatiga_ahora",
+          "texto": "¿Cómo te sientes en este momento?",
+          "escala": {"min": 1, "max": 7, "min_texto": "Totalmente alerta, con energía", "max_texto": "Completamente agotado/a, no puedo rendir"}
+        }
+      ]
+    },
+    {
+      "id": "somnolencia",
+      "nombre": "Somnolencia",
+      "estado": "propuesta",
+      "basado_en": "Escala de somnolencia de 9 puntos, del tipo Karolinska (KSS)",
+      "cuando": "Al inicio de turnos de cierre (21–23)",
+      "preguntas": [
+        {
+          "id": "somnolencia_ahora",
+          "texto": "¿Qué tan despierto/a te sientes ahora?",
+          "escala": {"min": 1, "max": 9, "min_texto": "Muy despierto/a", "max_texto": "Muy somnoliento/a, me cuesta mantenerme despierto/a"}
+        }
+      ]
+    },
+    {
+      "id": "carga_turno",
+      "nombre": "Carga del turno",
+      "estado": "propuesta",
+      "basado_en": "Dimensiones de carga de trabajo del tipo NASA-TLX (versión corta)",
+      "cuando": "Al marcar salida, máximo una vez por semana",
+      "preguntas": [
+        {"id": "exigencia_fisica", "texto": "¿Qué tan exigente fue físicamente el turno de hoy?", "escala": {"min": 0, "max": 10, "min_texto": "Nada", "max_texto": "Muchísimo"}},
+        {"id": "exigencia_mental", "texto": "¿Qué tan exigente fue mentalmente (pedidos, atención, coordinar)?", "escala": {"min": 0, "max": 10, "min_texto": "Nada", "max_texto": "Muchísimo"}},
+        {"id": "presion_tiempo", "texto": "¿Cuánta presión de tiempo sentiste?", "escala": {"min": 0, "max": 10, "min_texto": "Ninguna", "max_texto": "Muchísima"}},
+        {"id": "frustracion", "texto": "¿Qué tan frustrante fue el turno?", "escala": {"min": 0, "max": 10, "min_texto": "Nada", "max_texto": "Muchísimo"}}
+      ]
+    },
+    {
+      "id": "descanso",
+      "nombre": "Descanso (alternativa al reloj)",
+      "estado": "propuesta",
+      "basado_en": "Autorreporte simple de sueño",
+      "cuando": "Al marcar entrada, solo si la persona no usa reloj",
+      "preguntas": [
+        {"id": "horas_sueno", "texto": "¿Cuántas horas dormiste anoche, más o menos?", "escala": {"min": 0, "max": 12, "min_texto": "0 horas", "max_texto": "12 horas o más"}},
+        {"id": "descansado", "texto": "¿Te sentiste descansado/a al despertar?", "escala": {"min": 1, "max": 5, "min_texto": "Nada descansado/a", "max_texto": "Muy descansado/a"}}
+      ]
+    },
+    {
+      "id": "clima_equipo",
+      "nombre": "Apoyo del equipo",
+      "estado": "propuesta",
+      "basado_en": "Pregunta de clima laboral (no clínica)",
+      "cuando": "Una vez por semana",
+      "preguntas": [
+        {"id": "apoyo", "texto": "Esta semana, ¿sentiste apoyo de tu equipo y de tu jefe/a de turno cuando lo necesitaste?", "escala": {"min": 1, "max": 5, "min_texto": "Nunca", "max_texto": "Siempre"}},
+        {"id": "sugerencia", "texto": "¿Algo que te gustaría que cambiara en los turnos? (opcional)", "abierta": true, "max_caracteres": 300}
+      ]
+    }
+  ]
+}
