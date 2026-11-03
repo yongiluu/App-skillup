@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.repositorio import RepositorioMock, get_repo
+from app.repositorio import Repositorio, get_repo
 from app.schemas import Error, LoginIn, LoginOut
 from app.seguridad import (
     USUARIOS_DEMO,
@@ -24,7 +24,7 @@ _CREDENCIALES_INVALIDAS = "Usuario o contraseña incorrectos"
     response_model=LoginOut,
     responses={401: {"model": Error}, 429: {"model": Error}, 503: {"model": Error}},
 )
-def login(datos: LoginIn, repo: RepositorioMock = Depends(get_repo)) -> LoginOut:
+def login(datos: LoginIn, repo: Repositorio = Depends(get_repo)) -> LoginOut:
     """Inicia sesión y devuelve un token. Usuarios de prueba: `jefe` y `empleado`,
     con la contraseña definida en `DEMO_PASSWORD` (.env)."""
     guardado = hash_demo()
@@ -53,5 +53,5 @@ def login(datos: LoginIn, repo: RepositorioMock = Depends(get_repo)) -> LoginOut
         expira_en=expira,
         perfil=u["perfil"],
         empleado_id=u["empleado_id"],
-        nombre=repo.empleados[u["empleado_id"]]["nombre"],
+        nombre=repo.empleados.get(u["empleado_id"], {}).get("nombre", nombre_usuario),
     )

@@ -11,7 +11,7 @@ import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
 from app.main import app  # noqa: E402
-from app.repositorio import get_repo  # noqa: E402
+from app.repositorio import repo_mock  # noqa: E402
 from app.seguridad import limitador  # noqa: E402
 
 PASSWORD = os.environ["DEMO_PASSWORD"]
@@ -25,7 +25,7 @@ def _token(c: TestClient, usuario: str) -> str:
 
 @pytest.fixture()
 def anonimo():
-    get_repo.cache_clear()  # cada test parte con los mocks limpios
+    repo_mock.cache_clear()  # cada test parte con los mocks limpios
     limitador.limpiar()
     return TestClient(app)
 

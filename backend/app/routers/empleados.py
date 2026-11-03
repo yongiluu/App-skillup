@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app import bienestar, logica
 from app.config import get_settings
-from app.repositorio import RepositorioMock, get_repo
+from app.repositorio import Repositorio, get_repo
 from app.schemas import BienestarPropio, Empleado, EmpleadoFicha, Error, Rol, Turno
 from app.seguridad import Usuario, exigir_propio_o_jefe, usuario_actual
 
@@ -16,21 +16,21 @@ PERMISOS = {403: {"model": Error}, 404: {"model": Error}}
 @router.get("", response_model=list[Empleado])
 def listar(
     rol: Rol | None = Query(None, description="Filtrar por rol"),
-    repo: RepositorioMock = Depends(get_repo),
+    repo: Repositorio = Depends(get_repo),
 ):
     """Lista del equipo (solo datos básicos; sirve también para elegir reemplazo en un cambio de turno)."""
     return [e for e in repo.empleados.values() if rol is None or e["rol"] == rol]
 
 
 @router.get("/{empleado_id}", response_model=EmpleadoFicha, responses=PERMISOS)
-def ficha(empleado_id: str, u: Usuario = Depends(usuario_actual), repo: RepositorioMock = Depends(get_repo)):
+def ficha(empleado_id: str, u: Usuario = Depends(usuario_actual), repo: Repositorio = Depends(get_repo)):
     """Ficha: roles que puede cubrir, días seguidos, horas extra, ausencias y próximos turnos.
     Incluye el indicador de fatiga (nivel y motivos, nunca datos crudos). Un empleado solo ve la suya."""
     exigir_propio_o_jefe(u, empleado_id)
     datos = logica.ficha_empleado(repo, empleado_id, get_settings().mock_hoy)
     if datos is None:
         raise HTTPException(404, f"No existe el empleado {empleado_id}")
-    bienestar.registrar_acceso(u.usuario, "ficha_indicador", empleado_id)
+    bienestar.registrar_acceso(repo, u.usuario, "ficha_indicador", empleado_id)
     return datos
 
 
@@ -38,9 +38,9 @@ def ficha(empleado_id: str, u: Usuario = Depends(usuario_actual), repo: Reposito
 def bienestar_propio(
     empleado_id: str,
     desde: date | None = Query(None, description="YYYY-MM-DD. Por defecto, 14 días antes de 'hasta'."),
-    hasta: date | None = Query(None, description="YYYY-MM-DD. Por defecto, el 'hoy' de los mocks."),
+    hasta: date | None = Query(None, description="YYYY-MM-DD. Por defecto, MOCK_HOY."),
     u: Usuario = Depends(usuario_actual),
-    repo: RepositorioMock = Depends(get_repo),
+    repo: Repositorio = Depends(get_repo),
 ):
     """**Solo la propia persona** (ni siquiera el jefe de turno): pasos, sueño, pulso y encuesta
     de fatiga, más su indicador. Sin consentimiento no devuelve registros."""
@@ -52,7 +52,7 @@ def bienestar_propio(
     desde = desde or hasta - timedelta(days=13)
     if desde > hasta:
         raise HTTPException(422, "'desde' no puede ser posterior a 'hasta'")
-    bienestar.registrar_acceso(u.usuario, "datos_propios", empleado_id)
+    bienestar.registrar_acceso(repo, u.usuario, "datos_propios", empleado_id)
     return bienestar.datos_propios(repo, empleado_id, desde, hasta)
 
 
@@ -62,7 +62,7 @@ def turnos(
     desde: date | None = Query(None, description="YYYY-MM-DD (incluido)"),
     hasta: date | None = Query(None, description="YYYY-MM-DD (incluido)"),
     u: Usuario = Depends(usuario_actual),
-    repo: RepositorioMock = Depends(get_repo),
+    repo: Repositorio = Depends(get_repo),
 ):
     """Turnos de una persona, opcionalmente filtrados por fechas. Un empleado solo ve los suyos."""
     exigir_propio_o_jefe(u, empleado_id)

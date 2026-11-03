@@ -5,7 +5,7 @@ import json
 from datetime import date
 
 from app.bienestar import resumen
-from app.repositorio import get_repo
+from app.repositorio import repo_mock
 
 HOY = "2025-10-17"
 SIN_CONSENTIMIENTO = "RST_011"  # dato fijo de los mocks
@@ -74,7 +74,7 @@ def test_sin_consentimiento_no_hay_nada(client):
     equipo = {e["empleado_id"]: e for e in client.get("/bienestar/fatiga").json()}
     assert equipo[SIN_CONSENTIMIENTO]["fatiga"] is None
     # ni siquiera existen sus datos en el almacenamiento
-    assert get_repo().bienestar_de_empleado(SIN_CONSENTIMIENTO, date(2025, 1, 1), date(2026, 1, 1)) == []
+    assert repo_mock().bienestar_de_empleado(SIN_CONSENTIMIENTO, date(2025, 1, 1), date(2026, 1, 1)) == []
 
 
 def test_sin_datos_fuera_de_rango(client):
@@ -83,7 +83,7 @@ def test_sin_datos_fuera_de_rango(client):
 
 
 def test_sugerencias_dejan_al_final_a_quien_tiene_fatiga_alta(client):
-    repo = get_repo()
+    repo = repo_mock()
     for fecha in ("2025-10-03", "2025-10-17", "2025-10-31"):
         f = date.fromisoformat(fecha)
         sug = client.get("/sugerencias", params={"fecha": fecha}).json()
@@ -97,7 +97,7 @@ def test_sugerencias_dejan_al_final_a_quien_tiene_fatiga_alta(client):
 
 # ---------- nunca se filtran campos prohibidos ----------
 def test_mocks_sin_campos_prohibidos():
-    repo = get_repo()
+    repo = repo_mock()
     texto = json.dumps(repo._bienestar_por_empleado) + json.dumps(repo.ausencias)
     assert not any(p in texto for p in NUNCA)
 

@@ -1,6 +1,6 @@
 # SkillUp · Backend (FastAPI)
 
-API REST de SkillUp. **Etapa 1:** todos los endpoints del contrato responden **datos de ejemplo**. Todavía no hay conexión a la base de datos, pero el **login y los permisos ya son reales** (ver [Seguridad](#seguridad)).
+API REST de SkillUp. **Etapa 2:** la API lee y escribe en la base de datos de Supabase (esquema de Maxi) o, para pruebas, en los datos de ejemplo. Se elige con `FUENTE_DATOS` (ver [Fuente de datos](#fuente-de-datos)). El **login y los permisos ya son reales** (ver [Seguridad](#seguridad)).
 
 ## Levantarlo en local
 
@@ -22,7 +22,43 @@ uvicorn app.main:app --reload
   1. `POST /auth/login` con `{"usuario": "jefe", "password": "<tu DEMO_PASSWORD>"}`
   2. Copia el `access_token`, aprieta **Authorize** (arriba a la derecha) y pégalo.
   3. Ya puedes probar los demás endpoints.
-- Pruebas: `pytest` (74 pruebas: 33 de seguridad y 14 de bienestar)
+- Pruebas: `pytest` → 74 pruebas con los mocks (33 de seguridad y 14 de bienestar), más 17 de integración con Postgres si defines `TEST_DATABASE_URL` (ver abajo).
+
+## Fuente de datos
+
+| `FUENTE_DATOS` | De dónde lee | Para qué |
+|---|---|---|
+| `mock` (por defecto) | `app/mocks/*.json`, en memoria | Pruebas, CI y demo sin base de datos |
+| `supabase` | Postgres de Supabase (`DATABASE_URL`) | El prototipo real |
+
+Para usar Supabase, en tu `backend\.env`:
+```
+FUENTE_DATOS=supabase
+DATABASE_URL=postgresql://postgres:<contraseña>@db.<proyecto>.supabase.co:5432/postgres
+```
+`DATABASE_URL` va **solo** en `.env`, que Git ignora. Nunca en el código, un PR o un issue: el repo es público.
+
+Los dos modos tienen los mismos métodos (`app/repositorio.py` y `app/repositorio_db.py`), así que los routers no cambian. En modo `supabase`:
+
+- Se crea un repositorio por request con una conexión del pool (máximo 5), y lo que ya se leyó en ese request se reutiliza.
+- **`asignados` = turnos programados** del servicio (en los mocks era la dotación real del CSV).
+- **`puede_cubrir`** = `empleado_rol` (sin el rol principal) + `rol_respaldo`.
+- **Días seguidos y horas extra** se calculan desde las fechas de los turnos.
+- **Servicios sin fila en `prediccion` no se muestran** (no hay probabilidad que dar).
+- **Consentimiento vigente** = fila en `sensible.consentimiento` con `tipo = 'bienestar'` y `revocado_en` nulo. Los datos de bienestar se leen solo para quien lo tiene (se usa `sensible.tiene_consentimiento`).
+- **Accesos a bienestar** quedan en `sensible.registro_acceso` (la tabla de Maxi no permite borrar ni editar).
+- **`resuelta_por`** en la tabla es un `usuario.id`; la API muestra el `empleado_id` de ese usuario. Si el jefe que resuelve no tiene fila en `usuario`, queda vacío.
+- La conexión usa el usuario `postgres`, que se salta RLS. Sirve para el prototipo; en producción hay que usar un rol con permisos mínimos (ver pendientes).
+
+### Pruebas de integración con Postgres
+`tests/test_bd.py` recrea en una base **local y descartable** una copia de la estructura de Supabase (`tests/fixtures/esquema_supabase.sql`, solo la estructura, sin datos), carga los mocks con `scripts/cargar_mocks_en_bd.py` y verifica que la API responda lo mismo que en modo mock.
+
+```bash
+TEST_DATABASE_URL=postgresql://postgres@localhost:5432/skillup_test pytest
+```
+Si `TEST_DATABASE_URL` no está definida, esas pruebas se saltan. La prueba se niega a correr contra un host que no sea local.
+
+`scripts/cargar_mocks_en_bd.py` también se niega a escribir en un host remoto salvo con `--permitir-remoto`. Cargar la semilla en Supabase le toca a base de datos (Maxi).
 
 ## Datos de ejemplo
 
@@ -32,7 +68,7 @@ uvicorn app.main:app --reload
 - Fuera del rango, la API responde `404` con el rango disponible.
 - Los nombres de los empleados son **ficticios**.
 - Los eventos son simulados `[PENDIENTE CERVECERÍA]`.
-- Lo que se crea con `POST` o `PATCH` (eventos y solicitudes) **vive en memoria** y se pierde al reiniciar.
+- En modo `mock`, lo que se crea con `POST` o `PATCH` (eventos y solicitudes) **vive en memoria** y se pierde al reiniciar.
 - Para regenerar los mocks: `python scripts/build_mocks.py --origen <ruta>/skillup-dotacion-laboral-main/data/restaurant`
 
 **Privacidad:** las variables descartadas en la matriz de variables (IMC, género, hijos, tabaquismo, nivel educacional) no se exponen. La biometría es simulada y tiene reglas propias (ver [Bienestar](#bienestar-datos-sensibles)).
@@ -151,7 +187,8 @@ backend/
 │   ├── main.py          # crea la app, CORS y routers
 │   ├── config.py        # variables de entorno (.env)
 │   ├── schemas.py       # contrato: modelos de entrada/salida (Pydantic)
-│   ├── repositorio.py   # acceso a datos (hoy JSON en memoria; en la etapa 2, Supabase)
+│   ├── repositorio.py   # repositorio mock (JSON en memoria) y elección según FUENTE_DATOS
+│   ├── repositorio_db.py # repositorio sobre Postgres/Supabase
 │   ├── logica.py        # nivel de riesgo, sugerencias, ficha
 │   ├── routers/         # un archivo por grupo de endpoints
 │   └── mocks/           # datos de ejemplo
@@ -159,4 +196,7 @@ backend/
 └── tests/test_api.py
 ```
 
-**Etapa 2:** basta con reemplazar `RepositorioMock` por un repositorio que consulte Supabase y mantenga los mismos métodos. Los routers y los schemas no cambian.
+**Pendientes de la etapa 3:**
+- Login con la tabla `usuario`: cada persona con su cuenta y contraseña con hash (hoy, `jefe`/`empleado` con `DEMO_PASSWORD`).
+- Conectarse con un rol de Postgres con permisos mínimos, en vez de `postgres`.
+- Guardar en la base el bloqueo por intentos de login (hoy vive en memoria).

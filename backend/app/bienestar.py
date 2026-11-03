@@ -16,7 +16,7 @@ import logging
 from datetime import date, timedelta
 from statistics import mean
 
-from app.repositorio import RepositorioMock
+from app.repositorio import Repositorio
 
 auditoria = logging.getLogger("skillup.auditoria")
 
@@ -60,19 +60,15 @@ def _nivel(componentes: dict[str, float]) -> tuple[str, list[str]]:
     return nivel, motivos
 
 
-def _jornada(repo: RepositorioMock, empleado_id: str, fecha: date) -> tuple[int, float]:
-    f, hace_7 = fecha.isoformat(), (fecha - timedelta(days=6)).isoformat()
-    pasados = [t for t in repo.turnos_de_empleado(empleado_id) if t["fecha"] <= f]
-    dias = pasados[-1]["dias_seguidos"] if pasados else 0
-    extra = sum(t["horas_extra"] for t in pasados if t["fecha"] >= hace_7)
-    return dias, extra
+def _jornada(repo: Repositorio, empleado_id: str, fecha: date) -> tuple[int, float]:
+    return repo.dias_seguidos_hasta(fecha).get(empleado_id, 0), repo.horas_extra_7d(fecha).get(empleado_id, 0.0)
 
 
-def resumen(repo: RepositorioMock, empleado_id: str, fecha: date) -> dict:
+def resumen(repo: Repositorio, empleado_id: str, fecha: date) -> dict:
     """Estado + indicador de fatiga (lo que puede ver el jefe de turno)."""
-    consentimiento = repo.consentimientos.get(
-        empleado_id, {"otorgado": False, "fecha": None, "version_texto": "sin-registro"}
-    )
+    consentimiento = repo.consentimiento_de(empleado_id) or {
+        "otorgado": False, "fecha": None, "version_texto": "sin-registro"
+    }
     base = {"consentimiento": consentimiento, "fatiga": None}
     if not consentimiento["otorgado"]:
         return {**base, "estado": "sin_consentimiento"}
@@ -87,12 +83,14 @@ def resumen(repo: RepositorioMock, empleado_id: str, fecha: date) -> dict:
     }
 
 
-def datos_propios(repo: RepositorioMock, empleado_id: str, desde: date, hasta: date) -> dict:
+def datos_propios(repo: Repositorio, empleado_id: str, desde: date, hasta: date) -> dict:
     """Datos crudos + indicador. Solo para la propia persona (el router lo controla)."""
     r = resumen(repo, empleado_id, hasta)
     registros = repo.bienestar_de_empleado(empleado_id, desde, hasta) if r["estado"] != "sin_consentimiento" else []
     return {**r, "empleado_id": empleado_id, "registros": registros}
 
 
-def registrar_acceso(usuario: str, accion: str, empleado_id: str | None = None) -> None:
+def registrar_acceso(repo: Repositorio, usuario: str, accion: str, empleado_id: str | None = None) -> None:
+    """Deja rastro de quién miró datos de bienestar: en el log y, con BD, en sensible.registro_acceso."""
     auditoria.info("bienestar acceso usuario=%s accion=%s empleado=%s", usuario, accion, empleado_id or "-")
+    repo.registrar_acceso(usuario, accion, empleado_id)
