@@ -28,7 +28,7 @@ El AUC baja respecto a la v1 porque ahora el problema es de verdad: antes casi t
 
 **Viernes 17-10 (el "hoy" de la demo):** 11–13 bajo, 13–15 **alto** (falta la jefa de turno programada, Javiera Espinoza, ausente por salud → la app sugiere llamar a otro jefe), 19–21 bajo y 21–23 **alto** (garzón).
 
-Otros cambios en los datos: 80 empleados, 15 sin consentimiento (antes 13 de 72) y 5 ausencias el 17-10. Los usuarios demo no cambian: `jefe` = RST_055 (Catalina Flores) y `empleado` = RST_001 (Agustín Díaz).
+Otros cambios en los datos: 80 empleados, 15 sin consentimiento (antes 13 de 72) y 5 ausencias el 17-10. Usuarios demo: `jefe` = RST_055 (Catalina Flores) y `empleado` = **RST_056 (Cristóbal Silva, garzón)**. Antes, el empleado era RST_001 (Agustín Díaz), pero con la v2 no tiene turno el 17-10. Cristóbal trabaja ese día de 19 a 21 y de 21 a 23 (el servicio en alto por garzón), así que en la demo puede pedir un cambio justo ahí.
 
 ## Cómo reproducirlo
 En una copia del proyecto anterior (no en la original):

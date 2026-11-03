@@ -6,6 +6,9 @@ import os
 os.environ["SECRET_KEY"] = "clave-de-prueba-solo-para-tests-0123456789abcdef"
 os.environ["DEMO_PASSWORD"] = "clave-demo-tests"
 os.environ["APP_ENV"] = "local"
+# Las pruebas NUNCA usan Supabase, aunque el .env de quien las corre diga otra cosa.
+os.environ["FUENTE_DATOS"] = "mock"
+os.environ["DATABASE_URL"] = ""
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
@@ -39,7 +42,7 @@ def client(anonimo):
 
 @pytest.fixture()
 def empleado():
-    """Cliente con sesión de empleado (RST_001), independiente del de jefe."""
+    """Cliente con sesión de empleado (RST_056), independiente del de jefe."""
     c = TestClient(app)
     c.headers["Authorization"] = f"Bearer {_token(c, 'empleado')}"
     return c

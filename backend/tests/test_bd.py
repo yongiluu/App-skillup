@@ -124,7 +124,7 @@ def test_todas_las_fichas_iguales_a_mock(jefe_bd):
 
 
 def test_bienestar_propio_igual_a_mock(empleado_bd):
-    ruta = "/empleados/RST_001/bienestar"
+    ruta = "/empleados/RST_056/bienestar"
     bd = empleado_bd.get(ruta, params={"desde": "2025-10-11", "hasta": HOY}).json()
     mk = _mock(ruta, usuario="empleado", desde="2025-10-11", hasta=HOY)
     assert bd["registros"] == mk["registros"] and len(bd["registros"]) == 7
@@ -175,8 +175,8 @@ def test_crear_evento_en_bd(jefe_bd):
 
 
 def test_flujo_solicitud_en_bd(jefe_bd, empleado_bd):
-    t = empleado_bd.get("/empleados/RST_001/turnos", params={"desde": HOY}).json()[0]
-    r = empleado_bd.post("/solicitudes-cambio", json={"solicitante_id": "RST_001", "fecha": t["fecha"], "servicio": t["servicio"]})
+    t = empleado_bd.get("/empleados/RST_056/turnos", params={"desde": HOY}).json()[0]
+    r = empleado_bd.post("/solicitudes-cambio", json={"solicitante_id": "RST_056", "fecha": t["fecha"], "servicio": t["servicio"]})
     assert r.status_code == 201 and r.json()["estado"] == "pendiente"
     sid = r.json()["id"]
     assert [s["id"] for s in empleado_bd.get("/solicitudes-cambio").json()] == [sid]

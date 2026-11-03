@@ -84,7 +84,7 @@ Todos exigen la cabecera `Authorization: Bearer <token>`, salvo `/auth/login` y 
 
 | Método | Ruta | Quién | Notas |
 |---|---|---|---|
-| `POST` | `/auth/login` | Todos | Usuarios de prueba `jefe` (RST_055, Catalina Flores) y `empleado` (RST_001), con la contraseña de `DEMO_PASSWORD`. Devuelve el token, el perfil, `expira_en` y `hoy` (la fecha de trabajo de la API) |
+| `POST` | `/auth/login` | Todos | Usuarios de prueba `jefe` (RST_055, Catalina Flores) y `empleado` (RST_056, Cristóbal Silva), con la contraseña de `DEMO_PASSWORD`. Devuelve el token, el perfil, `expira_en` y `hoy` (la fecha de trabajo de la API) |
 | `GET` | `/servicios?fecha=` | Jefe | El día con sus 4 servicios |
 | `GET` | `/semana?inicio=` | Jefe | 7 días × 4 servicios. Si se omite `inicio`, usa el lunes de "hoy" |
 | `GET` | `/calendario?mes=YYYY-MM` | Todos | Ventana de pago, feriados, vísperas y eventos por día |
