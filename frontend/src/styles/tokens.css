@@ -1,0 +1,130 @@
+/*
+ * Sistema visual de SkillUp: todos los colores, espacios y tamaños salen de aquí.
+ * Base: demo "SkillUp Luthier" (paleta cervecera: oliva, ámbar y crema, con lúpulo de fondo).
+ * Regla del equipo: los componentes NO usan colores sueltos, solo estas variables.
+ * Modo oscuro automático según el sistema (prefers-color-scheme).
+ */
+:root {
+  color-scheme: light;
+
+  /* Marca */
+  --color-primario: #55652a; /* oliva */
+  --color-primario-claro: #4b5a22; /* hover */
+  --color-primario-suave: #e8ecd2;
+  --color-sobre-primario: #fffcf5;
+  --color-ambar: #f2c46d; /* destacado sobre la cabecera */
+
+  /* Superficies y texto */
+  --color-fondo: #f7f1e4;
+  --color-superficie: #fffcf5;
+  --color-hundido: #f1e9d7;
+  --color-borde: #e6dcc8;
+  --color-borde-campo: #9a907f; /* campos de formulario: contraste ≥ 3:1 */
+  --color-texto: #2a241b;
+  --color-texto-suave: #6c6150; /* contraste 5,9:1 sobre la superficie */
+  --color-foco: #55652a;
+  --sombra-color: rgba(60, 45, 20, 0.14);
+
+  /* Cabecera: degradado oliva → ámbar con patrón de lúpulo */
+  --cabecera-fondo: linear-gradient(115deg, #34401a 0%, #4b5a22 52%, #80601a 100%);
+  --cabecera-texto: #f7f1e4;
+  --cabecera-texto-suave: rgba(247, 241, 228, 0.78);
+  --cabecera-lupulo: rgba(255, 255, 255, 0.09);
+
+  /*
+   * Estados de riesgo (umbrales en src/lib/riesgo.ts: alerta ≥ 0,55, alto ≥ 0,75).
+   * El texto es un tono más oscuro que el de la demo para pasar contraste AA (≥ 4,5:1).
+   * El color nunca va solo: siempre acompaña un ícono y una palabra.
+   */
+  --riesgo-bajo-fondo: #e2edd6;
+  --riesgo-bajo-texto: #2f6a2c;
+  --riesgo-bajo-borde: #3d7a3a;
+  --riesgo-alerta-fondo: #f8e7c3;
+  --riesgo-alerta-texto: #8a5410;
+  --riesgo-alerta-borde: #a3660a;
+  --riesgo-alto-fondo: #f9e0d6;
+  --riesgo-alto-texto: #a8402a;
+  --riesgo-alto-borde: #c04a31;
+
+  /* Avisos neutros (p. ej. "pendiente", "datos simulados") */
+  --info-fondo: #eee7da;
+  --info-texto: #5a5042;
+
+  /* Tipografía */
+  --fuente: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --texto-xs: 0.8125rem;
+  --texto-sm: 0.875rem;
+  --texto-md: 1rem;
+  --texto-lg: 1.25rem;
+  --texto-xl: 1.75rem;
+  --texto-2xl: 2rem;
+  --peso-normal: 400;
+  --peso-medio: 500;
+  --peso-fuerte: 600;
+  --peso-titulo: 600;
+  --espaciado-titulo: -0.015em;
+
+  /* Espacios (escala de 4 px) */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-5: 24px;
+  --esp-6: 32px;
+  --esp-7: 48px;
+
+  /* Bordes y sombras */
+  --radio-sm: 10px;
+  --radio-md: 12px;
+  --radio-lg: 20px;
+  --radio-pildora: 999px;
+  --sombra-sm: 0 1px 2px var(--sombra-color);
+  --sombra-md: 0 12px 30px -12px var(--sombra-color);
+
+  /* Accesibilidad: objetivo táctil mínimo (README: 44 px o más) */
+  --toque-min: 44px;
+
+  /* Layout */
+  --ancho-contenido: 1200px;
+  --alto-cabecera: 64px;
+  --alto-barra-inferior: 64px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --color-primario: #b7c67b;
+    --color-primario-claro: #c8d58f;
+    --color-primario-suave: #2d3420;
+    --color-sobre-primario: #1a1a10;
+    --color-ambar: #e8b055;
+
+    --color-fondo: #16130e;
+    --color-superficie: #201c15;
+    --color-hundido: #29241b;
+    --color-borde: #3a3326;
+    --color-borde-campo: #8e8574;
+    --color-texto: #f2ebdd;
+    --color-texto-suave: #b4a994;
+    --color-foco: #b7c67b;
+    --sombra-color: rgba(0, 0, 0, 0.5);
+
+    --cabecera-fondo: linear-gradient(115deg, #1c2210 0%, #29321a 55%, #4a3913 100%);
+    --cabecera-texto: #f2ebdd;
+    --cabecera-texto-suave: rgba(242, 235, 221, 0.75);
+
+    --riesgo-bajo-fondo: #24331f;
+    --riesgo-bajo-texto: #95cb7e;
+    --riesgo-bajo-borde: #95cb7e;
+    --riesgo-alerta-fondo: #3d2f17;
+    --riesgo-alerta-texto: #e8b055;
+    --riesgo-alerta-borde: #e8b055;
+    --riesgo-alto-fondo: #43251d;
+    --riesgo-alto-texto: #f2896f;
+    --riesgo-alto-borde: #f2896f;
+
+    --info-fondo: #2c2820;
+    --info-texto: #c9bfab;
+  }
+}

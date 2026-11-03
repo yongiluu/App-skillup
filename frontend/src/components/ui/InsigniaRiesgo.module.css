@@ -1,0 +1,31 @@
+.insignia {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px var(--esp-3) 3px var(--esp-2);
+  border-radius: var(--radio-pildora);
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+  white-space: nowrap;
+  background: var(--color-superficie);
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.prob {
+  font-weight: var(--peso-medio);
+  font-variant-numeric: tabular-nums;
+}
+
+.bajo {
+  color: var(--riesgo-bajo-texto);
+  background: var(--riesgo-bajo-fondo);
+  box-shadow: none;
+}
+
+.alerta {
+  color: var(--riesgo-alerta-texto);
+}
+
+.alto {
+  color: var(--riesgo-alto-texto);
+}

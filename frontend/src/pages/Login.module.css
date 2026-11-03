@@ -1,0 +1,120 @@
+.pagina {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-bottom: var(--esp-7);
+}
+
+/* Portada con el degradado y el lúpulo de la demo Luthier */
+.portada {
+  background: var(--cabecera-fondo);
+  color: var(--cabecera-texto);
+  padding: calc(var(--esp-6) + env(safe-area-inset-top)) var(--esp-4) 104px;
+}
+
+.portada > * {
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-5);
+}
+
+.logo {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radio-sm);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--color-ambar);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.22), 0 4px 10px -4px rgba(0, 0, 0, 0.4);
+}
+
+.nombreMarca {
+  font-size: var(--texto-xs);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cabecera-texto-suave);
+}
+
+.titulo {
+  font-size: 2rem;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.titulo span {
+  color: var(--color-ambar);
+}
+
+.bajada {
+  margin-top: var(--esp-3);
+  color: var(--cabecera-texto-suave);
+}
+
+.caja {
+  position: relative;
+  width: calc(100% - 2 * var(--esp-4));
+  max-width: 440px;
+  margin: -72px auto 0;
+  padding: var(--esp-5);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  box-shadow: var(--sombra-md);
+}
+
+.ingresar {
+  font-size: var(--texto-lg);
+  margin-bottom: var(--esp-4);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+}
+
+.campo input {
+  min-height: var(--toque-min);
+  padding: 0 var(--esp-3);
+  border: 1px solid var(--color-borde-campo); /* contraste ≥ 3:1 para campos */
+  border-radius: var(--radio-sm);
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  font-size: var(--texto-md); /* 16 px: evita el zoom automático en iPhone */
+}
+
+.campo input:focus-visible {
+  border-color: var(--color-foco);
+}
+
+.ayuda {
+  margin-top: var(--esp-4);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+}
+
+@media (min-width: 900px) {
+  .portada {
+    padding-top: var(--esp-7);
+  }
+
+  .titulo {
+    font-size: 2.5rem;
+  }
+}

@@ -1,0 +1,112 @@
+[
+  {
+    "fecha": "2025-10-17",
+    "servicio": "11_13",
+    "rol_a_cubrir": "jefe_turno",
+    "prob_deficit_rol": 0.684,
+    "accion": "llamar",
+    "empleado_id": "RST_055",
+    "empleado_nombre": "Catalina Flores",
+    "rol_actual": null,
+    "mensaje": "Llamar a Catalina Flores (jefe de turno) para cubrir jefe de turno en 11:00–13:00"
+  },
+  {
+    "fecha": "2025-10-17",
+    "servicio": "11_13",
+    "rol_a_cubrir": "jefe_turno",
+    "prob_deficit_rol": 0.684,
+    "accion": "llamar",
+    "empleado_id": "RST_023",
+    "empleado_nombre": "Daniela Martínez",
+    "rol_actual": null,
+    "mensaje": "Llamar a Daniela Martínez (jefe de turno) para cubrir jefe de turno en 11:00–13:00"
+  },
+  {
+    "fecha": "2025-10-17",
+    "servicio": "13_15",
+    "rol_a_cubrir": "cocinero_linea",
+    "prob_deficit_rol": 0.318,
+    "accion": "llamar",
+    "empleado_id": "RST_018",
+    "empleado_nombre": "Tomás Martínez",
+    "rol_actual": null,
+    "mensaje": "Llamar a Tomás Martínez (cocinero de línea) para cubrir cocinero de línea en 13:00–15:00"
+  },
+  {
+    "fecha": "2025-10-17",
+    "servicio": "13_15",
+    "rol_a_cubrir": "cocinero_linea",
+    "prob_deficit_rol": 0.318,
+    "accion": "llamar",
+    "empleado_id": "RST_027",
+    "empleado_nombre": "Javiera López",
+    "rol_actual": null,
+    "mensaje": "Llamar a Javiera López (cocinero de línea) para cubrir cocinero de línea en 13:00–15:00"
+  },
+  {
+    "fecha": "2025-10-17",
+    "servicio": "21_23",
+    "rol_a_cubrir": "garzon",
+    "prob_deficit_rol": 0.775,
+    "accion": "mover",
+    "empleado_id": "RST_049",
+    "empleado_nombre": "Paula Rodríguez",
+    "rol_actual": "runner",
+    "mensaje": "Mover a Paula Rodríguez (runner) a garzón en 21:00–23:00"
+  },
+  {
+    "fecha": "2025-10-17",
+    "servicio": "21_23",
+    "rol_a_cubrir": "garzon",
+    "prob_deficit_rol": 0.775,
+    "accion": "mover",
+    "empleado_id": "RST_004",
+    "empleado_nombre": "Antonia Pérez",
+    "rol_actual": "host",
+    "mensaje": "Mover a Antonia Pérez (host) a garzón en 21:00–23:00"
+  },
+  {
+    "fecha": "2025-10-17",
+    "servicio": "21_23",
+    "rol_a_cubrir": "cocinero_linea",
+    "prob_deficit_rol": 0.679,
+    "accion": "llamar",
+    "empleado_id": "RST_010",
+    "empleado_nombre": "Camila Rojas",
+    "rol_actual": null,
+    "mensaje": "Llamar a Camila Rojas (cocinero de línea) para cubrir cocinero de línea en 21:00–23:00"
+  },
+  {
+    "fecha": "2025-10-17",
+    "servicio": "21_23",
+    "rol_a_cubrir": "cocinero_linea",
+    "prob_deficit_rol": 0.679,
+    "accion": "llamar",
+    "empleado_id": "RST_018",
+    "empleado_nombre": "Tomás Martínez",
+    "rol_actual": null,
+    "mensaje": "Llamar a Tomás Martínez (cocinero de línea) para cubrir cocinero de línea en 21:00–23:00"
+  },
+  {
+    "fecha": "2025-10-17",
+    "servicio": "21_23",
+    "rol_a_cubrir": "jefe_turno",
+    "prob_deficit_rol": 0.797,
+    "accion": "llamar",
+    "empleado_id": "RST_055",
+    "empleado_nombre": "Catalina Flores",
+    "rol_actual": null,
+    "mensaje": "Llamar a Catalina Flores (jefe de turno) para cubrir jefe de turno en 21:00–23:00"
+  },
+  {
+    "fecha": "2025-10-17",
+    "servicio": "21_23",
+    "rol_a_cubrir": "jefe_turno",
+    "prob_deficit_rol": 0.797,
+    "accion": "llamar",
+    "empleado_id": "RST_023",
+    "empleado_nombre": "Daniela Martínez",
+    "rol_actual": null,
+    "mensaje": "Llamar a Daniela Martínez (jefe de turno) para cubrir jefe de turno en 21:00–23:00"
+  }
+]

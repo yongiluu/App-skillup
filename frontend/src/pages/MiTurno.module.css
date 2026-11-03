@@ -1,0 +1,11 @@
+.pagina {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: calc(var(--esp-5) + env(safe-area-inset-top)) var(--esp-4) var(--esp-7);
+}
+
+.proximo {
+  margin-top: var(--esp-5);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+}

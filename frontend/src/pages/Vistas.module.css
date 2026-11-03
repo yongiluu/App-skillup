@@ -1,0 +1,89 @@
+.grilla {
+  display: grid;
+  gap: var(--esp-4);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+}
+
+.cifra {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-fuerte);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.cifra span {
+  font-size: var(--texto-md);
+  font-weight: var(--peso-normal);
+  letter-spacing: 0;
+  color: var(--color-texto-suave);
+}
+
+.cifra.alto {
+  color: var(--riesgo-alto-texto);
+}
+
+.cifra.alerta {
+  color: var(--riesgo-alerta-texto);
+}
+
+/* Barra de cobertura (asignados / requeridos) */
+.barra {
+  height: 8px;
+  margin-top: var(--esp-3);
+  border-radius: 4px;
+  background: var(--color-hundido);
+  overflow: hidden;
+}
+
+.barra i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--color-primario);
+}
+
+.barra i.alto {
+  background: var(--riesgo-alto-borde);
+}
+
+.barra i.alerta {
+  background: var(--riesgo-alerta-borde);
+}
+
+.texto {
+  margin-top: var(--esp-3);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+}
+
+.proximo {
+  margin-top: var(--esp-6);
+  padding: var(--esp-4) var(--esp-5);
+  border: 1px dashed var(--color-borde);
+  border-radius: var(--radio-md);
+  color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.proximo h2 {
+  font-size: var(--texto-sm);
+  margin-bottom: var(--esp-2);
+  color: var(--color-texto);
+}
+
+.proximo ul {
+  padding-left: var(--esp-5);
+  display: grid;
+  gap: var(--esp-1);
+}
+
+.centrado {
+  max-width: 480px;
+  margin: var(--esp-7) auto;
+  padding: 0 var(--esp-4);
+  text-align: center;
+  display: grid;
+  gap: var(--esp-4);
+  justify-items: center;
+}
