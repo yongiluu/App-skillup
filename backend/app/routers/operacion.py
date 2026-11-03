@@ -10,7 +10,7 @@ from app import logica
 from app.config import get_settings
 from app.repositorio import Repositorio, get_repo
 from app.schemas import AusenciaDia, Calendario, DiaServicios, Error, Evento, EventoIn, Semana, Sugerencia
-from app.seguridad import solo_jefe, usuario_actual
+from app.seguridad import Usuario, solo_jefe, usuario_actual
 
 # Todo exige sesión iniciada; los datos operativos son solo para el jefe de turno.
 router = APIRouter(tags=["operación"], dependencies=[Depends(usuario_actual)])
@@ -76,13 +76,15 @@ def calendario(
 @router.get("/sugerencias", response_model=list[Sugerencia], responses=NO_ENCONTRADO, dependencies=SOLO_JEFE)
 def sugerencias(
     fecha: date | None = Query(None, description="YYYY-MM-DD. Si se omite, usa MOCK_HOY."),
+    u: Usuario = Depends(usuario_actual),
     repo: Repositorio = Depends(get_repo),
 ):
-    """Acciones sugeridas de cobertura (mover o llamar) para los servicios en riesgo del día."""
+    """Acciones sugeridas de cobertura (mover o llamar) para los servicios en riesgo del día.
+    Nunca sugiere a la persona que tiene la sesión iniciada."""
     fecha = fecha or get_settings().mock_hoy
     if not repo.servicios_de(fecha):
         raise _sin_datos(repo, str(fecha))
-    return logica.sugerencias(repo, fecha)
+    return logica.sugerencias(repo, fecha, excluir=u.empleado_id)
 
 
 @router.get("/ausencias", response_model=list[AusenciaDia], dependencies=SOLO_JEFE)

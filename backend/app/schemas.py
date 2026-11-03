@@ -36,6 +36,7 @@ class LoginOut(BaseModel):
     access_token: str
     token_type: Literal["bearer"] = "bearer"
     expira_en: int = Field(description="Segundos de validez del token")
+    hoy: date = Field(description="Fecha de 'hoy' para la API (MOCK_HOY mientras se usen datos simulados)")
     perfil: Perfil
     empleado_id: str | None
     nombre: str
