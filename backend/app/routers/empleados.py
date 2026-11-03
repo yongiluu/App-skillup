@@ -1,11 +1,11 @@
-from datetime import date
+from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from app import logica
+from app import bienestar, logica
 from app.config import get_settings
 from app.repositorio import RepositorioMock, get_repo
-from app.schemas import Empleado, EmpleadoFicha, Error, Rol, Turno
+from app.schemas import BienestarPropio, Empleado, EmpleadoFicha, Error, Rol, Turno
 from app.seguridad import Usuario, exigir_propio_o_jefe, usuario_actual
 
 router = APIRouter(prefix="/empleados", tags=["empleados"], dependencies=[Depends(usuario_actual)])
@@ -25,12 +25,35 @@ def listar(
 @router.get("/{empleado_id}", response_model=EmpleadoFicha, responses=PERMISOS)
 def ficha(empleado_id: str, u: Usuario = Depends(usuario_actual), repo: RepositorioMock = Depends(get_repo)):
     """Ficha: roles que puede cubrir, días seguidos, horas extra, ausencias y próximos turnos.
-    La biometría y los test aparecen como `pendiente`. Un empleado solo puede ver la suya."""
+    Incluye el indicador de fatiga (nivel y motivos, nunca datos crudos). Un empleado solo ve la suya."""
     exigir_propio_o_jefe(u, empleado_id)
     datos = logica.ficha_empleado(repo, empleado_id, get_settings().mock_hoy)
     if datos is None:
         raise HTTPException(404, f"No existe el empleado {empleado_id}")
+    bienestar.registrar_acceso(u.usuario, "ficha_indicador", empleado_id)
     return datos
+
+
+@router.get("/{empleado_id}/bienestar", response_model=BienestarPropio, responses=PERMISOS)
+def bienestar_propio(
+    empleado_id: str,
+    desde: date | None = Query(None, description="YYYY-MM-DD. Por defecto, 14 días antes de 'hasta'."),
+    hasta: date | None = Query(None, description="YYYY-MM-DD. Por defecto, el 'hoy' de los mocks."),
+    u: Usuario = Depends(usuario_actual),
+    repo: RepositorioMock = Depends(get_repo),
+):
+    """**Solo la propia persona** (ni siquiera el jefe de turno): pasos, sueño, pulso y encuesta
+    de fatiga, más su indicador. Sin consentimiento no devuelve registros."""
+    if u.empleado_id != empleado_id:
+        raise HTTPException(403, "Los datos de bienestar solo los puede ver la propia persona")
+    if empleado_id not in repo.empleados:
+        raise HTTPException(404, f"No existe el empleado {empleado_id}")
+    hasta = hasta or get_settings().mock_hoy
+    desde = desde or hasta - timedelta(days=13)
+    if desde > hasta:
+        raise HTTPException(422, "'desde' no puede ser posterior a 'hasta'")
+    bienestar.registrar_acceso(u.usuario, "datos_propios", empleado_id)
+    return bienestar.datos_propios(repo, empleado_id, desde, hasta)
 
 
 @router.get("/{empleado_id}/turnos", response_model=list[Turno], responses=PERMISOS)

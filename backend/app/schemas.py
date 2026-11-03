@@ -157,11 +157,61 @@ class Ausencia(BaseModel):
     aviso_corto: bool
 
 
-class Bienestar(BaseModel):
-    """Biometría y test: datos sensibles, fuera del alcance por ahora."""
+# ---------- Bienestar (datos sensibles) ----------
+Motivo = Literal["descanso", "carga_fisica", "jornada", "autorreporte"]
 
+
+class Consentimiento(BaseModel):
+    otorgado: bool
+    fecha: date | None
+    version_texto: str
+
+
+class IndicadorFatiga(BaseModel):
+    """Lo único que ve el jefe de turno: nivel y motivos generales, nunca los datos crudos."""
+
+    nivel: Literal["bajo", "medio", "alto"]
+    motivos: list[Motivo] = Field(description="Hasta 2 motivos generales, del más al menos influyente")
+    calculado_al: date
+    dias_considerados: int
+
+
+class TestsEstado(BaseModel):
     estado: Literal["pendiente"] = "pendiente"
-    nota: str = "Requiere decisión de la cervecería y consentimiento registrado."
+    nota: str = "Tests aún no definidos. Ver GET /bienestar/preguntas (propuestas)."
+
+
+class Bienestar(BaseModel):
+    """Resumen de bienestar que aparece en la ficha (lo ve el jefe y la propia persona)."""
+
+    estado: Literal["ok", "sin_consentimiento", "sin_datos"]
+    consentimiento: Consentimiento
+    fatiga: IndicadorFatiga | None
+    tests: TestsEstado = Field(default_factory=TestsEstado)
+
+
+class FatigaEquipo(BaseModel):
+    empleado_id: str
+    nombre: str
+    rol: Rol
+    estado: Literal["ok", "sin_consentimiento", "sin_datos"]
+    fatiga: IndicadorFatiga | None
+
+
+class RegistroBienestar(BaseModel):
+    fecha: date
+    pasos: int | None = Field(description="null = el reloj no tuvo buena señal ese día")
+    sueno_horas: float | None
+    pulso_medio_bpm: float | None
+    encuesta_fatiga_inicio: int = Field(ge=1, le=7, description="1 = totalmente alerta, 7 = agotado/a")
+    encuesta_fatiga_fin: int = Field(ge=1, le=7)
+
+
+class BienestarPropio(Bienestar):
+    """Datos crudos: solo los ve la propia persona."""
+
+    empleado_id: str
+    registros: list[RegistroBienestar]
 
 
 class EmpleadoFicha(Empleado):
@@ -171,7 +221,7 @@ class EmpleadoFicha(Empleado):
     horas_extra_ultimos_7_dias: float
     ausencias: list[Ausencia]
     proximos_turnos: list[Turno]
-    bienestar: Bienestar = Field(default_factory=Bienestar)
+    bienestar: Bienestar
 
 
 # ---------- Solicitudes de cambio ----------

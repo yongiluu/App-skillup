@@ -24,7 +24,7 @@ Este repositorio contiene el **prototipo funcional** de la app: frontend, backen
 2. **Jefe de turno**: el servicio más crítico del día, el resto del día y la semana.
 
 **Fuera del alcance por ahora** (pendiente de la reunión con la cervecería):
-- Integración con relojes inteligentes y test psicológicos. Se mostrarán como "pendiente".
+- Integración real con relojes inteligentes y test psicológicos. Por ahora la biometría y la encuesta de fatiga son **simuladas** (con consentimiento simulado), y los tests son solo preguntas propuestas.
 - Datos reales de la cervecería (eventos, días hábiles, dotación real). Mientras tanto usamos los datos simulados.
 
 > El diseño de referencia (pantallas desktop y móvil) está en el canvas de diseño de SkillUp y en `desktop-prototype/` y `mobile-prototype/` del repo anterior.
@@ -102,6 +102,9 @@ Todos los endpoints, salvo `/auth/login` y `/health`, exigen la cabecera `Author
 | `POST` | `/solicitudes-cambio` | Pedir un cambio de turno |
 | `PATCH` | `/solicitudes-cambio/{id}` | Aprobar o rechazar (jefe de turno) |
 | `POST` | `/eventos` | Registrar un evento de la cervecería |
+| `GET` | `/bienestar/fatiga?fecha=` | Indicador de fatiga del equipo: solo nivel y motivo general (jefe de turno) |
+| `GET` | `/empleados/{id}/bienestar` | Datos de bienestar propios: solo la misma persona |
+| `GET` | `/bienestar/preguntas` | Preguntas propuestas para los tests (pendiente) |
 
 Ejemplo de respuesta de `GET /servicios` (se muestra 1 de los 4 servicios del día):
 
@@ -154,6 +157,8 @@ erDiagram
 - **prediccion**: probabilidad de déficit total y por rol crítico, y recomendación.
 - **calendario / evento**: feriados, días de pago y eventos del local.
 - **solicitud_cambio**: quién pide, quién cubre y estado (pendiente / aprobada / rechazada).
+- **consentimiento** *(sensible)*: por empleado, si lo otorgó, cuándo y qué versión del texto aceptó.
+- **bienestar_diario** *(sensible, tabla separada y con acceso restringido)*: pasos, sueño, pulso medio y encuesta de fatiga al inicio y fin del turno. Solo existe para quien consintió.
 
 ---
 

@@ -30,6 +30,12 @@ class RepositorioMock:
         self.turnos: list[dict] = _cargar("turnos")
         self.ausencias: list[dict] = _cargar("ausencias")
         self.solicitudes: dict[int, dict] = {}
+        # Datos sensibles: se cargan aparte y solo se leen desde app/bienestar.py
+        self.consentimientos: dict[str, dict] = {c["empleado_id"]: c for c in _cargar("consentimientos")}
+        self._bienestar_por_empleado: dict[str, list[dict]] = defaultdict(list)
+        for b in _cargar("bienestar"):
+            self._bienestar_por_empleado[b["empleado_id"]].append(b)
+        self.preguntas_tests: dict = _cargar("preguntas_tests")
 
         self._servicios_por_fecha: dict[str, list[dict]] = defaultdict(list)
         for s in self.servicios:
@@ -69,6 +75,10 @@ class RepositorioMock:
     def ausentes_en(self, fecha: date) -> set[str]:
         f = fecha.isoformat()
         return {a["empleado_id"] for a in self.ausencias if a["fecha"] == f}
+
+    def bienestar_de_empleado(self, empleado_id: str, desde: date, hasta: date) -> list[dict]:
+        d, h = desde.isoformat(), hasta.isoformat()
+        return [b for b in self._bienestar_por_empleado.get(empleado_id, []) if d <= b["fecha"] <= h]
 
     # ---- escrituras (solo en memoria; se pierden al reiniciar) ----
     def crear_evento(self, datos: dict) -> dict:

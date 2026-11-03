@@ -22,7 +22,7 @@ uvicorn app.main:app --reload
   1. `POST /auth/login` con `{"usuario": "jefe", "password": "<tu DEMO_PASSWORD>"}`
   2. Copia el `access_token`, aprieta **Authorize** (arriba a la derecha) y pégalo.
   3. Ya puedes probar los demás endpoints.
-- Pruebas: `pytest` (60 pruebas, 33 de ellas de seguridad)
+- Pruebas: `pytest` (74 pruebas: 33 de seguridad y 14 de bienestar)
 
 ## Datos de ejemplo
 
@@ -35,7 +35,7 @@ uvicorn app.main:app --reload
 - Lo que se crea con `POST` o `PATCH` (eventos y solicitudes) **vive en memoria** y se pierde al reiniciar.
 - Para regenerar los mocks: `python scripts/build_mocks.py --origen <ruta>/skillup-dotacion-laboral-main/data/restaurant`
 
-**Privacidad:** las variables descartadas en la matriz de variables (IMC, género, hijos, tabaquismo, nivel educacional) no se exponen. La biometría y los test aparecen como `bienestar.estado = "pendiente"`.
+**Privacidad:** las variables descartadas en la matriz de variables (IMC, género, hijos, tabaquismo, nivel educacional) no se exponen. La biometría es simulada y tiene reglas propias (ver [Bienestar](#bienestar-datos-sensibles)).
 
 ## Endpoints
 
@@ -55,6 +55,9 @@ Todos exigen la cabecera `Authorization: Bearer <token>`, salvo `/auth/login` y 
 | `POST` | `/solicitudes-cambio` | Todos | El empleado solo puede pedir por sí mismo. Se valida que tenga ese turno |
 | `PATCH` | `/solicitudes-cambio/{id}` | Jefe | `aprobada` o `rechazada`. Queda registrado quién la resolvió (`resuelta_por`) |
 | `POST` | `/eventos` | Jefe | Registra un evento. Aparece en `/calendario` |
+| `GET` | `/bienestar/fatiga?fecha=` | Jefe | **Nuevo.** Indicador de fatiga de cada persona: solo nivel y motivos |
+| `GET` | `/empleados/{id}/bienestar?desde=&hasta=` | **Solo la misma persona** | **Nuevo.** Datos crudos propios: pasos, sueño, pulso y encuesta. El jefe recibe `403` |
+| `GET` | `/bienestar/preguntas` | Todos | **Nuevo.** Preguntas propuestas para los tests (estado `pendiente`) |
 | `GET` | `/health` | Todos | Verifica que la API está arriba. No muestra datos |
 
 Respuestas de error: `401` sin sesión o con sesión vencida · `403` sin permiso · `404` no existe · `409` conflicto · `422` datos inválidos · `429` demasiados intentos de login.
@@ -74,6 +77,28 @@ Para cada servicio con `prob_deficit ≥ 0,55` y cada rol crítico en riesgo:
 En cada grupo se prioriza a quien lleva menos días seguidos trabajados. En la etapa 4 esto se combina con el modelo.
 
 > En los datos simulados **nadie está entrenado como respaldo de cocinero de línea ni de jefe de turno**. Para esos roles la API solo puede sugerir "llamar". Hay que confirmar con la cervecería cómo se cubren en la realidad `[PENDIENTE CERVECERÍA]`.
+
+## Bienestar (datos sensibles)
+
+Los datos son **simulados** y solo incluyen las variables activas de la matriz: pasos, horas de sueño, pulso medio y la encuesta de fatiga al inicio y al final del turno (escala 1–7). Del proyecto anterior se descartan a propósito `hrv`, `stress_score`, `_is_sick` y `_absence_reason`.
+
+| Quién | Qué ve |
+|---|---|
+| La propia persona | Sus datos crudos y su indicador (`/empleados/{id}/bienestar`) |
+| Jefe de turno | Solo el **indicador**: nivel `bajo` / `medio` / `alto` y hasta 2 motivos generales (`descanso`, `carga_fisica`, `jornada`, `autorreporte`). Aparece en la ficha y en `/bienestar/fatiga` |
+| Nadie | Diagnósticos ni datos de quien no dio consentimiento |
+
+- **Consentimiento:** cada persona tiene un registro simulado (`otorgado`, `fecha`, `version_texto`). 13 de las 72 no consintieron (por ejemplo, `RST_011`). Para ellas el estado es `sin_consentimiento` y no existen datos de bienestar, ni siquiera guardados.
+- **Indicador v0** (`app/bienestar.py`): se calcula con los últimos 3 días. Cada componente va de 0 a 1:
+  - descanso: menos de 5,5 h de sueño promedio = 1;
+  - carga física: más de 15.000 pasos o pulso medio sobre 93 = 1;
+  - autorreporte: encuesta de cierre en 6–7 = 1;
+  - jornada: días seguidos trabajados y horas extra (no es dato de salud).
+
+  Puntaje = 0,6 × el peor componente + 0,4 × el promedio. Es `alto` desde 0,60 y `medio` desde 0,35. Es una regla simple y explicable, no un modelo clínico.
+- **Sugerencias:** quien tiene fatiga `alta` queda al final de la lista de candidatos. A quien no consintió no se le aplica el indicador: no se le favorece ni se le perjudica.
+- **Auditoría:** cada acceso a datos de bienestar queda en el log `skillup.auditoria` (quién, qué y de quién).
+- **Tests psicológicos:** siguen `pendiente`. `/bienestar/preguntas` trae **preguntas propuestas** (fatiga, somnolencia, carga del turno, descanso y apoyo del equipo), inspiradas en escalas conocidas y sin preguntas de salud mental. Antes de usarlas tiene que revisarlas un profesional y decidirlas la cervecería `[PENDIENTE CERVECERÍA]`.
 
 ## Seguridad
 
