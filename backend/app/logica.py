@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
+from app import bienestar
 from app.config import get_settings
 from app.repositorio import RepositorioMock
 
@@ -63,11 +64,19 @@ def sugerencias(repo: RepositorioMock, fecha: date, max_por_rol: int = 2) -> lis
       2. "llamar": alguien libre en ese servicio y no ausente ese día; primero quien tiene ese
          mismo rol y después quien está entrenado para cubrirlo (en los datos simulados nadie
          respalda a cocinero de línea ni a jefe de turno).
-    Se prioriza a quien lleva menos días seguidos trabajados (menos fatiga).
+    Se prioriza a quien lleva menos días seguidos trabajados; quien tiene fatiga "alta" va al final.
     """
     umbral = get_settings().umbral_alerta
     ausentes = repo.ausentes_en(fecha)
     dias_seguidos = _dias_seguidos_hasta(repo, fecha)
+    _cache_fatiga: dict[str, bool] = {}
+
+    def fatiga_alta(emp_id: str) -> bool:
+        if emp_id not in _cache_fatiga:
+            f = bienestar.resumen(repo, emp_id, fecha)["fatiga"]
+            _cache_fatiga[emp_id] = bool(f and f["nivel"] == "alto")
+        return _cache_fatiga[emp_id]
+
     resultado: list[dict] = []
 
     for s in repo.servicios_de(fecha):
@@ -91,7 +100,9 @@ def sugerencias(repo: RepositorioMock, fecha: date, max_por_rol: int = 2) -> lis
             ]
             # llamar: libre en ese servicio; primero quien tiene ese rol, luego los polivalentes
             libres = [e for e in disponibles if e["id"] not in asignados]
-            orden = lambda e: dias_seguidos.get(e["id"], 0)  # noqa: E731
+            # Menos días seguidos primero; quien tiene fatiga "alta" va al final. Sin consentimiento
+            # no se usa su indicador (no se le favorece ni se le perjudica).
+            orden = lambda e: (fatiga_alta(e["id"]), dias_seguidos.get(e["id"], 0))  # noqa: E731
             llamar = sorted((e for e in libres if e["rol"] == rol), key=orden) + sorted(
                 (e for e in libres if rol in e["puede_cubrir"]), key=orden
             )
@@ -145,4 +156,5 @@ def ficha_empleado(repo: RepositorioMock, empleado_id: str, hoy: date) -> dict |
         "horas_extra_ultimos_7_dias": round(sum(t["horas_extra"] for t in pasados if t["fecha"] >= hace_7), 1),
         "ausencias": repo.ausencias_de_empleado(empleado_id),
         "proximos_turnos": [t for t in turnos if t["fecha"] >= h][:10],
+        "bienestar": bienestar.resumen(repo, empleado_id, hoy),
     }

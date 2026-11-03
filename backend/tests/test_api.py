@@ -141,7 +141,7 @@ def test_empleados_filtro_rol(client):
 
 def test_ficha(client):
     f = client.get("/empleados/RST_001").json()
-    assert f["bienestar"]["estado"] == "pendiente"
+    assert f["bienestar"]["estado"] == "ok" and f["bienestar"]["tests"]["estado"] == "pendiente"
     assert all(t["fecha"] >= HOY for t in f["proximos_turnos"])
 
 

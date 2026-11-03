@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import auth, empleados, operacion, solicitudes
+from app.routers import auth, bienestar, empleados, operacion, solicitudes
 
 settings = get_settings()
 docs = not settings.es_produccion
@@ -55,6 +55,7 @@ app.include_router(auth.router)
 app.include_router(operacion.router)
 app.include_router(empleados.router)
 app.include_router(solicitudes.router)
+app.include_router(bienestar.router)
 
 
 @app.get("/health", tags=["sistema"])

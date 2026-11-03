@@ -178,6 +178,48 @@ def construir(origen: Path) -> None:
         for r in a.itertuples()
     ]
 
+    # --- bienestar (datos sensibles, simulados) -----------------------------------
+    # Solo las variables activas de la matriz: pasos, sueño, pulso medio y encuesta de
+    # fatiga. Se descartan a propósito: hrv, stress_score, sleep_efficiency, _is_sick y
+    # _absence_reason (diagnóstico). La encuesta no existe en el proyecto anterior: se
+    # simula a partir de fatigue_proxy (escala 1–7, 1 = totalmente alerta).
+    bio = en_rango(pd.read_csv(raw / "restaurant_biometrics.csv")).sort_values(["employee_id", "date"])
+    rb = random.Random(7)
+    bienestar = []
+    for r in bio.itertuples():
+        fin = min(7, max(1, round(1 + r.fatigue_proxy / 100 * 5 + rb.gauss(0, 0.7))))
+        inicio = min(7, max(1, round(fin - 1.5 + rb.gauss(0, 0.8))))
+        reloj_ok = r.data_quality_score >= 0.5  # días con mala señal del reloj: sin datos
+        bienestar.append(
+            {
+                "empleado_id": r.employee_id,
+                "fecha": r.date,
+                "pasos": int(r.steps) if reloj_ok else None,
+                "sueno_horas": round(float(r.sleep_duration_hours), 1) if reloj_ok else None,
+                "pulso_medio_bpm": round(float(r.hr_mean_bpm), 1) if reloj_ok else None,
+                "encuesta_fatiga_inicio": inicio,
+                "encuesta_fatiga_fin": fin,
+            }
+        )
+
+    # --- consentimientos (simulados): ~15% no consiente [PENDIENTE CERVECERÍA] ---------
+    rc = random.Random(11)
+    consentimientos = []
+    for e in empleados:
+        otorgado = rc.random() >= 0.15
+        consentimientos.append(
+            {
+                "empleado_id": e["id"],
+                "otorgado": otorgado,
+                "fecha": "2025-09-15" if otorgado else None,
+                "version_texto": "borrador-v0",
+            }
+        )
+
+    # Quien no consiente no tiene datos: ni siquiera se "recolectan" en los mocks.
+    sin_consentimiento = {c["empleado_id"] for c in consentimientos if not c["otorgado"]}
+    bienestar = [b for b in bienestar if b["empleado_id"] not in sin_consentimiento]
+
     DESTINO.mkdir(parents=True, exist_ok=True)
     salida = {
         "servicios": servicios,
@@ -186,6 +228,8 @@ def construir(origen: Path) -> None:
         "empleados": empleados,
         "turnos": turnos,
         "ausencias": ausencias,
+        "bienestar": bienestar,
+        "consentimientos": consentimientos,
     }
     for nombre, datos in salida.items():
         ruta = DESTINO / f"{nombre}.json"
