@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     database_url: str = ""
     # Local (sucursal) que atiende esta API. Vacío = el primero de la tabla `local`.
     local_id: int | None = None
+    # Segundos máximos esperando la base antes de responder 503 (en vez de quedarse colgada).
+    db_timeout_segundos: float = 8.0
 
     # --- Seguridad ---
     # Clave para firmar los tokens. Nunca en el código ni en el repo.

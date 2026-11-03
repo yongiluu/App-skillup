@@ -53,4 +53,6 @@ def resolver(
         raise HTTPException(404, f"No existe la solicitud {solicitud_id}")
     if s["estado"] != "pendiente":
         raise HTTPException(409, f"La solicitud ya está {s['estado']}")
-    return repo.actualizar_solicitud(solicitud_id, {**cambios.model_dump(), "resuelta_por": u.empleado_id})
+    return repo.actualizar_solicitud(
+        solicitud_id, {**cambios.model_dump(), "resuelta_por": u.empleado_id, "usuario": u.usuario}
+    )

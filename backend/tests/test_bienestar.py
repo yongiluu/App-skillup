@@ -41,7 +41,7 @@ def test_ficha_del_jefe_sin_datos_crudos(client):
 
 def test_jefe_no_ve_datos_crudos_de_nadie(client):
     assert client.get("/empleados/RST_001/bienestar").status_code == 403
-    assert client.get("/empleados/RST_008/bienestar").status_code == 200  # los suyos sí
+    assert client.get("/empleados/RST_055/bienestar").status_code == 200  # los suyos sí
 
 
 # ---------- empleado: solo lo suyo ----------

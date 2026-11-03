@@ -17,6 +17,7 @@ PROTEGIDOS = [
     ("get", "/semana"),
     ("get", "/calendario"),
     ("get", "/sugerencias"),
+    ("get", "/ausencias"),
     ("get", "/empleados"),
     ("get", "/empleados/RST_001"),
     ("get", "/empleados/RST_001/turnos"),
@@ -45,7 +46,7 @@ def test_token_falso_o_alterado(anonimo, client):
 
 def test_token_firmado_con_otra_clave(anonimo):
     falso = jwt.encode(
-        {"sub": "jefe", "perfil": "jefe_turno", "emp": "RST_008", "exp": datetime.now(timezone.utc) + timedelta(hours=1)},
+        {"sub": "jefe", "perfil": "jefe_turno", "emp": "RST_055", "exp": datetime.now(timezone.utc) + timedelta(hours=1)},
         "otra-clave-que-no-es-la-del-servidor-1234567890",
         algorithm="HS256",
     )
@@ -54,14 +55,14 @@ def test_token_firmado_con_otra_clave(anonimo):
 
 
 def test_token_alg_none_rechazado(anonimo):
-    falso = jwt.encode({"sub": "jefe", "perfil": "jefe_turno", "emp": "RST_008", "exp": 9999999999}, key=None, algorithm="none")
+    falso = jwt.encode({"sub": "jefe", "perfil": "jefe_turno", "emp": "RST_055", "exp": 9999999999}, key=None, algorithm="none")
     anonimo.headers["Authorization"] = f"Bearer {falso}"
     assert anonimo.get("/servicios").status_code == 401
 
 
 def test_token_vencido(anonimo):
     vencido = jwt.encode(
-        {"sub": "jefe", "perfil": "jefe_turno", "emp": "RST_008", "exp": datetime.now(timezone.utc) - timedelta(minutes=1)},
+        {"sub": "jefe", "perfil": "jefe_turno", "emp": "RST_055", "exp": datetime.now(timezone.utc) - timedelta(minutes=1)},
         get_settings().secret_key,
         algorithm="HS256",
     )
@@ -80,7 +81,7 @@ def test_empleado_no_puede_auto_ascenderse(anonimo):
 
 
 # ---------- permisos por perfil ----------
-@pytest.mark.parametrize("ruta", ["/servicios", "/semana", "/sugerencias"])
+@pytest.mark.parametrize("ruta", ["/servicios", "/semana", "/sugerencias", "/ausencias"])
 def test_empleado_no_ve_datos_operativos(empleado, ruta):
     assert empleado.get(ruta).status_code == 403
 
@@ -117,7 +118,7 @@ def test_empleado_solo_lista_sus_solicitudes(client, empleado):
 def test_jefe_queda_registrado_al_resolver(client):
     t = client.get("/empleados/RST_001/turnos", params={"desde": HOY}).json()[0]
     sid = client.post("/solicitudes-cambio", json={"solicitante_id": "RST_001", "fecha": t["fecha"], "servicio": t["servicio"]}).json()["id"]
-    assert client.patch(f"/solicitudes-cambio/{sid}", json={"estado": "rechazada"}).json()["resuelta_por"] == "RST_008"
+    assert client.patch(f"/solicitudes-cambio/{sid}", json={"estado": "rechazada"}).json()["resuelta_por"] == "RST_055"
 
 
 # ---------- fuerza bruta ----------
@@ -194,3 +195,26 @@ def test_ausencias_sin_diagnostico(client):
     for e in client.get("/empleados").json():
         motivos |= {a["motivo"] for a in client.get(f"/empleados/{e['id']}").json()["ausencias"]}
     assert motivos <= {"personal", "salud"}
+
+
+def test_sin_base_responde_503_rapido(anonimo, monkeypatch):
+    """Si la base no responde, la API contesta 503 con un mensaje claro y no se queda colgada."""
+    import time
+
+    from app.config import get_settings
+    from app.repositorio_db import cerrar_pool
+
+    monkeypatch.setenv("FUENTE_DATOS", "supabase")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://postgres@127.0.0.1:1/nada")  # puerto cerrado
+    monkeypatch.setenv("DB_TIMEOUT_SEGUNDOS", "2")
+    get_settings.cache_clear()
+    cerrar_pool()
+    try:
+        inicio = time.monotonic()
+        r = anonimo.post("/auth/login", json={"usuario": "jefe", "password": PASSWORD})
+        assert r.status_code == 503 and "Session pooler" in r.json()["detail"]
+        assert time.monotonic() - inicio < 10
+    finally:
+        monkeypatch.undo()
+        get_settings.cache_clear()
+        cerrar_pool()

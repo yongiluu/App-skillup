@@ -199,3 +199,31 @@ def test_sugerencias_sin_persona_repetida_en_un_servicio(client):
 def test_solicitud_inexistente(client):
     assert client.patch("/solicitudes-cambio/999", json={"estado": "aprobada"}).status_code == 404
     assert client.patch("/solicitudes-cambio/1", json={"estado": "pendiente"}).status_code == 422
+
+
+# ---------- ausencias del día ----------
+def test_ausencias_del_dia(client):
+    aus = client.get("/ausencias", params={"fecha": HOY}).json()
+    assert {a["empleado_id"] for a in aus} == {"RST_006", "RST_008", "RST_063", "RST_068"}  # dato fijo de los mocks
+    assert all(a["motivo"] in {"personal", "salud"} for a in aus)
+    assert [a["empleado_id"] for a in aus] == sorted(a["empleado_id"] for a in aus)
+    # "servicios" = franjas en que esa persona tenía turno ese día
+    for a in aus:
+        turnos = client.get(f"/empleados/{a['empleado_id']}/turnos", params={"desde": HOY, "hasta": HOY}).json()
+        assert a["servicios"] == sorted(t["servicio"] for t in turnos)
+
+
+def test_ausencias_sin_fecha_y_dia_sin_ausencias(client):
+    assert client.get("/ausencias").json() == client.get("/ausencias", params={"fecha": HOY}).json()
+    assert client.get("/ausencias", params={"fecha": "2030-01-01"}).json() == []
+
+
+# ---------- recomendación en lenguaje normal ----------
+def test_recomendacion_en_lenguaje_normal(client):
+    for s in client.get("/semana", params={"inicio": "2025-10-13"}).json()["dias"][0]["servicios"]:
+        r = s["recomendacion"]
+        assert r and "_" not in r and "cross-trained" not in r and r.endswith(".")
+
+
+def test_jefe_demo_no_esta_ausente_hoy(client):
+    assert "RST_055" not in [a["empleado_id"] for a in client.get("/ausencias", params={"fecha": HOY}).json()]

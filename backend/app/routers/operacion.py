@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app import logica
 from app.config import get_settings
 from app.repositorio import Repositorio, get_repo
-from app.schemas import Calendario, DiaServicios, Error, Evento, EventoIn, Semana, Sugerencia
+from app.schemas import AusenciaDia, Calendario, DiaServicios, Error, Evento, EventoIn, Semana, Sugerencia
 from app.seguridad import solo_jefe, usuario_actual
 
 # Todo exige sesión iniciada; los datos operativos son solo para el jefe de turno.
@@ -83,6 +83,16 @@ def sugerencias(
     if not repo.servicios_de(fecha):
         raise _sin_datos(repo, str(fecha))
     return logica.sugerencias(repo, fecha)
+
+
+@router.get("/ausencias", response_model=list[AusenciaDia], dependencies=SOLO_JEFE)
+def ausencias_del_dia(
+    fecha: date | None = Query(None, description="YYYY-MM-DD. Si se omite, usa MOCK_HOY."),
+    repo: Repositorio = Depends(get_repo),
+):
+    """Quién falta ese día, con el motivo general (`personal` o `salud`, nunca el diagnóstico),
+    si avisó con poca anticipación y en qué servicios tenía turno. Lista vacía si nadie falta."""
+    return repo.ausencias_del_dia(fecha or get_settings().mock_hoy)
 
 
 @router.post("/eventos", response_model=Evento, status_code=201, dependencies=SOLO_JEFE)

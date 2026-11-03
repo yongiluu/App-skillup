@@ -22,7 +22,7 @@ uvicorn app.main:app --reload
   1. `POST /auth/login` con `{"usuario": "jefe", "password": "<tu DEMO_PASSWORD>"}`
   2. Copia el `access_token`, aprieta **Authorize** (arriba a la derecha) y pégalo.
   3. Ya puedes probar los demás endpoints.
-- Pruebas: `pytest` → 74 pruebas con los mocks (33 de seguridad y 14 de bienestar), más 17 de integración con Postgres si defines `TEST_DATABASE_URL` (ver abajo).
+- Pruebas: `pytest` → 80 pruebas con los mocks (incluye seguridad y bienestar), más 29 de integración con Postgres si defines `TEST_DATABASE_URL` (ver abajo).
 
 ## Fuente de datos
 
@@ -34,14 +34,17 @@ uvicorn app.main:app --reload
 Para usar Supabase, en tu `backend\.env`:
 ```
 FUENTE_DATOS=supabase
-DATABASE_URL=postgresql://postgres:<contraseña>@db.<proyecto>.supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres.<proyecto>:<contraseña>@aws-0-<región>.pooler.supabase.com:5432/postgres
 ```
+Usa la conexión **Session pooler** (Supabase → botón **Connect** → *Session pooler* → URI). La conexión directa (`db.<proyecto>.supabase.co`) solo funciona con IPv6 y falla en muchas redes de casa o de la universidad.
+
+Si la base no responde, la API contesta `503` con un mensaje claro en pocos segundos (`DB_TIMEOUT_SEGUNDOS`, por defecto 8), en vez de quedarse colgada.
 `DATABASE_URL` va **solo** en `.env`, que Git ignora. Nunca en el código, un PR o un issue: el repo es público.
 
 Los dos modos tienen los mismos métodos (`app/repositorio.py` y `app/repositorio_db.py`), así que los routers no cambian. En modo `supabase`:
 
 - Se crea un repositorio por request con una conexión del pool (máximo 5), y lo que ya se leyó en ese request se reutiliza.
-- **`asignados` = turnos programados** del servicio (en los mocks era la dotación real del CSV).
+- **`asignados` = turnos programados** del servicio, igual que en los mocks.
 - **`puede_cubrir`** = `empleado_rol` (sin el rol principal) + `rol_respaldo`.
 - **Días seguidos y horas extra** se calculan desde las fechas de los turnos.
 - **Servicios sin fila en `prediccion` no se muestran** (no hay probabilidad que dar).
@@ -51,7 +54,7 @@ Los dos modos tienen los mismos métodos (`app/repositorio.py` y `app/repositori
 - La conexión usa el usuario `postgres`, que se salta RLS. Sirve para el prototipo; en producción hay que usar un rol con permisos mínimos (ver pendientes).
 
 ### Pruebas de integración con Postgres
-`tests/test_bd.py` recrea en una base **local y descartable** una copia de la estructura de Supabase (`tests/fixtures/esquema_supabase.sql`, solo la estructura, sin datos), carga los mocks con `scripts/cargar_mocks_en_bd.py` y verifica que la API responda lo mismo que en modo mock.
+`tests/test_bd.py` aplica en una base **local y descartable** las migraciones oficiales de Maxi (`database/migrations/*.sql`), carga los mocks con `scripts/cargar_mocks_en_bd.py` y verifica que la API responda **exactamente igual** que en modo mock: las 72 fichas, servicios, sugerencias, fatiga, ausencias, semana y calendario. Los mocks se generan para que coincidan con la base: sin turnos repetidos, `asignados` = turnos programados, dotación con 1 decimal y días seguidos calculados desde los turnos.
 
 ```bash
 TEST_DATABASE_URL=postgresql://postgres@localhost:5432/skillup_test pytest
@@ -79,11 +82,12 @@ Todos exigen la cabecera `Authorization: Bearer <token>`, salvo `/auth/login` y 
 
 | Método | Ruta | Quién | Notas |
 |---|---|---|---|
-| `POST` | `/auth/login` | Todos | Usuarios de prueba `jefe` y `empleado`, con la contraseña de `DEMO_PASSWORD`. Devuelve el token, el perfil y `expira_en` |
+| `POST` | `/auth/login` | Todos | Usuarios de prueba `jefe` (RST_055, Catalina Flores) y `empleado` (RST_001), con la contraseña de `DEMO_PASSWORD`. Devuelve el token, el perfil y `expira_en` |
 | `GET` | `/servicios?fecha=` | Jefe | El día con sus 4 servicios |
 | `GET` | `/semana?inicio=` | Jefe | 7 días × 4 servicios. Si se omite `inicio`, usa el lunes de "hoy" |
 | `GET` | `/calendario?mes=YYYY-MM` | Todos | Ventana de pago, feriados, vísperas y eventos por día |
 | `GET` | `/sugerencias?fecha=` | Jefe | Acciones "mover" o "llamar" para los roles críticos en riesgo |
+| `GET` | `/ausencias?fecha=` | Jefe | **Nuevo.** Quién falta ese día: nombre, rol, motivo (`personal`/`salud`), horas, si avisó con poca anticipación y `servicios` (las franjas en que tenía turno). Ordenado por ID. Lista vacía si nadie falta |
 | `GET` | `/empleados?rol=` | Todos | Solo datos básicos (sirven para elegir reemplazo) |
 | `GET` | `/empleados/{id}` | Jefe, o la misma persona | Ficha completa |
 | `GET` | `/empleados/{id}/turnos?desde=&hasta=` | Jefe, o la misma persona | Turnos de una persona |
@@ -102,6 +106,9 @@ Los errores siempre vienen como `{"detail": "mensaje en español"}`.
 
 ### Nivel de riesgo
 Cada servicio trae `nivel_riesgo`, calculado con los umbrales acordados: `bajo` (< 0,55), `alerta` (≥ 0,55) y `alto` (≥ 0,75). Así el frontend no tiene que repetir esa lógica.
+
+### Recomendación en lenguaje normal
+El modelo guarda frases técnicas ("Activar reemplazo inmediato y reforzar garzon para la franja 13_15"). La API las traduce al mostrarlas: "Riesgo alto: busca reemplazo ya y refuerza garzón de 13:00–15:00." Si aparece una frase que no reconoce, la deja igual. En la base queda el texto original.
 
 ### Regla de sugerencias (v0)
 Una misma persona nunca se sugiere para dos roles en el mismo servicio.
