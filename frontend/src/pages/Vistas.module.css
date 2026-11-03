@@ -119,3 +119,9 @@
     gap: var(--esp-5);
   }
 }
+
+.nota {
+  margin-top: var(--esp-2);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-suave);
+}

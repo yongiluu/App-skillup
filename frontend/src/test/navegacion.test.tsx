@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { SesionProvider } from '../auth/SesionContext'
@@ -48,8 +48,12 @@ describe('navegación', () => {
   it('Hoy muestra los 4 servicios con su nivel de riesgo', async () => {
     montar('/')
     await ingresar('jefe')
-    expect(await screen.findByText('13:00–15:00')).toBeInTheDocument()
-    expect(screen.getAllByText(/Riesgo alto|Alerta|Riesgo bajo/)).toHaveLength(4)
+    const servicios = await screen.findByRole('region', { name: 'Servicios del día' })
+    const tarjetas = within(servicios).getAllByRole('heading', { level: 2, name: /^\d\d:00–\d\d:00$/ })
+    expect(tarjetas.map((t) => t.textContent)).toEqual(['11:00–13:00', '13:00–15:00', '19:00–21:00', '21:00–23:00'])
+    // Cada servicio con su nivel de riesgo y la recomendación en lenguaje normal
+    expect(within(servicios).getAllByText(/^(Riesgo alto|Alerta|Riesgo bajo)/, { selector: 'span' })).toHaveLength(4)
+    expect(within(servicios).getAllByText(/refuerza|mantén|monitoreo|reemplazo/i, { selector: 'p' }).length).toBeGreaterThan(0)
   })
 
   it('el empleado entra a su bienestar y no a las vistas del jefe', async () => {

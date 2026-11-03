@@ -81,7 +81,8 @@ export default function Hoy() {
                     style={{ width: `${Math.min(100, (s.asignados / s.requeridos) * 100)}%` }}
                   />
                 </div>
-                <p className={estilos.texto}>
+                <p className={estilos.texto}>{s.recomendacion}</p>
+                <p className={estilos.nota}>
                   {s.cubiertos_previstos} cubiertos previstos · {s.reservas} reservas
                 </p>
               </Tarjeta>
@@ -103,8 +104,8 @@ export default function Hoy() {
           {ausencias.estado === 'listo' &&
             (ausencias.datos === null ? (
               <Aviso>
-                Falta que la API entregue las ausencias del día (propuesta: <code>GET /ausencias?fecha=</code>). Se
-                mostrarán aquí apenas exista.
+                Esta versión de la API todavía no entrega las ausencias del día (<code>GET /ausencias</code>). Actualiza el
+                backend a la última versión de <code>main</code>.
               </Aviso>
             ) : (
               <AusenciasDia ausencias={ausencias.datos} />

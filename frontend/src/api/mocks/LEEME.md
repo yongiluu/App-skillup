@@ -1,15 +1,31 @@
 # Datos simulados del frontend
 
-Son respuestas reales de la API de ejemplo de Diego, capturadas con el backend corriendo:
+Son respuestas reales de la API de Diego (`main`, con `FUENTE_DATOS=mock`), capturadas con
+`scripts/capturar_mocks.py`. Así tienen exactamente la misma forma y los mismos datos que la API.
 
-| Archivo | Endpoint | Rama del backend |
+| Archivo | Endpoint | Usuario |
 |---|---|---|
-| `servicios.json`, `semana.json`, `sugerencias.json`, `empleados.json` | `/servicios`, `/semana`, `/sugerencias`, `/empleados` | `backend/etapa-1-api-mock` |
-| `fatiga.json` | `GET /bienestar/fatiga` | `backend/biometria-simulada` |
-| `fichas.json` | `GET /empleados/{id}` (de los 72, con máx. 5 ausencias y 5 próximos turnos) | `backend/biometria-simulada` |
-| `ausencias.json` | **[PROPUESTA]** `GET /ausencias?fecha=` (aún no existe) | armado con `ausencias.json`, `empleados.json` y `turnos.json` de `backend/app/mocks` para el 17-10 |
-| `bienestar-propio.json` | `GET /empleados/RST_001/bienestar` (usuario `empleado`) | `backend/biometria-simulada` |
+| `servicios.json` | `GET /servicios` | jefe |
+| `semana.json` | `GET /semana` | jefe |
+| `sugerencias.json` | `GET /sugerencias` | jefe |
+| `ausencias.json` | `GET /ausencias` | jefe |
+| `empleados.json` | `GET /empleados` | jefe |
+| `fatiga.json` | `GET /bienestar/fatiga` | jefe |
+| `fichas.json` | `GET /empleados/{id}` de las 72 personas (máx. 5 ausencias y 5 próximos turnos cada una) | jefe |
+| `bienestar-propio.json` | `GET /empleados/RST_001/bienestar` | empleado |
 
-**Único cambio a mano:** `RST_004` (Antonia Pérez) se dejó en estado `sin_datos`, para poder ver
-ese caso en la ficha. Los datos del backend no traen ninguno para el "hoy" simulado (17-10-2025).
+Usuarios de prueba (iguales al backend): `jefe` = Catalina Flores (RST_055) y `empleado` = Agustín Díaz (RST_001).
+"Hoy" simulado: 17-10-2025.
+
+**Único cambio a mano:** `RST_004` (Antonia Pérez) queda en estado `sin_datos` en `fatiga.json` y
+`fichas.json`, para poder ver ese caso en la ficha (los datos de ejemplo no traen ninguno para el "hoy").
 Todo el bienestar es **simulado**.
+
+## Cómo volver a capturarlos
+Con el backend corriendo en modo mock (ver `backend/README.md`):
+
+```bash
+cd frontend
+DEMO_PASSWORD=<la de tu backend/.env> python scripts/capturar_mocks.py http://localhost:8000
+npm test
+```
