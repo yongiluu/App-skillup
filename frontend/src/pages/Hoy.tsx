@@ -1,5 +1,5 @@
 import { getAusencias, getServicios, getSugerencias } from '../api'
-import type { DiaCalendario } from '../api/tipos'
+import { marcasDelDia } from '../lib/calendario'
 import { useDatos } from '../lib/useDatos'
 import { fechaLarga } from '../lib/formato'
 import EncabezadoPagina from '../components/ui/EncabezadoPagina'
@@ -16,18 +16,6 @@ import estilos from './Vistas.module.css'
 const cargarServicios = () => getServicios()
 const cargarSugerencias = () => getSugerencias()
 const cargarAusencias = () => getAusencias()
-
-/** Lo que hace distinto al día: viernes, pago, feriado, eventos. */
-function marcasDelDia(c: DiaCalendario): string[] {
-  const m: string[] = []
-  if (c.feriado) m.push(`Feriado: ${c.feriado}`)
-  if (c.es_vispera_feriado) m.push('Víspera de feriado')
-  if (c.es_ventana_pago) m.push('Día de pago / quincena')
-  if (c.es_viernes) m.push('Viernes')
-  else if (c.es_fin_de_semana) m.push('Fin de semana')
-  for (const e of c.eventos) m.push(`Evento: ${e.nombre}`)
-  return m
-}
 
 /** Vista Hoy (jefe de turno): cobertura de los 4 servicios, acciones sugeridas y ausencias. */
 export default function Hoy() {
@@ -46,7 +34,7 @@ export default function Hoy() {
       {dia && marcasDelDia(dia.calendario).length > 0 && (
         <ul className={estilos.marcas} aria-label="Lo especial de este día">
           {marcasDelDia(dia.calendario).map((m) => (
-            <li key={m}>{m}</li>
+            <li key={m.texto}>{m.texto}</li>
           ))}
         </ul>
       )}

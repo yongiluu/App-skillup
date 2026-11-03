@@ -85,6 +85,12 @@ export interface DiaServicios {
   servicios: Servicio[]
 }
 
+export interface Calendario {
+  /** "YYYY-MM" */
+  mes: string
+  dias: DiaCalendario[]
+}
+
 export interface Semana {
   inicio: string
   fin: string

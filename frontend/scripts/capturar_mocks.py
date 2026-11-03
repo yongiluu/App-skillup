@@ -12,7 +12,9 @@ from __future__ import annotations
 import json
 import os
 import sys
+import urllib.error
 import urllib.request
+from datetime import date, timedelta
 from pathlib import Path
 
 API = (sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8000").rstrip("/")
@@ -48,7 +50,24 @@ yo = pedir("/auth/login", cuerpo={"usuario": "empleado", "password": CLAVE})["em
 
 print(f"Capturando desde {API}:")
 guardar("servicios.json", pedir("/servicios", jefe))
-guardar("semana.json", pedir("/semana", jefe))
+# Todas las semanas con datos (lunes a domingo), desde la semana de "hoy" hacia atrás y adelante.
+hoy = pedir("/semana", jefe)["inicio"]
+semanas = {}
+for paso in (-7, 7):
+    d = date.fromisoformat(hoy) if paso < 0 else date.fromisoformat(hoy) + timedelta(days=7)
+    while True:
+        try:
+            semanas[d.isoformat()] = pedir(f"/semana?inicio={d.isoformat()}", jefe)
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                break
+            raise
+        d += timedelta(days=paso)
+guardar("semanas.json", {"hoy": hoy, "semanas": dict(sorted(semanas.items()))}, sangria=None)
+
+# Calendario de los meses que tocan esas semanas.
+meses = sorted({s[:7] for s in semanas} | {(date.fromisoformat(s) + timedelta(days=6)).isoformat()[:7] for s in semanas})
+guardar("calendario.json", {m: pedir(f"/calendario?mes={m}", jefe) for m in meses}, sangria=None)
 guardar("sugerencias.json", pedir("/sugerencias", jefe))
 guardar("ausencias.json", pedir("/ausencias", jefe))
 guardar("empleados.json", pedir("/empleados", jefe))
