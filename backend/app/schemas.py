@@ -216,7 +216,7 @@ class BienestarPropio(Bienestar):
 
 class EmpleadoFicha(Empleado):
     antiguedad_anos: int
-    distancia_trabajo_km: float
+    distancia_trabajo_km: float | None
     dias_seguidos_trabajados: int
     horas_extra_ultimos_7_dias: float
     ausencias: list[Ausencia]

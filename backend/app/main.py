@@ -4,6 +4,8 @@ Levantar en local:  uvicorn app.main:app --reload
 Documentación:      http://localhost:8000/docs  (apagada si APP_ENV=production)
 """
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -13,17 +15,27 @@ from app.routers import auth, bienestar, empleados, operacion, solicitudes
 settings = get_settings()
 docs = not settings.es_produccion
 
+
+@asynccontextmanager
+async def ciclo_de_vida(_app: FastAPI):
+    yield
+    if get_settings().fuente_datos == "supabase":
+        from app.repositorio_db import cerrar_pool
+
+        cerrar_pool()  # cierra las conexiones a la base al apagar la API
+
 app = FastAPI(
     title="SkillUp API",
-    version="0.2.0",
+    version="0.3.0",
     description=(
         "API de gestión de turnos para restaurantes.\n\n"
         "**Cómo probar:** `POST /auth/login` con `jefe` o `empleado` y la contraseña de `DEMO_PASSWORD`; "
         "copia el `access_token` y pégalo en el botón **Authorize** (arriba a la derecha).\n\n"
-        "**Datos de ejemplo:** el 'hoy' de los mocks es "
-        f"**{settings.mock_hoy}** y los servicios cubren del 2025-09-29 al 2025-11-02. "
-        "Lo que se crea (eventos, solicitudes) vive en memoria."
+        f"**Fuente de datos:** `{settings.fuente_datos}`. El 'hoy' por defecto es **{settings.mock_hoy}** "
+        "(los datos simulados cubren del 2025-09-29 al 2025-11-02). "
+        "En modo `mock`, lo que se crea (eventos, solicitudes) vive en memoria; en modo `supabase`, se guarda en la base."
     ),
+    lifespan=ciclo_de_vida,
     docs_url="/docs" if docs else None,
     redoc_url=None,
     openapi_url="/openapi.json" if docs else None,

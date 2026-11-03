@@ -6,7 +6,7 @@ from datetime import date, timedelta
 
 from app import bienestar
 from app.config import get_settings
-from app.repositorio import RepositorioMock
+from app.repositorio import Repositorio
 
 HORARIOS = {"11_13": "11:00–13:00", "13_15": "13:00–15:00", "19_21": "19:00–21:00", "21_23": "21:00–23:00"}
 DIAS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
@@ -30,7 +30,7 @@ def armar_servicio(s: dict) -> dict:
     return {**s, "horario": HORARIOS[s["servicio"]], "nivel_riesgo": nivel_riesgo(s["prob_deficit"])}
 
 
-def armar_dia_calendario(repo: RepositorioMock, fecha: date) -> dict:
+def armar_dia_calendario(repo: Repositorio, fecha: date) -> dict:
     cal = repo.dia_calendario(fecha) or {}
     wd = fecha.weekday()
     return {
@@ -45,7 +45,7 @@ def armar_dia_calendario(repo: RepositorioMock, fecha: date) -> dict:
     }
 
 
-def armar_dia_servicios(repo: RepositorioMock, fecha: date) -> dict | None:
+def armar_dia_servicios(repo: Repositorio, fecha: date) -> dict | None:
     servicios = repo.servicios_de(fecha)
     if not servicios:
         return None
@@ -56,7 +56,7 @@ def armar_dia_servicios(repo: RepositorioMock, fecha: date) -> dict | None:
     }
 
 
-def sugerencias(repo: RepositorioMock, fecha: date, max_por_rol: int = 2) -> list[dict]:
+def sugerencias(repo: Repositorio, fecha: date, max_por_rol: int = 2) -> list[dict]:
     """Regla v0 de cobertura (reemplazable por el modelo en la etapa 4).
 
     Para cada servicio con prob_deficit >= umbral de alerta y cada rol crítico en riesgo:
@@ -68,7 +68,7 @@ def sugerencias(repo: RepositorioMock, fecha: date, max_por_rol: int = 2) -> lis
     """
     umbral = get_settings().umbral_alerta
     ausentes = repo.ausentes_en(fecha)
-    dias_seguidos = _dias_seguidos_hasta(repo, fecha)
+    dias_seguidos = repo.dias_seguidos_hasta(fecha)
     _cache_fatiga: dict[str, bool] = {}
 
     def fatiga_alta(emp_id: str) -> bool:
@@ -130,30 +130,16 @@ def sugerencias(repo: RepositorioMock, fecha: date, max_por_rol: int = 2) -> lis
     return resultado
 
 
-def _dias_seguidos_hasta(repo: RepositorioMock, fecha: date) -> dict[str, int]:
-    """Último valor de días seguidos trabajados de cada empleado hasta `fecha` (inclusive)."""
-    f = fecha.isoformat()
-    ultimo: dict[str, tuple[str, int]] = {}
-    for t in repo.turnos:
-        if t["fecha"] <= f:
-            prev = ultimo.get(t["empleado_id"])
-            if prev is None or t["fecha"] >= prev[0]:
-                ultimo[t["empleado_id"]] = (t["fecha"], t["dias_seguidos"])
-    return {k: v[1] for k, v in ultimo.items()}
-
-
-def ficha_empleado(repo: RepositorioMock, empleado_id: str, hoy: date) -> dict | None:
+def ficha_empleado(repo: Repositorio, empleado_id: str, hoy: date) -> dict | None:
     e = repo.empleados.get(empleado_id)
     if e is None:
         return None
     turnos = repo.turnos_de_empleado(empleado_id)
     h = hoy.isoformat()
-    hace_7 = (hoy - timedelta(days=6)).isoformat()
-    pasados = [t for t in turnos if t["fecha"] <= h]
     return {
         **e,
-        "dias_seguidos_trabajados": pasados[-1]["dias_seguidos"] if pasados else 0,
-        "horas_extra_ultimos_7_dias": round(sum(t["horas_extra"] for t in pasados if t["fecha"] >= hace_7), 1),
+        "dias_seguidos_trabajados": repo.dias_seguidos_hasta(hoy).get(empleado_id, 0),
+        "horas_extra_ultimos_7_dias": round(repo.horas_extra_7d(hoy).get(empleado_id, 0.0), 1),
         "ausencias": repo.ausencias_de_empleado(empleado_id),
         "proximos_turnos": [t for t in turnos if t["fecha"] >= h][:10],
         "bienestar": bienestar.resumen(repo, empleado_id, hoy),

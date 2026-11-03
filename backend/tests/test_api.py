@@ -117,7 +117,7 @@ def test_sugerencias(client):
 
 
 def test_sugerencias_no_incluyen_ausentes(client):
-    from app.repositorio import get_repo as repo
+    from app.repositorio import repo_mock as repo
     from datetime import date
 
     for fecha in ("2025-10-03", "2025-10-17", "2025-10-24"):

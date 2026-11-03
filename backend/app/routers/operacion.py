@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app import logica
 from app.config import get_settings
-from app.repositorio import RepositorioMock, get_repo
+from app.repositorio import Repositorio, get_repo
 from app.schemas import Calendario, DiaServicios, Error, Evento, EventoIn, Semana, Sugerencia
 from app.seguridad import solo_jefe, usuario_actual
 
@@ -18,15 +18,17 @@ NO_ENCONTRADO = {404: {"model": Error}}
 SOLO_JEFE = [Depends(solo_jefe)]
 
 
-def _sin_datos(repo: RepositorioMock, que: str) -> HTTPException:
-    ini, fin = repo.rango_servicios
-    return HTTPException(404, f"Sin datos de ejemplo para {que}. Rango disponible: {ini} a {fin}.")
+def _sin_datos(repo: Repositorio, que: str) -> HTTPException:
+    rango = repo.rango_servicios()
+    if rango is None:
+        return HTTPException(404, "Todavía no hay servicios cargados.")
+    return HTTPException(404, f"Sin datos para {que}. Rango disponible: {rango[0]} a {rango[1]}.")
 
 
 @router.get("/servicios", response_model=DiaServicios, responses=NO_ENCONTRADO, dependencies=SOLO_JEFE)
 def servicios_del_dia(
-    fecha: date | None = Query(None, description="YYYY-MM-DD. Si se omite, usa el 'hoy' de los mocks."),
-    repo: RepositorioMock = Depends(get_repo),
+    fecha: date | None = Query(None, description="YYYY-MM-DD. Si se omite, usa MOCK_HOY."),
+    repo: Repositorio = Depends(get_repo),
 ):
     """Los 4 servicios del día con dotación, demanda, probabilidad de déficit y nivel de riesgo."""
     fecha = fecha or get_settings().mock_hoy
@@ -39,7 +41,7 @@ def servicios_del_dia(
 @router.get("/semana", response_model=Semana, responses=NO_ENCONTRADO, dependencies=SOLO_JEFE)
 def semana(
     inicio: date | None = Query(None, description="Primer día (YYYY-MM-DD). Si se omite, el lunes de 'hoy'."),
-    repo: RepositorioMock = Depends(get_repo),
+    repo: Repositorio = Depends(get_repo),
 ):
     """Grilla de 7 días × 4 servicios, a partir de `inicio`."""
     if inicio is None:
@@ -54,7 +56,7 @@ def semana(
 @router.get("/calendario", response_model=Calendario, responses={**NO_ENCONTRADO, 422: {"model": Error}})
 def calendario(
     mes: str | None = Query(None, description="YYYY-MM. Si se omite, el mes de 'hoy'."),
-    repo: RepositorioMock = Depends(get_repo),
+    repo: Repositorio = Depends(get_repo),
 ):
     """Días de pago/quincenas, feriados, vísperas y eventos del mes."""
     if mes is None:
@@ -64,15 +66,17 @@ def calendario(
     anio, m = map(int, mes.split("-"))
     fechas = [date(anio, m, d) for d in range(1, pycal.monthrange(anio, m)[1] + 1)]
     if not any(repo.dia_calendario(f) for f in fechas):
-        fs = sorted(repo.calendario)
-        raise HTTPException(404, f"Sin calendario de ejemplo para {mes}. Disponible: {fs[0][:7]} a {fs[-1][:7]}.")
+        rango = repo.rango_calendario()
+        if rango is None:
+            raise HTTPException(404, "Todavía no hay calendario cargado.")
+        raise HTTPException(404, f"Sin calendario para {mes}. Disponible: {rango[0][:7]} a {rango[1][:7]}.")
     return {"mes": mes, "dias": [logica.armar_dia_calendario(repo, f) for f in fechas]}
 
 
 @router.get("/sugerencias", response_model=list[Sugerencia], responses=NO_ENCONTRADO, dependencies=SOLO_JEFE)
 def sugerencias(
-    fecha: date | None = Query(None, description="YYYY-MM-DD. Si se omite, usa el 'hoy' de los mocks."),
-    repo: RepositorioMock = Depends(get_repo),
+    fecha: date | None = Query(None, description="YYYY-MM-DD. Si se omite, usa MOCK_HOY."),
+    repo: Repositorio = Depends(get_repo),
 ):
     """Acciones sugeridas de cobertura (mover o llamar) para los servicios en riesgo del día."""
     fecha = fecha or get_settings().mock_hoy
@@ -82,6 +86,6 @@ def sugerencias(
 
 
 @router.post("/eventos", response_model=Evento, status_code=201, dependencies=SOLO_JEFE)
-def crear_evento(evento: EventoIn, repo: RepositorioMock = Depends(get_repo)):
-    """Registra un evento de la cervecería. **Mock**: se guarda en memoria y se pierde al reiniciar."""
+def crear_evento(evento: EventoIn, repo: Repositorio = Depends(get_repo)):
+    """Registra un evento de la cervecería. Aparece en `/calendario`."""
     return repo.crear_evento(evento.model_dump(mode="json"))

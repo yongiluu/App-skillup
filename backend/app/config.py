@@ -4,6 +4,7 @@ import logging
 import secrets
 from datetime import date
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -24,6 +25,14 @@ class Settings(BaseSettings):
     umbral_alerta: float = 0.55
     umbral_alto: float = 0.75
 
+    # --- Datos ---
+    # "mock" = archivos de app/mocks (pruebas y CI). "supabase" = base de datos real.
+    fuente_datos: Literal["mock", "supabase"] = "mock"
+    # Cadena de conexión a Postgres (Supabase). Solo en .env, nunca en el repo.
+    database_url: str = ""
+    # Local (sucursal) que atiende esta API. Vacío = el primero de la tabla `local`.
+    local_id: int | None = None
+
     # --- Seguridad ---
     # Clave para firmar los tokens. Nunca en el código ni en el repo.
     secret_key: str = ""
@@ -36,6 +45,8 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _validar_secretos(self):
+        if self.fuente_datos == "supabase" and not self.database_url:
+            raise ValueError("FUENTE_DATOS=supabase requiere DATABASE_URL en .env")
         if not self.secret_key:
             if self.es_produccion:
                 raise ValueError("Falta SECRET_KEY en el entorno de producción")
