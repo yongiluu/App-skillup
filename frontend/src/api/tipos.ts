@@ -188,11 +188,26 @@ export interface BienestarPropio extends Bienestar {
 
 export interface EmpleadoFicha extends Empleado {
   antiguedad_anos: number
-  distancia_trabajo_km: number
+  /** null si no se conoce (desde la etapa 2 del backend) */
+  distancia_trabajo_km: number | null
   dias_seguidos_trabajados: number
   horas_extra_ultimos_7_dias: number
   ausencias: Ausencia[]
   proximos_turnos: Turno[]
   /** Lo que ve el jefe: estado, consentimiento e indicador. Nunca datos crudos. */
   bienestar: Bienestar
+}
+
+// ---------- Ausencias del día [PROPUESTA para GET /ausencias?fecha=, aún no existe] ----------
+export interface AusenciaDia {
+  empleado_id: string
+  nombre: string
+  rol: Rol
+  fecha: string
+  /** Nunca el diagnóstico */
+  motivo: 'personal' | 'salud'
+  horas: number
+  aviso_corto: boolean
+  /** Servicios del día en que esa persona estaba programada */
+  servicios: Franja[]
 }

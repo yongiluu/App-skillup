@@ -1,0 +1,38 @@
+import { Link } from 'react-router-dom'
+import type { AusenciaDia, Rol } from '../../api/tipos'
+import { HORARIO_FRANJA, NOMBRE_ROL } from '../../lib/formato'
+import estilos from './Hoy.module.css'
+
+/**
+ * Quién falta hoy y en qué servicios. Motivo solo "personal" o "salud", nunca el diagnóstico.
+ * Fuente: GET /ausencias?fecha= [PROPUESTA; mientras tanto, datos simulados].
+ */
+export default function AusenciasDia({ ausencias }: { ausencias: AusenciaDia[] }) {
+  if (ausencias.length === 0) {
+    return <p className={estilos.vacio}>Nadie avisó ausencia para hoy.</p>
+  }
+
+  return (
+    <ul className={estilos.lista}>
+      {ausencias.map((a) => (
+        <li key={a.empleado_id} className={estilos.ausencia}>
+          <span>
+            <Link to={`/equipo/${a.empleado_id}`}>
+              <b>{a.nombre}</b>
+            </Link>{' '}
+            · {NOMBRE_ROL[a.rol as Rol] ?? a.rol}
+            <span className={estilos.detalle}>
+              {a.servicios.length > 0
+                ? `Programado/a en ${a.servicios.map((s) => HORARIO_FRANJA[s]).join(', ')}`
+                : 'Sin turnos programados hoy'}
+            </span>
+          </span>
+          <span className={estilos.etiquetas}>
+            <span className={estilos.motivo}>{a.motivo === 'salud' ? 'Salud' : 'Personal'}</span>
+            {a.aviso_corto && <span className={estilos.avisoCorto}>Aviso corto</span>}
+          </span>
+        </li>
+      ))}
+    </ul>
+  )
+}
