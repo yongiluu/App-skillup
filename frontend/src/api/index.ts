@@ -8,6 +8,7 @@ import { ErrorApi, pedir } from './cliente'
 import type {
   AusenciaDia,
   BienestarPropio,
+  Calendario,
   DiaServicios,
   Empleado,
   EmpleadoFicha,
@@ -18,7 +19,8 @@ import type {
   Sugerencia,
 } from './tipos'
 import mockServicios from './mocks/servicios.json'
-import mockSemana from './mocks/semana.json'
+import mockSemanas from './mocks/semanas.json'
+import mockCalendario from './mocks/calendario.json'
 import mockSugerencias from './mocks/sugerencias.json'
 import mockEmpleados from './mocks/empleados.json'
 import mockFatiga from './mocks/fatiga.json'
@@ -59,9 +61,30 @@ export function getServicios(fecha?: string): Promise<DiaServicios> {
   return pedir<DiaServicios>(`/servicios${fecha ? `?fecha=${encodeURIComponent(fecha)}` : ''}`)
 }
 
+/** 7 días × 4 servicios desde `inicio`. Sin `inicio`, la API usa el lunes de su "hoy". */
 export function getSemana(inicio?: string): Promise<Semana> {
-  if (USAR_MOCKS) return simularRed(mockSemana as Semana)
+  if (USAR_MOCKS) {
+    const semanas = mockSemanas.semanas as Record<string, Semana>
+    const semana = semanas[inicio ?? mockSemanas.hoy]
+    if (!semana) {
+      const fechas = Object.keys(semanas)
+      return Promise.reject(
+        new ErrorApi(404, `Sin datos de ejemplo para la semana que empieza el ${inicio}. Disponibles: ${fechas[0]} a ${fechas.at(-1)}.`),
+      )
+    }
+    return simularRed(semana)
+  }
   return pedir<Semana>(`/semana${inicio ? `?inicio=${encodeURIComponent(inicio)}` : ''}`)
+}
+
+/** Días de pago, quincenas, feriados, vísperas y eventos de un mes ("YYYY-MM"). */
+export function getCalendario(mes?: string): Promise<Calendario> {
+  if (USAR_MOCKS) {
+    const meses = mockCalendario as Record<string, Calendario>
+    const cal = meses[mes ?? MOCK_HOY.slice(0, 7)]
+    return cal ? simularRed(cal) : Promise.reject(new ErrorApi(404, `Sin calendario de ejemplo para ${mes}.`))
+  }
+  return pedir<Calendario>(`/calendario${mes ? `?mes=${encodeURIComponent(mes)}` : ''}`)
 }
 
 export function getSugerencias(fecha?: string): Promise<Sugerencia[]> {

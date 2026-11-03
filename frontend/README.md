@@ -61,6 +61,7 @@ src/
 |---|---|---|
 | `/login` | todos | 1 |
 | `/hoy`, `/planificador`, `/equipo` | jefe de turno | 1 (estructura) → 2 y 3 |
+| `/planificador?inicio=YYYY-MM-DD` | jefe de turno | 2 (grilla semanal + calendario; la semana va en la URL) |
 | `/equipo/:id` (ficha) | jefe de turno | 1 (bienestar) → 3 |
 | `/mi-turno` | empleado | 1 (bienestar propio) → 3 |
 

@@ -6,7 +6,8 @@ Son respuestas reales de la API de Diego (`main`, con `FUENTE_DATOS=mock`), capt
 | Archivo | Endpoint | Usuario |
 |---|---|---|
 | `servicios.json` | `GET /servicios` | jefe |
-| `semana.json` | `GET /semana` | jefe |
+| `semanas.json` | `GET /semana?inicio=` de **todas** las semanas con datos (29-09 al 02-11) + cuál es la de "hoy" | jefe |
+| `calendario.json` | `GET /calendario?mes=` de septiembre, octubre y noviembre 2025 | jefe |
 | `sugerencias.json` | `GET /sugerencias` | jefe |
 | `ausencias.json` | `GET /ausencias` | jefe |
 | `empleados.json` | `GET /empleados` | jefe |
