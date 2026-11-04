@@ -20,6 +20,8 @@ from app.repositorio import Repositorio
 
 auditoria = logging.getLogger("skillup.auditoria")
 
+# Versión del texto de autorización que acepta quien autoriza hoy. [PENDIENTE CERVECERÍA / revisión legal]
+VERSION_TEXTO_CONSENTIMIENTO = "borrador-v0"
 DIAS_VENTANA = 3  # se consideran los últimos 3 días hasta la fecha
 UMBRAL_MEDIO = 0.35
 UMBRAL_ALTO = 0.60

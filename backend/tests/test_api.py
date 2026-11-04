@@ -232,6 +232,27 @@ def test_recomendacion_en_lenguaje_normal(client):
     for s in client.get("/semana", params={"inicio": "2025-10-13"}).json()["dias"][0]["servicios"]:
         r = s["recomendacion"]
         assert r and "_" not in r and "cross-trained" not in r and r.endswith(".")
+        assert f"{s['asignados']} programados para {s['requeridos']}" in r
+
+
+def test_recomendacion_explica_el_margen(client):
+    """AP-01: con más programados que requeridos, el riesgo alto se explica con el margen y el rol."""
+    s = {x["servicio"]: x for x in client.get("/servicios", params={"fecha": HOY}).json()["servicios"]}
+    assert s["13_15"]["nivel_riesgo"] == "alto"
+    assert s["13_15"]["recomendacion"] == (
+        "Riesgo alto de quedar corto, sobre todo en jefe de turno. Hay 25 programados para 23: "
+        "alcanza si no faltan más de 2. Confirma quién viene y ten un reemplazo de jefe de turno listo."
+    )
+    assert "sobre todo en garzón" in s["21_23"]["recomendacion"]
+    assert s["11_13"]["recomendacion"].startswith("Dotación suficiente: hay 12 programados para 10")
+
+
+def test_margen():
+    from app.logica import margen
+
+    assert margen(25, 23).endswith("alcanza si no faltan más de 2")
+    assert margen(12, 12).endswith("cualquier ausencia lo deja corto")
+    assert margen(10, 12).endswith("faltan 2 desde ya")
 
 
 def test_jefe_demo_no_esta_ausente_hoy(client):

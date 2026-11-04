@@ -166,6 +166,29 @@ def test_accesos_se_guardan_en_sensible(jefe_bd):
     assert ("jefe", "ficha_indicador", "RST_005") in filas
 
 
+def test_retirar_autorizacion_en_bd(modo_bd):
+    """AP-04 con la base: retirar llena revocado_en (no borra) y queda en el registro de accesos."""
+    from tests.test_bienestar import revisar_retirar_y_volver_a_autorizar
+
+    _recrear_base()
+    limitador.limpiar()
+    try:
+        revisar_retirar_y_volver_a_autorizar(_cliente("jefe"), _cliente("empleado"))
+        with psycopg.connect(URL) as con:
+            filas = con.execute(
+                "select revocado_en is not null from sensible.consentimiento "
+                "where empleado_id = 'RST_056' order by id"
+            ).fetchall()
+            acciones = [f[0] for f in con.execute(
+                "select accion from sensible.registro_acceso where empleado_id = 'RST_056' "
+                "and accion like 'consentimiento_%' order by id"
+            ).fetchall()]
+        assert [f[0] for f in filas] == [True, False]  # la antigua revocada, la nueva vigente
+        assert acciones == ["consentimiento_retirado", "consentimiento_otorgado"]
+    finally:
+        _recrear_base()
+
+
 # ---------- escrituras ----------
 def test_crear_evento_en_bd(jefe_bd):
     r = jefe_bd.post("/eventos", json={"fecha": "2025-10-25", "nombre": "Tocata", "tipo": "tocata", "servicios": ["21_23"]})

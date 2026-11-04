@@ -27,25 +27,45 @@ def nivel_riesgo(prob: float) -> str:
     return "bajo"
 
 
-_REGLAS_RECOMENDACION = [
-    (re.compile(r"^Activar reemplazo inmediato y reforzar (\w+) para la franja (\w+)$"),
-     lambda m: f"Riesgo alto: busca reemplazo ya y refuerza {NOMBRE_ROL.get(m[1], m[1])} de {HORARIOS.get(m[2], m[2])}."),
-    (re.compile(r"^Mover personal cross-trained y preparar backup en (\w+)$"),
-     lambda m: f"Mueve a alguien entrenado como {NOMBRE_ROL.get(m[1], m[1])} y deja un respaldo listo."),
-    (re.compile(r"^Monitorear ausentismo corto aviso y confirmar cobertura de (\w+)$"),
-     lambda m: f"Atento a ausencias de último minuto: confirma quién cubre {NOMBRE_ROL.get(m[1], m[1])}."),
-    (re.compile(r"^Cobertura estable; mantener monitoreo operativo$"),
-     lambda m: "Dotación suficiente: no hace falta hacer nada por ahora."),
-]
+_ROL_EN_TEXTO = re.compile(r"\b(garzon|cocinero_linea|jefe_turno)\b")
 
 
-def recomendacion_natural(texto: str) -> str:
-    """Traduce el texto técnico del modelo a lenguaje normal. Si no lo reconoce, lo deja igual."""
-    for patron, frase in _REGLAS_RECOMENDACION:
-        m = patron.match(texto.strip())
-        if m:
-            return frase(m)
-    return texto
+def rol_mas_en_riesgo(s: dict) -> str:
+    """El rol que nombra el modelo en su recomendación; si no nombra ninguno, el de mayor probabilidad."""
+    m = _ROL_EN_TEXTO.search(s.get("recomendacion") or "")
+    if m:
+        return m[1]
+    return max(CRITICOS, key=lambda r: s["prob_por_rol"][r])
+
+
+def margen(asignados: int, requeridos: int) -> str:
+    """Cuánta ausencia aguanta el servicio, en palabras."""
+    base = f"Hay {asignados} programados para {requeridos}"
+    if asignados > requeridos:
+        holgura = asignados - requeridos
+        return f"{base}: alcanza si no faltan más de {holgura}"
+    if asignados == requeridos:
+        return f"{base}: cualquier ausencia lo deja corto"
+    return f"{base}: faltan {requeridos - asignados} desde ya"
+
+
+def recomendacion(s: dict) -> str:
+    """Qué hacer con el servicio, explicado (AP-01 de Cata).
+
+    El riesgo del modelo es la probabilidad de que **los que lleguen** sean menos que los
+    requeridos (después de las ausencias). Por eso un servicio con más programados que
+    requeridos puede estar en riesgo alto: se dice el margen y el rol más ajustado.
+    """
+    rol = NOMBRE_ROL[rol_mas_en_riesgo(s)]
+    texto_margen = margen(s["asignados"], s["requeridos"])
+    nivel = nivel_riesgo(s["prob_deficit"])
+    if nivel == "alto":
+        return f"Riesgo alto de quedar corto, sobre todo en {rol}. {texto_margen}. Confirma quién viene y ten un reemplazo de {rol} listo."
+    if nivel == "alerta":
+        return f"Atento a {rol}. {texto_margen}. Si alguien avisa, confirma quién lo cubre."
+    if s["asignados"] < s["requeridos"]:
+        return f"{texto_margen}. Riesgo bajo según el modelo, pero revisa {rol}."
+    return f"Dotación suficiente: {texto_margen.lower()}. No hace falta hacer nada por ahora."
 
 
 def armar_servicio(s: dict) -> dict:
@@ -53,7 +73,7 @@ def armar_servicio(s: dict) -> dict:
         **s,
         "horario": HORARIOS[s["servicio"]],
         "nivel_riesgo": nivel_riesgo(s["prob_deficit"]),
-        "recomendacion": recomendacion_natural(s["recomendacion"]),
+        "recomendacion": recomendacion(s),
     }
 
 

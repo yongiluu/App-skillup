@@ -31,7 +31,7 @@ from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool, PoolTimeout
 
 from app.config import get_settings
-from app.repositorio import PENDIENTE_DUPLICADA, ReglaNegocio
+from app.repositorio import CONSENTIMIENTO_NO_VIGENTE, CONSENTIMIENTO_YA_VIGENTE, PENDIENTE_DUPLICADA, ReglaNegocio
 
 log = logging.getLogger("skillup")
 _pool: ConnectionPool | None = None
@@ -384,8 +384,11 @@ class RepositorioDB:
     # ---------- solicitudes de cambio (las reglas las hace cumplir la base: migración 0003) ----------
     _SQL_SOLICITUD = """
         select sc.id, sc.solicitante_id, sc.fecha, sc.franja as servicio, sc.reemplazo_id, sc.motivo,
-               sc.estado, sc.respuesta_reemplazo, sc.respondida_en, sc.comentario,
-               u.empleado_id as resuelta_por, sc.creada_en, sc.actualizada_en
+               sc.estado, sc.respuesta_reemplazo, sc.respondida_en, sc.propuesto_en, sc.comentario,
+               u.empleado_id as resuelta_por, sc.creada_en, sc.actualizada_en,
+               coalesce((select json_agg(json_build_object('empleado_id', r.empleado_id,
+                                                           'rechazado_en', r.rechazado_en) order by r.id)
+                         from public.solicitud_rechazo r where r.solicitud_id = sc.id), '[]') as rechazaron
         from public.solicitud_cambio sc
         left join public.usuario u on u.id = sc.resuelta_por
     """
@@ -486,6 +489,33 @@ class RepositorioDB:
             }
 
         return self._cacheado("consentimientos", cargar).get(empleado_id)
+
+    def cambiar_consentimiento(self, empleado_id: str, acepta: bool, version_texto: str) -> dict:
+        """Otorgar = nueva fila; retirar = llenar revocado_en (nunca se borra, regla de Maxi)."""
+        self._cache.pop("consentimientos", None)
+        if acepta:
+            vigente = self.consentimiento_de(empleado_id)
+            if vigente and vigente["otorgado"]:
+                raise ReglaNegocio(CONSENTIMIENTO_YA_VIGENTE)
+            try:
+                self._una(
+                    "insert into sensible.consentimiento (empleado_id, tipo, version_texto) "
+                    "values (%s, 'bienestar', %s) returning id",
+                    (empleado_id, version_texto),
+                )
+            except errors.UniqueViolation:
+                raise ReglaNegocio(CONSENTIMIENTO_YA_VIGENTE) from None
+        else:
+            f = self._una(
+                """update sensible.consentimiento set revocado_en = now()
+                   where empleado_id = %s and tipo = 'bienestar' and revocado_en is null
+                   returning id""",
+                (empleado_id,),
+            )
+            if f is None:
+                raise ReglaNegocio(CONSENTIMIENTO_NO_VIGENTE)
+        self._cache.pop("consentimientos", None)
+        return self.consentimiento_de(empleado_id)
 
     def bienestar_de_empleado(self, empleado_id: str, desde: date, hasta: date) -> list[dict]:
         def cargar():

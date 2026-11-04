@@ -122,3 +122,42 @@ def test_accesos_quedan_registrados(client, caplog):
     textos = [r.getMessage() for r in caplog.records if r.name == "skillup.auditoria"]
     assert any("fatiga_equipo" in t and "usuario=jefe" in t for t in textos)
     assert any("ficha_indicador" in t and "RST_005" in t for t in textos)
+
+
+# ---------- retirar o volver a dar la autorización (AP-04) ----------
+def revisar_retirar_y_volver_a_autorizar(jefe, empleado):
+    """La usan también las pruebas con la base (tests/test_bd.py)."""
+    yo = "RST_056"
+    assert empleado.get(f"/empleados/{yo}").json()["bienestar"]["estado"] == "ok"
+
+    r = empleado.post(f"/empleados/{yo}/consentimiento", json={"acepta": False})
+    assert r.status_code == 200, r.text
+    assert r.json()["otorgado"] is False and r.json()["fecha"] is None
+    # desde ya, nadie ve su indicador ni sus datos
+    fila = next(e for e in jefe.get("/bienestar/fatiga", params={"fecha": HOY}).json() if e["empleado_id"] == yo)
+    assert fila["estado"] == "sin_consentimiento" and fila["fatiga"] is None
+    assert jefe.get(f"/empleados/{yo}").json()["bienestar"]["estado"] == "sin_consentimiento"
+    propio = empleado.get(f"/empleados/{yo}/bienestar").json()
+    assert propio["estado"] == "sin_consentimiento" and propio["registros"] == []
+    # retirar dos veces → 409
+    r = empleado.post(f"/empleados/{yo}/consentimiento", json={"acepta": False})
+    assert r.status_code == 409 and r.json()["detail"] == "No tienes una autorización vigente que retirar"
+
+    # vuelve a autorizar: se ve de nuevo
+    r = empleado.post(f"/empleados/{yo}/consentimiento", json={"acepta": True})
+    assert r.status_code == 200 and r.json()["otorgado"] is True and r.json()["fecha"] == date.today().isoformat()
+    assert r.json()["version_texto"] == "borrador-v0"
+    assert jefe.get(f"/empleados/{yo}").json()["bienestar"]["estado"] == "ok"
+    r = empleado.post(f"/empleados/{yo}/consentimiento", json={"acepta": True})
+    assert r.status_code == 409 and r.json()["detail"] == "Ya tienes una autorización vigente"
+
+
+def test_retirar_y_volver_a_autorizar(client, empleado):
+    revisar_retirar_y_volver_a_autorizar(client, empleado)
+
+
+def test_solo_la_propia_persona_cambia_su_autorizacion(client, empleado):
+    assert client.post("/empleados/RST_056/consentimiento", json={"acepta": False}).status_code == 403  # ni el jefe
+    assert empleado.post("/empleados/RST_005/consentimiento", json={"acepta": False}).status_code == 403
+    assert empleado.post("/empleados/RST_056/consentimiento", json={"acepta": "talvez"}).status_code == 422
+    assert empleado.post("/empleados/RST_056/consentimiento", json={"acepta": False, "x": 1}).status_code == 422

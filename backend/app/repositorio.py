@@ -22,6 +22,8 @@ MOCKS = Path(__file__).resolve().parent / "mocks"
 Repositorio = Any
 
 PENDIENTE_DUPLICADA = "Ya hay una solicitud pendiente para ese turno"
+CONSENTIMIENTO_YA_VIGENTE = "Ya tienes una autorización vigente"
+CONSENTIMIENTO_NO_VIGENTE = "No tienes una autorización vigente que retirar"
 
 
 class ReglaNegocio(Exception):
@@ -132,6 +134,22 @@ class RepositorioMock:
         c = self.consentimientos.get(empleado_id)
         return c if c and c["otorgado"] else None
 
+    def cambiar_consentimiento(self, empleado_id: str, acepta: bool, version_texto: str) -> dict:
+        """Otorga o retira la autorización de bienestar (como la base: retirar no borra el registro)."""
+        with self._lock:
+            vigente = self.consentimiento_de(empleado_id)
+            if acepta:
+                if vigente:
+                    raise ReglaNegocio(CONSENTIMIENTO_YA_VIGENTE)
+                nuevo = {"empleado_id": empleado_id, "otorgado": True,
+                         "fecha": date.today().isoformat(), "version_texto": version_texto}
+            else:
+                if not vigente:
+                    raise ReglaNegocio(CONSENTIMIENTO_NO_VIGENTE)
+                nuevo = {**vigente, "otorgado": False, "fecha": None}
+            self.consentimientos[empleado_id] = nuevo
+            return nuevo
+
     def ausencias_del_dia(self, fecha: date) -> list[dict]:
         """Ausencias del día con nombre, rol y las franjas en que la persona tenía turno."""
         f = fecha.isoformat()
@@ -210,6 +228,8 @@ class RepositorioMock:
                 "estado": "pendiente",
                 "respuesta_reemplazo": "pendiente" if datos.get("reemplazo_id") else None,
                 "respondida_en": None,
+                "propuesto_en": ahora if datos.get("reemplazo_id") else None,
+                "rechazaron": [],
                 "comentario": None,
                 "resuelta_por": None,
                 "creada_en": ahora,
@@ -223,7 +243,7 @@ class RepositorioMock:
             s = self._pendiente(solicitud_id)
             if reemplazo_id != s["reemplazo_id"]:
                 s.update(reemplazo_id=reemplazo_id, respuesta_reemplazo="pendiente" if reemplazo_id else None,
-                         respondida_en=None)
+                         respondida_en=None, propuesto_en=datetime.now(timezone.utc) if reemplazo_id else None)
             s["actualizada_en"] = datetime.now(timezone.utc)
             return s
 
@@ -238,6 +258,8 @@ class RepositorioMock:
                 if motivo:
                     raise ReglaNegocio(f"No puede aceptar: {motivo}")
             ahora = datetime.now(timezone.utc)
+            if not acepta and s["respuesta_reemplazo"] != "rechazada":  # como el trigger de la 0004
+                s["rechazaron"].append({"empleado_id": s["reemplazo_id"], "rechazado_en": ahora})
             s.update(respuesta_reemplazo="aceptada" if acepta else "rechazada", respondida_en=ahora, actualizada_en=ahora)
             return s
 

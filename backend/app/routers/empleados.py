@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app import bienestar, logica
 from app.config import get_settings
 from app.repositorio import Repositorio, get_repo
-from app.schemas import BienestarPropio, Empleado, EmpleadoFicha, Error, Rol, Turno
+from app.schemas import BienestarPropio, Consentimiento, ConsentimientoIn, Empleado, EmpleadoFicha, Error, Rol, Turno
 from app.seguridad import Usuario, exigir_propio_o_jefe, usuario_actual
 
 router = APIRouter(prefix="/empleados", tags=["empleados"], dependencies=[Depends(usuario_actual)])
@@ -54,6 +54,31 @@ def bienestar_propio(
         raise HTTPException(422, "'desde' no puede ser posterior a 'hasta'")
     bienestar.registrar_acceso(repo, u.usuario, "datos_propios", empleado_id)
     return bienestar.datos_propios(repo, empleado_id, desde, hasta)
+
+
+@router.post("/{empleado_id}/consentimiento", response_model=Consentimiento, responses={**PERMISOS, 409: {"model": Error}})
+def cambiar_consentimiento(
+    empleado_id: str,
+    datos: ConsentimientoIn,
+    u: Usuario = Depends(usuario_actual),
+    repo: Repositorio = Depends(get_repo),
+):
+    """**Solo la propia persona** (ni siquiera el jefe): autoriza o retira la autorización de bienestar (AP-04).
+
+    - Al **retirarla**, desde ese momento nadie ve su indicador (el jefe ve "sin indicador") y la app
+      deja de usar sus datos. El registro de la autorización no se borra (queda `revocado_en`).
+    - Qué pasa con los datos ya guardados (borrarlos o conservarlos un tiempo) está
+      [PENDIENTE CERVECERÍA / revisión legal]: hoy quedan guardados pero nadie los puede leer.
+    - 409 si ya estaba en ese estado."""
+    if u.empleado_id != empleado_id:
+        raise HTTPException(403, "Solo la propia persona puede dar o retirar su autorización")
+    if empleado_id not in repo.empleados:
+        raise HTTPException(404, f"No existe el empleado {empleado_id}")
+    c = repo.cambiar_consentimiento(empleado_id, datos.acepta, bienestar.VERSION_TEXTO_CONSENTIMIENTO)
+    bienestar.registrar_acceso(
+        repo, u.usuario, "consentimiento_otorgado" if datos.acepta else "consentimiento_retirado", empleado_id
+    )
+    return c
 
 
 @router.get("/{empleado_id}/turnos", response_model=list[Turno], responses=PERMISOS)
