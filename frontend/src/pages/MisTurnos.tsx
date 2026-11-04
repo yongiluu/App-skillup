@@ -1,17 +1,21 @@
 import { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useSesion } from '../auth/sesion'
-import { getSolicitudes, getTurnos } from '../api'
+import { getBienestarPropio, getSolicitudes, getTurnos } from '../api'
 import type { SolicitudCambio, Turno } from '../api/tipos'
 import { useDatos } from '../lib/useDatos'
 import { useEquipo } from '../lib/useNombres'
-import { HORARIO_FRANJA, NOMBRE_ROL } from '../lib/formato'
+import { HORARIO_FRANJA, NOMBRE_ROL, fechaBreve } from '../lib/formato'
 import { encabezadoDia } from '../lib/fechas'
 import EncabezadoPagina from '../components/ui/EncabezadoPagina'
 import Boton from '../components/ui/Boton'
+import Icono from '../components/ui/Icono'
 import Aviso from '../components/ui/Aviso'
 import EstadoSolicitud from '../components/solicitudes/EstadoSolicitud'
 import FormularioCambio from '../components/solicitudes/FormularioCambio'
+import AnilloFatiga from '../components/inicio/AnilloFatiga'
+import { TuSemana, TuTurnoHoy } from '../components/inicio/TuDia'
+import inicio from '../components/inicio/Inicio.module.css'
 import estilos from '../components/solicitudes/Solicitudes.module.css'
 
 const cargarSolicitudes = () => getSolicitudes()
@@ -27,7 +31,9 @@ function porDia(turnos: Turno[]) {
 }
 
 /**
- * Inicio del empleado (celular): sus próximos turnos y "Pedir cambio" en cada uno.
+ * Inicio del empleado (celular), con el diseño del kit Luthier:
+ * saludo, su fatiga (anillo, solo la ve la persona), su turno de hoy, su semana
+ * y la lista de próximos turnos con "Pedir cambio" en cada uno.
  * Un turno con una solicitud pendiente o aprobada muestra el estado en vez del botón.
  */
 export default function MisTurnos() {
@@ -37,6 +43,8 @@ export default function MisTurnos() {
 
   const cargarTurnos = useCallback(() => getTurnos(id, hoy), [id, hoy])
   const turnos = useDatos(cargarTurnos)
+  const cargarBienestar = useCallback(() => getBienestarPropio(id), [id])
+  const bienestar = useDatos(cargarBienestar)
   const solicitudes = useDatos(cargarSolicitudes)
   const { empleados } = useEquipo()
 
@@ -51,7 +59,11 @@ export default function MisTurnos() {
 
   return (
     <>
-      <EncabezadoPagina titulo={`Hola, ${sesion?.nombre.split(' ')[0] ?? ''}`} bajada="Tus próximos turnos" />
+      <EncabezadoPagina
+        saludo
+        titulo={`Hola, ${sesion?.nombre.split(' ')[0] ?? ''}`}
+        bajada={hoy ? `${fechaBreve(hoy)} · hoy` : 'Tus próximos turnos'}
+      />
 
       {enviada && (
         <div className={estilos.confirmacion}>
@@ -60,6 +72,22 @@ export default function MisTurnos() {
             de turno la va a revisar. Puedes seguirla en <Link to="/mis-solicitudes">Solicitudes</Link>.
           </Aviso>
         </div>
+      )}
+
+      <div className={inicio.resumen}>
+        {bienestar.estado === 'listo' && <AnilloFatiga bienestar={bienestar.datos} />}
+        {turnos.estado === 'listo' && hoy && <TuTurnoHoy turnos={turnos.datos} hoy={hoy} />}
+      </div>
+
+      {turnos.estado === 'listo' && hoy && <TuSemana turnos={turnos.datos} hoy={hoy} />}
+
+      {turnos.estado === 'listo' && turnos.datos.length > 0 && (
+        <h2 className={inicio.tituloSeccion}>
+          <span className={inicio.iconoTitulo}>
+            <Icono nombre="cambio" tamano={18} />
+          </span>
+          Próximos turnos
+        </h2>
       )}
 
       {turnos.estado === 'cargando' && <p role="status">Cargando turnos…</p>}

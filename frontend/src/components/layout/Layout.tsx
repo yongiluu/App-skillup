@@ -3,6 +3,8 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { useSesion } from '../../auth/sesion'
 import { USAR_MOCKS } from '../../api'
 import Icono from '../ui/Icono'
+import { useTema } from '../../lib/tema'
+import logoLuthier from '../../assets/luthier-logo.png'
 import { SECCIONES } from './secciones'
 import estilos from './Layout.module.css'
 
@@ -17,6 +19,7 @@ const claseEnlace = ({ isActive }: { isActive: boolean }) =>
  */
 export default function Layout() {
   const { sesion, cerrarSesion } = useSesion()
+  const { tema, alternar } = useTema()
 
   return (
     <div className={estilos.marco}>
@@ -28,7 +31,7 @@ export default function Layout() {
         <div className={estilos.envoltorio}>
           <div className={estilos.marca}>
             <span className={estilos.logo}>
-              <Icono nombre="lupulo" tamano={22} />
+              <img src={logoLuthier} alt="" width={40} height={40} />
             </span>
             <span className={estilos.textoMarca}>
               <b>SkillUp</b>
@@ -56,6 +59,15 @@ export default function Layout() {
               <b>{sesion?.nombre}</b>
               <span>{sesion?.perfil === 'jefe_turno' ? 'Jefe de turno' : 'Empleado'}</span>
             </span>
+            <button
+              type="button"
+              className={estilos.salir}
+              onClick={alternar}
+              aria-label={tema === 'oscuro' ? 'Usar modo claro' : 'Usar modo oscuro'}
+              title={tema === 'oscuro' ? 'Modo claro' : 'Modo oscuro'}
+            >
+              <Icono nombre={tema === 'oscuro' ? 'sol' : 'luna'} />
+            </button>
             <button type="button" className={estilos.salir} onClick={() => cerrarSesion()}>
               <Icono nombre="salir" />
               <span>Salir</span>

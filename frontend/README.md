@@ -44,12 +44,18 @@ src/
 
 ## Sistema visual
 
-- Base: demo **SkillUp Luthier** (paleta cervecera: oliva `#55652A`, ámbar y crema; cabecera con degradado
-  y patrón de lúpulo; Inter). Modo oscuro automático según el sistema.
+- Base: demo **SkillUp Luthier** y su **kit de diseño v14** (paleta cervecera: oliva `#55652A`, ámbar y crema;
+  cabecera con degradado y patrón de lúpulo; Inter; tarjetas de 18–20 px; íconos de trazo 1,75).
+- **Modo oscuro:** automático según el sistema, o con el botón luna/sol de la cabecera (se recuerda en el
+  navegador, `lib/tema.ts`).
+- Piezas del kit: tarjeta de saludo, avatares con iniciales, cifras del día, riesgo por rol, demanda prevista,
+  anillo de fatiga, "Tu turno de hoy" y "Tu semana". **Solo muestran datos que ya entrega la API**: el frontend
+  no agrega variables ni cálculos nuevos (el anillo muestra el nivel del backend, no la fórmula ilustrativa del kit).
 - Los componentes usan **solo** variables de `styles/tokens.css`; nada de colores sueltos.
 - Patrón de lúpulo reutilizable: clase global `con-lupulo` (en `styles/global.css`).
 - Los textos de riesgo son un tono más oscuro que los de la demo para cumplir contraste AA (todos ≥ 4,8:1).
-- Logos (Luthier y UdeC): **no** están en el repo hasta confirmar permiso de uso; se usa un ícono de lúpulo.
+- Logo de Luthier en la cabecera y el login (`src/assets/luthier-logo.png`, del kit). El de la Facultad de
+  Ingeniería **no** se usa.
 - Estilos con **CSS Modules** (`Componente.module.css`): las clases no chocan entre componentes.
 - Riesgo: bajo < 0,55 · alerta ≥ 0,55 · alto ≥ 0,75 (`lib/riesgo.ts`). Siempre color + ícono + palabra.
 - Accesibilidad: botones reales, objetivos táctiles ≥ 44 px, foco visible, enlace "Saltar al contenido",
@@ -78,7 +84,7 @@ Sigue las reglas de `backend/biometria-simulada` (ver `backend/README.md` → Bi
 | Dónde | Quién | Qué se muestra |
 |---|---|---|
 | `/equipo` y `/equipo/:id` (ficha) | Jefe de turno | Solo el **indicador**: nivel (bajo / medio / alto) y hasta 2 motivos generales. Nunca datos crudos |
-| `/mi-turno` | La propia persona | Su indicador **y** sus registros: sueño, pasos, pulso y encuesta de cansancio |
+| `/mi-turno` (anillo) y `/mi-bienestar` | La propia persona | Su indicador **y**, en Mi bienestar, sus registros: sueño, pasos, pulso y encuesta de cansancio |
 
 La ficha siempre muestra uno de los **3 casos**: con datos, sin consentimiento (no se muestra ni se calcula
 nada) y sin datos recientes. Cuando hay consentimiento, se muestra un aviso con la fecha, la versión del texto

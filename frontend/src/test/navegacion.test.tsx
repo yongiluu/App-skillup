@@ -73,7 +73,7 @@ describe('navegación', () => {
     await u.click(screen.getByRole('link', { name: 'Equipo' }))
     await u.click(await screen.findByRole('link', { name: /Francisca Silva/ }))
     expect(await screen.findByRole('heading', { level: 1, name: 'Francisca Silva' })).toBeInTheDocument()
-    expect(screen.getByText('Sin consentimiento')).toBeInTheDocument()
+    expect(screen.getByText('Sin indicador')).toBeInTheDocument()
   })
 
   it('si el empleado venía de una vista del jefe, al entrar va a su propio inicio', async () => {
@@ -97,5 +97,24 @@ describe('navegación', () => {
     await screen.findByRole('heading', { level: 1, name: 'Hoy' })
     await u.click(screen.getByRole('button', { name: 'Salir' }))
     expect(screen.getByRole('button', { name: 'Ingresar' })).toBeInTheDocument()
+  })
+
+  it('Equipo: buscar por nombre (sin tildes), filtrar por rol y ordenar (AP-06)', async () => {
+    montar('/')
+    const u = await ingresar('jefe')
+    await screen.findByRole('heading', { level: 1, name: 'Hoy' })
+    await u.click(screen.getByRole('link', { name: 'Equipo' }))
+    await screen.findByRole('link', { name: /Cristóbal Silva/ })
+    await u.type(screen.getByLabelText('Buscar por nombre'), 'cristobal silva')
+    expect(screen.getAllByRole('link', { name: /Cristóbal/ })).toHaveLength(1)
+    expect(screen.getByText('1 de 80 personas')).toBeInTheDocument()
+    await u.clear(screen.getByLabelText('Buscar por nombre'))
+    await u.selectOptions(screen.getByLabelText('Rol'), 'jefe_turno')
+    const jefes = screen.getAllByRole('link', { name: /Jefe de turno/ })
+    expect(jefes.length).toBeGreaterThan(0)
+    const nombres = jefes.map((a) => a.querySelector('b')!.textContent!)
+    expect(nombres).toEqual([...nombres].sort((a, b) => a.localeCompare(b, 'es')))
+    // Nunca dice "Sin consentimiento" en la lista del jefe (AP-05)
+    expect(screen.queryByText('Sin consentimiento')).not.toBeInTheDocument()
   })
 })

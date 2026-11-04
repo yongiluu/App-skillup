@@ -2,7 +2,8 @@
  * Sistema visual de SkillUp: todos los colores, espacios y tamaños salen de aquí.
  * Base: demo "SkillUp Luthier" (paleta cervecera: oliva, ámbar y crema, con lúpulo de fondo).
  * Regla del equipo: los componentes NO usan colores sueltos, solo estas variables.
- * Modo oscuro automático según el sistema (prefers-color-scheme).
+ * Modo oscuro: automático según el sistema (prefers-color-scheme), o forzado con el botón de la
+ * cabecera (<html data-tema="oscuro"> o "claro"; ver src/lib/tema.ts).
  */
 :root {
   color-scheme: light;
@@ -50,6 +51,19 @@
   --info-fondo: #eee7da;
   --info-texto: #5a5042;
 
+  /* Marcas del calendario: color y forma distintos (círculo, cuadrado, triángulo) */
+  --marca-pago: #c98a00;
+  --marca-feriado: #c04a31;
+  --marca-evento: #3a6ea5;
+
+  /* Tarjeta de saludo (degradado suave) y avatares */
+  --saludo-fondo: linear-gradient(135deg, #f8e2b4 0%, #eee3c2 45%, #dce5bf 100%);
+  --saludo-lupulo: rgba(128, 96, 26, 0.16);
+  --avatar-1: #55652a;
+  --avatar-2: #b4621b;
+  --avatar-3: #8a5a3b;
+  --avatar-texto: #fffcf5;
+
   /* Tipografía */
   --fuente: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --texto-xs: 0.8125rem;
@@ -91,7 +105,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-tema='claro']) {
     color-scheme: dark;
 
     --color-primario: #b7c67b;
@@ -126,5 +140,63 @@
 
     --info-fondo: #2c2820;
     --info-texto: #c9bfab;
+
+    --marca-pago: #e8b055;
+    --marca-feriado: #f2896f;
+    --marca-evento: #8fb6e3;
+    --saludo-fondo: linear-gradient(135deg, #3b2e17 0%, #2c2a1c 50%, #28311d 100%);
+    --saludo-lupulo: rgba(232, 176, 85, 0.16);
+    --avatar-1: #b7c67b;
+    --avatar-2: #e3a266;
+    --avatar-3: #d3a47f;
+    --avatar-texto: #1a1610;
   }
+}
+
+/* Mismo modo oscuro, elegido a mano */
+:root[data-tema='oscuro'] {
+  color-scheme: dark;
+
+  --color-primario: #b7c67b;
+  --color-primario-claro: #c8d58f;
+  --color-primario-suave: #2d3420;
+  --color-sobre-primario: #1a1a10;
+  --color-ambar: #e8b055;
+
+  --color-fondo: #16130e;
+  --color-superficie: #201c15;
+  --color-hundido: #29241b;
+  --color-borde: #3a3326;
+  --color-borde-campo: #8e8574;
+  --color-texto: #f2ebdd;
+  --color-texto-suave: #b4a994;
+  --color-foco: #b7c67b;
+  --sombra-color: rgba(0, 0, 0, 0.5);
+
+  --cabecera-fondo: linear-gradient(115deg, #1c2210 0%, #29321a 55%, #4a3913 100%);
+  --cabecera-texto: #f2ebdd;
+  --cabecera-texto-suave: rgba(242, 235, 221, 0.75);
+
+  --riesgo-bajo-fondo: #24331f;
+  --riesgo-bajo-texto: #95cb7e;
+  --riesgo-bajo-borde: #95cb7e;
+  --riesgo-alerta-fondo: #3d2f17;
+  --riesgo-alerta-texto: #e8b055;
+  --riesgo-alerta-borde: #e8b055;
+  --riesgo-alto-fondo: #43251d;
+  --riesgo-alto-texto: #f2896f;
+  --riesgo-alto-borde: #f2896f;
+
+  --info-fondo: #2c2820;
+  --info-texto: #c9bfab;
+
+  --marca-pago: #e8b055;
+  --marca-feriado: #f2896f;
+  --marca-evento: #8fb6e3;
+  --saludo-fondo: linear-gradient(135deg, #3b2e17 0%, #2c2a1c 50%, #28311d 100%);
+  --saludo-lupulo: rgba(232, 176, 85, 0.16);
+  --avatar-1: #b7c67b;
+  --avatar-2: #e3a266;
+  --avatar-3: #d3a47f;
+  --avatar-texto: #1a1610;
 }

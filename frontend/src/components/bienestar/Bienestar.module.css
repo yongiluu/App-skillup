@@ -88,3 +88,17 @@
     font-size: var(--texto-xs);
   }
 }
+
+/* Escala del cansancio antes de la tabla (evaluación heurística AP-12) */
+.escala {
+  margin-bottom: var(--esp-2);
+  padding: var(--esp-2) var(--esp-3);
+  border-left: 3px solid var(--color-primario);
+  border-radius: 0 var(--radio-sm) var(--radio-sm) 0;
+  background: var(--color-primario-suave);
+  font-size: var(--texto-sm);
+}
+
+.escala b {
+  font-weight: var(--peso-fuerte);
+}

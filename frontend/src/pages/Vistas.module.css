@@ -125,3 +125,13 @@
   font-size: var(--texto-xs);
   color: var(--color-texto-suave);
 }
+
+/* Rol crítico con más probabilidad de faltar (prob_por_rol) */
+.rolRiesgo {
+  margin-top: var(--esp-2);
+  font-size: var(--texto-sm);
+}
+
+.rolRiesgo b {
+  font-weight: var(--peso-fuerte);
+}

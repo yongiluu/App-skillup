@@ -1,0 +1,300 @@
+/* Piezas de inicio con el estilo del kit Luthier v14: tarjetas de 18–20 px, fichas y anillo. */
+
+.resumen {
+  display: grid;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-5);
+}
+
+@media (min-width: 900px) {
+  .resumen {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--esp-4);
+  }
+
+  .tarjeta {
+    padding: var(--esp-4) var(--esp-5);
+  }
+}
+
+.tarjeta {
+  display: grid;
+  align-content: start;
+  gap: var(--esp-3);
+  padding: var(--esp-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-sm);
+}
+
+.tituloTarjeta,
+.tituloSeccion {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: var(--texto-md);
+  font-weight: var(--peso-fuerte);
+}
+
+.tituloSeccion {
+  margin-bottom: var(--esp-3);
+  font-size: var(--texto-lg);
+}
+
+.iconoTitulo {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--radio-sm);
+  background: var(--color-primario-suave);
+  color: var(--color-primario);
+}
+
+/* ---------- Anillo de fatiga ---------- */
+.fondo_bajo {
+  background: var(--riesgo-bajo-fondo);
+  border-color: transparent;
+}
+
+.fondo_alerta {
+  background: var(--riesgo-alerta-fondo);
+  border-color: transparent;
+}
+
+.fondo_alto {
+  background: var(--riesgo-alto-fondo);
+  border-color: transparent;
+}
+
+.fondo_gris {
+  background: var(--color-hundido);
+  border-color: transparent;
+}
+
+.anilloFila {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-4);
+}
+
+.anillo {
+  width: 120px;
+  height: 120px;
+  flex: none;
+}
+
+@media (min-width: 900px) {
+  .anillo {
+    width: 132px;
+    height: 132px;
+  }
+}
+
+.pista,
+.arco {
+  fill: none;
+  stroke-width: 10;
+}
+
+.arco {
+  stroke-linecap: round;
+}
+
+.trazo_bajo {
+  color: var(--riesgo-bajo-borde);
+}
+
+.trazo_alerta {
+  color: var(--riesgo-alerta-borde);
+}
+
+.trazo_alto {
+  color: var(--riesgo-alto-borde);
+}
+
+.trazo_gris {
+  color: var(--color-borde-campo);
+}
+
+.pista {
+  stroke: currentColor;
+  opacity: 0.18;
+}
+
+.arco {
+  stroke: currentColor;
+}
+
+.centro {
+  fill: var(--color-texto);
+  font-size: 20px;
+  font-weight: var(--peso-fuerte);
+  font-family: var(--fuente);
+}
+
+.nivel {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: var(--texto-lg);
+  font-weight: var(--peso-fuerte);
+}
+
+.punto {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.punto_bajo {
+  background: var(--riesgo-bajo-borde);
+}
+
+.punto_alerta {
+  background: var(--riesgo-alerta-borde);
+}
+
+.punto_alto {
+  background: var(--riesgo-alto-borde);
+}
+
+.punto_gris {
+  background: var(--color-borde-campo);
+}
+
+.detalleAnillo {
+  margin-top: var(--esp-1);
+  color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.detalleAnillo::first-letter {
+  text-transform: uppercase;
+}
+
+.pieTarjeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--esp-3);
+  padding-top: var(--esp-3);
+  border-top: 1px solid var(--color-borde);
+  color: var(--color-texto-suave);
+  font-size: var(--texto-xs);
+}
+
+.pieTarjeta a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--toque-min);
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+  font-weight: var(--peso-fuerte);
+}
+
+/* ---------- Tu turno de hoy ---------- */
+.fichas {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.fichas li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--esp-2) var(--esp-3);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-fondo);
+  font-size: 1.0625rem;
+  font-weight: var(--peso-fuerte);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 900px) {
+  .fichas li {
+    font-size: var(--texto-lg);
+  }
+}
+
+.fichas li svg {
+  color: var(--color-primario);
+}
+
+.rol {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-weight: var(--peso-medio);
+}
+
+.libre {
+  color: var(--color-texto-suave);
+}
+
+/* ---------- Tu semana ---------- */
+.semana {
+  margin-bottom: var(--esp-6);
+}
+
+.dias7 {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.dias7 li {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 2px;
+  padding: var(--esp-2) 2px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-md);
+  background: var(--color-superficie);
+  font-size: 0.75rem;
+  font-weight: var(--peso-fuerte);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.nombreDia {
+  display: grid;
+  margin-bottom: 2px;
+  color: var(--color-texto-suave);
+  font-weight: var(--peso-medio);
+  text-transform: capitalize;
+}
+
+.nombreDia b {
+  color: var(--color-texto);
+  font-size: var(--texto-sm);
+}
+
+.diaHoy {
+  border-color: var(--color-primario) !important;
+  box-shadow: inset 0 0 0 1px var(--color-primario);
+}
+
+.diaLibre {
+  background: var(--color-hundido) !important;
+  color: var(--color-texto-suave);
+  font-weight: var(--peso-normal) !important;
+}
+
+@media (min-width: 900px) {
+  .dias7 {
+    gap: var(--esp-2);
+  }
+
+  .dias7 li {
+    padding: var(--esp-3) var(--esp-2);
+    font-size: var(--texto-sm);
+  }
+}

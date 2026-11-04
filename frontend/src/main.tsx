@@ -5,6 +5,9 @@ import '@fontsource-variable/inter'
 import './styles/global.css'
 import { SesionProvider } from './auth/SesionContext'
 import App from './App'
+import { aplicarTemaGuardado } from './lib/tema'
+
+aplicarTemaGuardado()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

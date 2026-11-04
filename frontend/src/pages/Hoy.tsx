@@ -1,6 +1,9 @@
-import { getAusencias, getServicios, getSugerencias } from '../api'
+import { getAusencias, getServicios, getSolicitudes, getSugerencias } from '../api'
+import { useSesion } from '../auth/sesion'
 import { marcasDelDia } from '../lib/calendario'
 import { useDatos } from '../lib/useDatos'
+import { cobertura, rolMasEnRiesgo } from '../lib/cobertura'
+import { NOMBRE_ROL, porcentaje } from '../lib/formato'
 import { fechaLarga } from '../lib/formato'
 import EncabezadoPagina from '../components/ui/EncabezadoPagina'
 import InsigniaRiesgo from '../components/ui/InsigniaRiesgo'
@@ -8,6 +11,8 @@ import Tarjeta from '../components/ui/Tarjeta'
 import Aviso from '../components/ui/Aviso'
 import AccionesSugeridas from '../components/hoy/AccionesSugeridas'
 import AusenciasDia from '../components/hoy/AusenciasDia'
+import { Kpis, RiesgoPorRol } from '../components/hoy/PanelJefe'
+import panel from '../components/hoy/Panel.module.css'
 import SinPermiso from './SinPermiso'
 import estilos from './Vistas.module.css'
 
@@ -16,12 +21,18 @@ import estilos from './Vistas.module.css'
 const cargarServicios = () => getServicios()
 const cargarSugerencias = () => getSugerencias()
 const cargarAusencias = () => getAusencias()
+const cargarSolicitudes = () => getSolicitudes()
 
-/** Vista Hoy (jefe de turno): cobertura de los 4 servicios, acciones sugeridas y ausencias. */
+/**
+ * Vista Hoy (jefe de turno), con el diseño del kit Luthier: saludo, cifras del día, cobertura de
+ * los 4 servicios, riesgo por rol, acciones sugeridas y ausencias.
+ */
 export default function Hoy() {
   const servicios = useDatos(cargarServicios)
   const sugerencias = useDatos(cargarSugerencias)
   const ausencias = useDatos(cargarAusencias)
+  const solicitudes = useDatos(cargarSolicitudes)
+  const { sesion } = useSesion()
 
   if (servicios.estado === 'error' && servicios.sinPermiso) return <SinPermiso />
 
@@ -29,7 +40,19 @@ export default function Hoy() {
 
   return (
     <>
-      <EncabezadoPagina titulo="Hoy" bajada={dia ? fechaLarga(dia.fecha) : 'Cobertura del día'} />
+      <EncabezadoPagina
+        saludo
+        titulo="Hoy"
+        bajada={`Hola, ${sesion?.nombre.split(' ')[0] ?? ''} · ${dia ? fechaLarga(dia.fecha) : 'cobertura del día'}`}
+      />
+
+      {dia && (
+        <Kpis
+          servicios={dia.servicios}
+          ausencias={ausencias.estado === 'listo' ? ausencias.datos : null}
+          solicitudes={solicitudes.estado === 'listo' ? solicitudes.datos : null}
+        />
+      )}
 
       {dia && marcasDelDia(dia.calendario).length > 0 && (
         <ul className={estilos.marcas} aria-label="Lo especial de este día">
@@ -48,35 +71,60 @@ export default function Hoy() {
             Servicios del día
           </h2>
           <div className={estilos.grilla}>
-            {dia.servicios.map((s) => (
-              <Tarjeta
-                key={s.servicio}
-                titulo={s.horario}
-                acento={s.nivel_riesgo}
-                extra={<InsigniaRiesgo nivel={s.nivel_riesgo} prob={s.prob_deficit} />}
-              >
-                <p className={`${estilos.cifra} ${estilos[s.nivel_riesgo]}`}>
-                  {s.asignados}
-                  <span> de {s.requeridos} programados</span>
-                </p>
-                <div
-                  className={estilos.barra}
-                  role="img"
-                  aria-label={`${s.asignados} de ${s.requeridos} programados`}
+            {dia.servicios.map((s) => {
+              const c = cobertura(s, ausencias.estado === 'listo' ? ausencias.datos : null)
+              const r = rolMasEnRiesgo(s)
+              return (
+                <Tarjeta
+                  key={s.servicio}
+                  titulo={s.horario}
+                  acento={s.nivel_riesgo}
+                  extra={<InsigniaRiesgo nivel={s.nivel_riesgo} prob={s.prob_deficit} />}
                 >
-                  <i
-                    className={estilos[s.nivel_riesgo]}
-                    style={{ width: `${Math.min(100, (s.asignados / s.requeridos) * 100)}%` }}
-                  />
-                </div>
-                <p className={estilos.texto}>{s.recomendacion}</p>
-                <p className={estilos.nota}>
-                  {s.cubiertos_previstos} cubiertos previstos · {s.reservas} reservas
-                </p>
-              </Tarjeta>
-            ))}
+                  <p className={`${estilos.cifra} ${estilos[s.nivel_riesgo]}`}>
+                    {c.presentes}
+                    <span>
+                      {' '}
+                      de {s.requeridos} {c.ausentes === null ? 'programados' : 'vienen'}
+                    </span>
+                  </p>
+                  <div
+                    className={estilos.barra}
+                    role="img"
+                    aria-label={`${c.presentes} de ${s.requeridos} requeridos`}
+                  >
+                    <i
+                      className={estilos[s.nivel_riesgo]}
+                      style={{ width: `${Math.min(100, (c.presentes / s.requeridos) * 100)}%` }}
+                    />
+                  </div>
+                  {c.ausentes !== null && (
+                    <p className={estilos.nota}>
+                      {s.asignados} programados
+                      {c.ausentes > 0 && ` · ${c.ausentes} ${c.ausentes > 1 ? 'ausentes' : 'ausente'}`}
+                      {c.faltan > 0 && ` · falta${c.faltan > 1 ? 'n' : ''}\u00a0${c.faltan}`}
+                    </p>
+                  )}
+                  {s.nivel_riesgo !== 'bajo' && (
+                    <p className={estilos.rolRiesgo}>
+                      Más en riesgo: <b>{NOMBRE_ROL[r.rol]}</b> · {porcentaje(r.prob)}
+                    </p>
+                  )}
+                  <p className={estilos.texto}>{s.recomendacion}</p>
+                  <p className={estilos.nota}>
+                    {s.cubiertos_previstos} cubiertos previstos · {s.reservas} reservas
+                  </p>
+                </Tarjeta>
+              )
+            })}
           </div>
         </section>
+      )}
+
+      {dia && (
+        <div className={panel.par}>
+          <RiesgoPorRol servicios={dia.servicios} />
+        </div>
       )}
 
       <div className={estilos.dosColumnas}>

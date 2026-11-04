@@ -206,6 +206,7 @@
 /* ---------- Lista por día (celular) ---------- */
 .listaDias {
   display: grid;
+  grid-template-columns: minmax(0, 1fr); /* que ningún día empuje el ancho de la página en celulares de 360 px */
   gap: var(--esp-3);
 }
 
@@ -360,16 +361,25 @@
   border-radius: 50%;
 }
 
-.pago {
-  background: var(--riesgo-alerta-borde);
+.puntos i.pago,
+.leyendaMes i.pago {
+  background: var(--marca-pago);
 }
 
-.feriado {
-  background: var(--riesgo-alto-borde);
+/* Feriado: cuadrado */
+.puntos i.feriado,
+.leyendaMes i.feriado {
+  background: var(--marca-feriado);
+  border-radius: 1px;
 }
 
-.evento {
-  background: var(--color-primario);
+/* Evento: triángulo */
+.puntos i.evento,
+.leyendaMes i.evento {
+  width: 8px;
+  background: var(--marca-evento);
+  border-radius: 0;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
 
 .leyendaMes {

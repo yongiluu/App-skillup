@@ -18,9 +18,9 @@ export const NOMBRE_ROL: Record<Rol, string> = {
   copero: 'Copero',
 }
 
-/** 0.968 → "97 %" (formato chileno, con espacio antes del %). */
+/** 0.968 → "97 %" (formato chileno, con espacio antes del %; espacio duro para que no se corte la línea). */
 export function porcentaje(prob: number): string {
-  return `${Math.round(prob * 100)} %`
+  return `${Math.round(prob * 100)}\u00a0%`
 }
 
 /** "2025-10-17" → "viernes 17 de octubre de 2025". Se arma a mediodía para no correr el día por zona horaria. */
@@ -42,4 +42,10 @@ export function fechaCorta(iso: string): string {
 /** "2025-10-17" → "vie 17 oct" */
 export function fechaBreve(iso: string): string {
   return new Date(`${iso}T12:00:00`).toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' })
+}
+
+/** Iniciales de un nombre: "Cristóbal Silva" → "CS". */
+export function iniciales(nombre: string): string {
+  const partes = nombre.trim().split(/\s+/)
+  return ((partes[0]?.[0] ?? '') + (partes.length > 1 ? partes[partes.length - 1][0] : '')).toUpperCase()
 }

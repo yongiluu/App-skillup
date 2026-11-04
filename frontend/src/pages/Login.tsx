@@ -5,7 +5,7 @@ import { useSesion } from '../auth/sesion'
 import { USAR_MOCKS } from '../api'
 import Boton from '../components/ui/Boton'
 import Aviso from '../components/ui/Aviso'
-import Icono from '../components/ui/Icono'
+import logoLuthier from '../assets/luthier-logo.png'
 import { SECCIONES } from '../components/layout/secciones'
 import estilos from './Login.module.css'
 
@@ -47,7 +47,7 @@ export default function Login() {
       <section className={`${estilos.portada} con-lupulo`}>
         <div className={estilos.marca}>
           <span className={estilos.logo}>
-            <Icono nombre="lupulo" tamano={24} />
+            <img src={logoLuthier} alt="" width={44} height={44} />
           </span>
           <span className={estilos.nombreMarca}>SkillUp · Cervecería Luthier</span>
         </div>

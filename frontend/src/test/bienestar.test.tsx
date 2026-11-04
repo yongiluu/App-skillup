@@ -17,7 +17,7 @@ describe('bienestar en la ficha (vista del jefe)', () => {
 
   it('sin consentimiento: no muestra indicador ni aviso de autorización', () => {
     render(<BienestarFicha vista="jefe" bienestar={de('RST_011')} />)
-    expect(screen.getByText('Sin consentimiento')).toBeInTheDocument()
+    expect(screen.getByText('Sin indicador')).toBeInTheDocument()
     expect(screen.queryByText(/Fatiga/)).not.toBeInTheDocument()
     expect(screen.queryByText(/Autorizó/)).not.toBeInTheDocument()
   })
