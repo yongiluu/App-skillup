@@ -1,0 +1,230 @@
+/* Panel del jefe (kit Luthier v14): cifras arriba y riesgo por rol. */
+
+/* ---------- Cifras ---------- */
+.kpis {
+  list-style: none;
+  display: grid;
+  gap: var(--esp-3);
+  margin-bottom: var(--esp-5);
+}
+
+@media (min-width: 700px) {
+  .kpis {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--esp-4);
+  }
+}
+
+.kpi {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  height: 100%;
+  padding: var(--esp-4) var(--esp-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-sm);
+  color: var(--color-texto);
+  text-decoration: none;
+}
+
+.kpiEnlace:hover {
+  border-color: var(--color-primario);
+}
+
+.kpi > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.kpiIcono {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: var(--radio-md);
+  background: var(--color-primario-suave);
+  color: var(--color-primario);
+}
+
+.kpiTitulo {
+  color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.kpiCifra {
+  font-size: var(--texto-2xl);
+  font-weight: var(--peso-fuerte);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpiCifra small {
+  color: var(--color-texto-suave);
+  font-size: var(--texto-md);
+  font-weight: var(--peso-medio);
+}
+
+.kpiNota {
+  color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
+}
+
+.kpi_alto {
+  border-color: transparent;
+  background: var(--riesgo-alto-fondo);
+}
+
+.kpi_alto .kpiCifra {
+  color: var(--riesgo-alto-texto);
+}
+
+.kpi_alto .kpiIcono {
+  background: var(--color-superficie);
+  color: var(--riesgo-alto-texto);
+}
+
+.kpi_alerta {
+  border-color: transparent;
+  background: var(--riesgo-alerta-fondo);
+}
+
+.kpi_alerta .kpiCifra {
+  color: var(--riesgo-alerta-texto);
+}
+
+.kpi_alerta .kpiIcono {
+  background: var(--color-superficie);
+  color: var(--riesgo-alerta-texto);
+}
+
+/* ---------- Bloques ---------- */
+.bloque {
+  padding: var(--esp-4) var(--esp-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-lg);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-sm);
+}
+
+.tituloBloque {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  margin-bottom: var(--esp-3);
+  font-size: var(--texto-lg);
+}
+
+.iconoTitulo {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--radio-sm);
+  background: var(--riesgo-alerta-fondo);
+  color: var(--riesgo-alerta-texto);
+}
+
+.nota {
+  margin-top: var(--esp-3);
+  color: var(--color-texto-suave);
+  font-size: var(--texto-xs);
+}
+
+/* ---------- Riesgo por rol ---------- */
+.tablaScroll {
+  position: relative; /* contiene los textos solo-lector: sin esto la página se desbordaba en el celular (AP-02) */
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.mapa {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 6px;
+  font-size: var(--texto-sm);
+}
+
+.mapa th {
+  color: var(--color-texto-suave);
+  font-weight: var(--peso-medio);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.mapa th[scope='row'] {
+  padding-right: var(--esp-2);
+  color: var(--color-texto);
+  text-align: left;
+}
+
+.celda {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 var(--esp-2);
+  border: 1.5px solid transparent;
+  border-radius: var(--radio-md);
+  font-weight: var(--peso-fuerte);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.celda_bajo {
+  background: var(--riesgo-bajo-fondo);
+  color: var(--riesgo-bajo-texto);
+}
+
+.celda_alerta {
+  background: var(--riesgo-alerta-fondo);
+  color: var(--riesgo-alerta-texto);
+}
+
+.celda_alto {
+  background: var(--riesgo-alto-fondo);
+  border-color: var(--riesgo-alto-borde);
+  color: var(--riesgo-alto-texto);
+}
+
+/* Bloque bajo los servicios */
+.par {
+  margin: var(--esp-5) 0;
+}
+
+/* Celular: tres cifras compactas en una fila */
+@media (max-width: 699px) {
+  .kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--esp-2);
+  }
+
+  .kpi {
+    flex-direction: column;
+    gap: 0;
+    padding: var(--esp-3);
+    border-radius: var(--radio-md);
+  }
+
+  .kpiIcono {
+    display: none;
+  }
+
+  .kpiTitulo,
+  .kpiNota {
+    font-size: 0.75rem;
+    line-height: 1.25;
+  }
+
+  .kpiCifra {
+    font-size: var(--texto-xl);
+  }
+
+  .kpiCifra small {
+    font-size: var(--texto-xs);
+  }
+}

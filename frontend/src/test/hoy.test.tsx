@@ -9,7 +9,11 @@ import type { AusenciaDia, Sugerencia } from '../api/tipos'
 
 describe('acciones sugeridas', () => {
   it('agrupa por servicio y rol, en orden de franja', () => {
-    render(<AccionesSugeridas sugerencias={sugerencias as Sugerencia[]} />)
+    render(
+      <MemoryRouter>
+        <AccionesSugeridas sugerencias={sugerencias as Sugerencia[]} />
+      </MemoryRouter>,
+    )
     const titulos = screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)
     // Ordenadas por franja (las sugerencias del 17-10 parten en 13:00–15:00)
     expect(titulos[0]).toMatch(/^13:00–15:00/)
@@ -17,10 +21,20 @@ describe('acciones sugeridas', () => {
     expect(inicios).toEqual([...inicios].sort())
     // Cada sugerencia aparece una vez con su acción
     expect(screen.getAllByText(/^(Mover|Llamar)$/)).toHaveLength(sugerencias.length)
+    // "Llamar" y "Mover" abren la ficha de la persona (AP-09)
+    const s0 = (sugerencias as Sugerencia[])[0]
+    expect(screen.getAllByRole('link', { name: new RegExp(`ver la ficha de ${s0.empleado_nombre}`) })[0]).toHaveAttribute(
+      'href',
+      `/equipo/${s0.empleado_id}`,
+    )
   })
 
   it('sin sugerencias lo dice', () => {
-    render(<AccionesSugeridas sugerencias={[]} />)
+    render(
+      <MemoryRouter>
+        <AccionesSugeridas sugerencias={[]} />
+      </MemoryRouter>,
+    )
     expect(screen.getByText(/Nada que mover ni llamar/)).toBeInTheDocument()
   })
 })

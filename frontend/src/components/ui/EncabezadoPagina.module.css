@@ -37,3 +37,38 @@
     font-size: var(--texto-xl);
   }
 }
+
+/* ---------- Tarjeta de saludo (kit Luthier) ---------- */
+.saludo {
+  position: relative;
+  overflow: hidden;
+  align-items: center;
+  padding: var(--esp-5) var(--esp-5);
+  border-radius: var(--radio-lg);
+  background: var(--saludo-fondo);
+  box-shadow: var(--sombra-sm);
+}
+
+.saludo .bajada {
+  color: var(--color-texto-suave);
+}
+
+.saludo .acciones {
+  position: relative;
+  z-index: 1;
+}
+
+.lupulo {
+  position: absolute;
+  right: var(--esp-5);
+  top: 50%;
+  width: 96px;
+  height: 96px;
+  transform: translateY(-50%) rotate(-12deg);
+  fill: none;
+  stroke: var(--saludo-lupulo);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}

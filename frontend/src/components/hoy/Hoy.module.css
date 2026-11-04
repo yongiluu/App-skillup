@@ -52,9 +52,15 @@
 
 /* Acción: palabra + color suave (mover = oliva, llamar = ámbar) */
 .accion {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: none;
-  min-width: 64px;
-  padding: 2px var(--esp-2);
+  min-width: 72px;
+  min-height: 36px;
+  padding: 2px var(--esp-3);
+  border: 1px solid currentColor;
+  text-decoration: none;
   border-radius: var(--radio-pildora);
   font-size: var(--texto-xs);
   font-weight: var(--peso-fuerte);
@@ -73,6 +79,11 @@
 
 .ausencia {
   justify-content: space-between;
+}
+
+.crece {
+  flex: 1;
+  min-width: 0;
 }
 
 .ausencia a {
@@ -115,4 +126,8 @@
   font-size: var(--texto-xs);
   color: var(--color-texto-suave);
   font-variant-numeric: tabular-nums;
+}
+
+.accion:hover {
+  text-decoration: underline;
 }

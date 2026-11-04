@@ -1,0 +1,22 @@
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+  color: var(--avatar-texto);
+  font-weight: var(--peso-fuerte);
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.tono1 {
+  background: var(--avatar-1);
+}
+
+.tono2 {
+  background: var(--avatar-2);
+}
+
+.tono3 {
+  background: var(--avatar-3);
+}

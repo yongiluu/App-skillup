@@ -1,5 +1,7 @@
+import { Link } from 'react-router-dom'
 import type { Franja, Rol, RolCritico, Sugerencia } from '../../api/tipos'
 import { HORARIO_FRANJA, NOMBRE_ROL, porcentaje } from '../../lib/formato'
+import Avatar from '../ui/Avatar'
 import estilos from './Hoy.module.css'
 
 const ORDEN: Franja[] = ['11_13', '13_15', '19_21', '21_23']
@@ -27,7 +29,8 @@ function agrupar(sugerencias: Sugerencia[]): Grupo[] {
 
 /**
  * Acciones sugeridas por la API (GET /sugerencias): "mover" a alguien que ya está en el servicio
- * o "llamar" a alguien libre. Por ahora es informativo: la app no ejecuta la acción.
+ * o "llamar" a alguien libre. "Mover" y "Llamar" abren la ficha de la persona (evaluación heurística AP-09);
+ * la app todavía no ejecuta la acción.
  */
 export default function AccionesSugeridas({ sugerencias }: { sugerencias: Sugerencia[] }) {
   if (sugerencias.length === 0) {
@@ -47,9 +50,14 @@ export default function AccionesSugeridas({ sugerencias }: { sugerencias: Sugere
           <ul className={estilos.lista}>
             {g.items.map((s) => (
               <li key={`${s.empleado_id}-${s.accion}`}>
-                <span className={`${estilos.accion} ${estilos[s.accion]}`}>
+                <Avatar nombre={s.empleado_nombre} id={s.empleado_id} tamano={32} />
+                <Link
+                  to={`/equipo/${s.empleado_id}`}
+                  className={`${estilos.accion} ${estilos[s.accion]}`}
+                  aria-label={`${s.accion === 'mover' ? 'Mover' : 'Llamar'}: ver la ficha de ${s.empleado_nombre}`}
+                >
                   {s.accion === 'mover' ? 'Mover' : 'Llamar'}
-                </span>
+                </Link>
                 <span>
                   <b>{s.empleado_nombre}</b>
                   {s.accion === 'mover' && s.rol_actual

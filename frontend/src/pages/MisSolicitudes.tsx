@@ -34,7 +34,7 @@ export default function MisSolicitudes() {
         <>
           {mias.length === 0 ? (
             <p className={estilos.vacio}>
-              Todavía no pides cambios. Puedes hacerlo desde <b>Mis turnos</b>.
+              Todavía no has pedido cambios. Puedes hacerlo desde <b>Mis turnos</b>.
             </p>
           ) : (
             <ul className={estilos.tarjetas}>

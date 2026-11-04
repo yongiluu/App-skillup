@@ -19,7 +19,8 @@ type Props =
   | { vista: 'propia'; bienestar: BienestarPropio }
 
 const ETIQUETA_ESTADO: Record<Exclude<EstadoBienestar, 'ok'>, string> = {
-  sin_consentimiento: 'Sin consentimiento',
+  // Palabra neutra (evaluación heurística AP-05): no presiona a quien no autorizó
+  sin_consentimiento: 'Sin indicador',
   sin_datos: 'Sin datos recientes',
 }
 
@@ -48,7 +49,7 @@ export default function BienestarFicha(props: Props) {
             {bienestar.estado === 'sin_consentimiento'
               ? propia
                 ? 'No autorizaste el uso de tus datos de bienestar, así que no se guarda ni se calcula nada.'
-                : 'Esta persona no autorizó el uso de sus datos de bienestar. No se muestra ni se calcula nada, y eso no la favorece ni la perjudica en las sugerencias.'
+                : 'Esta persona no comparte datos de bienestar. No se muestra ni se calcula nada, y eso no la favorece ni la perjudica en las sugerencias.'
               : propia
                 ? 'Autorizaste el uso de tus datos, pero no hay registros de los últimos días (por ejemplo, si no usaste el reloj).'
                 : 'Autorizó el uso de sus datos, pero no hay registros de los últimos días.'}
@@ -83,6 +84,9 @@ function TablaRegistros({ registros }: { registros: BienestarPropio['registros']
     x === null ? '—' : x.toLocaleString('es-CL', { minimumFractionDigits: dec, maximumFractionDigits: dec })
   return (
     <div className={estilos.tablaCaja}>
+      <p className={estilos.escala}>
+        <b>Cansancio:</b> 1 = muy alerta · 7 = agotado/a. El primer número es al llegar y el segundo, al salir.
+      </p>
       <table className={estilos.tabla}>
         <caption>Tus últimos {registros.length} días</caption>
         <thead>
@@ -111,8 +115,7 @@ function TablaRegistros({ registros }: { registros: BienestarPropio['registros']
         </tbody>
       </table>
       <p className={estilos.leyenda}>
-        Pulso medio en latidos por minuto. Cansancio al inicio → al final del turno (1 = muy alerta, 7 = agotado/a).
-        “—” = el reloj no registró ese día.
+        Pulso medio en latidos por minuto. “—” = el reloj no registró ese día.
       </p>
     </div>
   )
