@@ -5,7 +5,7 @@ disponible; al aprobar, el turno pasa al reemplazo.
 
 Las mismas comprobaciones corren con los mocks (aquí) y con Postgres + el trigger de Maxi
 (tests/test_bd.py importa `REVISIONES`). Caso de la demo: Cristóbal Silva (RST_056,
-usuario `empleado`) pide cambiar su turno del 17-10 de 21 a 23; Ignacia Muñoz (RST_009,
+usuario `empleado`) pide cambiar su turno del viernes 17-10 en el cierre (23:00–02:00); Ignacia Muñoz (RST_009,
 usuario `reemplazo`) puede cubrirlo.
 """
 
@@ -19,8 +19,8 @@ HOY = "2025-10-17"
 SOLICITANTE = "RST_056"
 REEMPLAZO = "RST_009"
 OTRO_GARZON_LIBRE = "RST_021"  # también disponible ese turno
-GARZON_DEL_SERVICIO = "RST_003"  # ya trabaja el 17-10 de 21 a 23
-SERVICIO = "21_23"
+GARZON_DEL_SERVICIO = "RST_062"  # ya trabaja el 17-10 en el cierre
+SERVICIO = "23_cierre"  # viernes: de 23:00 a 02:00
 
 
 def _turnos_servicio(jefe, fecha=HOY, servicio=SERVICIO) -> dict[str, str]:
@@ -256,7 +256,7 @@ def test_campos_extra_rechazados(client, empleado):
 def test_disponibles_jefe_ve_todo_con_motivo(client):
     filas = client.get("/disponibles", params={"fecha": HOY, "servicio": SERVICIO, "solicitante": SOLICITANTE}).json()
     assert SOLICITANTE not in [f["empleado_id"] for f in filas]
-    assert len(filas) == 79  # 80 personas menos quien pide
+    assert len(filas) == 85  # 86 personas menos quien pide
     libres = [f for f in filas if f["disponible"]]
     assert REEMPLAZO in [f["empleado_id"] for f in libres] and all(f["motivo"] is None for f in libres)
     ocupados = [f for f in filas if not f["disponible"]]
@@ -277,16 +277,17 @@ def test_disponibles_empleado_ve_solo_libres_sin_motivo(client, empleado):
 
 
 def test_disponibles_sin_turno_o_sin_sesion(client, anonimo):
-    r = client.get("/disponibles", params={"fecha": HOY, "servicio": "11_13", "solicitante": SOLICITANTE})
+    r = client.get("/disponibles", params={"fecha": HOY, "servicio": "13_15", "solicitante": SOLICITANTE})
     assert r.status_code == 409
     assert client.get("/disponibles", params={"fecha": HOY, "servicio": SERVICIO, "solicitante": "RST_999"}).status_code == 404
     assert client.get("/disponibles", params={"fecha": HOY, "servicio": "10_12"}).status_code == 422
+    assert client.get("/disponibles", params={"fecha": HOY, "servicio": "11_13"}).status_code == 422  # Luthier abre a las 13
     del anonimo.headers["Authorization"]
     assert anonimo.get("/disponibles", params={"fecha": HOY, "servicio": SERVICIO}).status_code == 401
 
 
 def test_disponibles_cuenta_dias_seguidos(client):
     """RST_056 lleva una racha larga: no puede cubrir a nadie el 17-10 por días seguidos."""
-    filas = client.get("/disponibles", params={"fecha": HOY, "servicio": "13_15", "solicitante": GARZON_DEL_SERVICIO}).json()
+    filas = client.get("/disponibles", params={"fecha": HOY, "servicio": "13_15", "solicitante": "RST_003"}).json()
     yo = next(f for f in filas if f["empleado_id"] == SOLICITANTE)
-    assert yo["motivo"] == "Quedaría con 10 días seguidos de trabajo (máximo 6)"
+    assert yo["motivo"] == "Quedaría con 19 días seguidos de trabajo (máximo 6)"

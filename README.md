@@ -156,7 +156,7 @@ erDiagram
 
 - **local**: sucursal de la cervecería.
 - **empleado**: rol, rol de respaldo, polivalente (sí/no), antigüedad, tipo de contrato y preferencia de turno.
-- **servicio**: fecha más franja (`11_13`, `13_15`, `19_21`, `21_23`) y dotación requerida.
+- **servicio**: fecha más franja (`13_15`, `19_21`, `21_23`, `23_cierre`) y dotación requerida. Horario de Luthier: lunes a jueves de 13:00 a 01:00 y viernes y sábado de 13:00 a 02:00, así que `23_cierre` termina a la 01:00 o a las 02:00 según el día.
 - **turno**: qué empleado trabaja en qué servicio y con qué rol.
 - **ausencia**: fecha, motivo y si fue con aviso corto.
 - **prediccion**: probabilidad de déficit total y por rol crítico, y recomendación.
@@ -212,7 +212,8 @@ App-skillup/
 ## Pendientes con la cervecería
 
 - [ ] Eventos del mes (partidos, lanzamientos, tocatas)
-- [ ] Días hábiles y horario real de atención
+- [x] Horario real de atención (lun–jue 13:00–01:00, vie–sáb 13:00–02:00)
+- [ ] ¿Abren el domingo? (hoy se asume igual que lunes a jueves)
 - [ ] Dotación real por rol
 - [ ] Días de pago relevantes para sus clientes
 - [ ] Decisión sobre relojes inteligentes y test psicológicos (y su consentimiento)

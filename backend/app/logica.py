@@ -9,7 +9,19 @@ from app import bienestar
 from app.config import get_settings
 from app.repositorio import Repositorio
 
-HORARIOS = {"11_13": "11:00–13:00", "13_15": "13:00–15:00", "19_21": "19:00–21:00", "21_23": "21:00–23:00"}
+# Horario de Luthier: lunes a jueves de 13:00 a 01:00; viernes y sábado de 13:00 a 02:00.
+# Domingo: se asume como lunes a jueves [PENDIENTE CERVECERÍA].
+HORARIOS = {"13_15": "13:00–15:00", "19_21": "19:00–21:00", "21_23": "21:00–23:00", "23_cierre": "23:00–cierre"}
+DIAS_CIERRE_TARDE = {4, 5}  # viernes y sábado cierran a las 02:00
+
+
+def horario(franja: str, fecha: date | None = None) -> str:
+    """Horario en palabras. El cierre depende del día: 01:00 o 02:00 (viernes y sábado)."""
+    if franja != "23_cierre":
+        return HORARIOS.get(franja, franja)
+    if fecha is None:
+        return "23:00–cierre"
+    return "23:00–02:00" if fecha.weekday() in DIAS_CIERRE_TARDE else "23:00–01:00"
 DIAS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
 CRITICOS = ("garzon", "cocinero_linea", "jefe_turno")
 NOMBRE_ROL = {
@@ -28,6 +40,10 @@ def nivel_riesgo(prob: float) -> str:
 
 
 _ROL_EN_TEXTO = re.compile(r"\b(garzon|cocinero_linea|jefe_turno)\b")
+
+
+def _fecha(f) -> date:
+    return f if isinstance(f, date) else date.fromisoformat(str(f))
 
 
 def rol_mas_en_riesgo(s: dict) -> str:
@@ -71,7 +87,7 @@ def recomendacion(s: dict) -> str:
 def armar_servicio(s: dict) -> dict:
     return {
         **s,
-        "horario": HORARIOS[s["servicio"]],
+        "horario": horario(s["servicio"], _fecha(s["fecha"])),
         "nivel_riesgo": nivel_riesgo(s["prob_deficit"]),
         "recomendacion": recomendacion(s),
     }
@@ -160,9 +176,9 @@ def sugerencias(repo: Repositorio, fecha: date, max_por_rol: int = 2, excluir: s
                 ya_sugeridos.add(e["id"])
                 rol_actual = asignados[e["id"]]["rol"] if accion == "mover" else None
                 if accion == "mover":
-                    msg = f"Mover a {e['nombre']} ({NOMBRE_ROL[rol_actual]}) a {NOMBRE_ROL[rol]} en {HORARIOS[s['servicio']]}"
+                    msg = f"Mover a {e['nombre']} ({NOMBRE_ROL[rol_actual]}) a {NOMBRE_ROL[rol]} en {horario(s['servicio'], _fecha(s['fecha']))}"
                 else:
-                    msg = f"Llamar a {e['nombre']} ({NOMBRE_ROL[e['rol']]}) para cubrir {NOMBRE_ROL[rol]} en {HORARIOS[s['servicio']]}"
+                    msg = f"Llamar a {e['nombre']} ({NOMBRE_ROL[e['rol']]}) para cubrir {NOMBRE_ROL[rol]} en {horario(s['servicio'], _fecha(s['fecha']))}"
                 resultado.append(
                     {
                         "fecha": fecha,

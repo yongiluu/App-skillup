@@ -4,7 +4,7 @@ Lee los CSV simulados de `skillup-dotacion-laboral/data/restaurant/` y escribe J
 pequeños con la forma del contrato de la API. Solo hace falta correrlo si se quieren
 regenerar los mocks; los JSON ya vienen versionados en el repo.
 
-Los mocks actuales salen de la simulación v2 (80 personas, margen de programación):
+Los mocks actuales salen de la simulación v3 (horario de Luthier, 86 personas, margen de programación):
 ver docs/simulacion-demo.md.
 
 Uso:

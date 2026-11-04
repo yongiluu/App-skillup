@@ -35,11 +35,24 @@ def test_servicios_del_dia(client):
     assert r.status_code == 200
     d = r.json()
     assert d["fecha"] == HOY
-    assert [s["servicio"] for s in d["servicios"]] == ["11_13", "13_15", "19_21", "21_23"]
+    assert [s["servicio"] for s in d["servicios"]] == ["13_15", "19_21", "21_23", "23_cierre"]
     assert d["calendario"]["es_viernes"] is True
+    # horario de Luthier: el viernes se cierra a las 02:00
+    assert [s["horario"] for s in d["servicios"]] == ["13:00–15:00", "19:00–21:00", "21:00–23:00", "23:00–02:00"]
     s = d["servicios"][0]
     assert set(s["prob_por_rol"]) == {"garzon", "cocinero_linea", "jefe_turno"}
     assert s["nivel_riesgo"] in {"bajo", "alerta", "alto"}
+
+
+def test_horario_de_cierre_segun_el_dia(client):
+    """Luthier: lunes a jueves (y domingo) cierra a la 01:00; viernes y sábado, a las 02:00."""
+    cierre = {}
+    for d in client.get("/semana", params={"inicio": "2025-10-13"}).json()["dias"]:
+        cierre[d["calendario"]["dia_semana"]] = next(s["horario"] for s in d["servicios"] if s["servicio"] == "23_cierre")
+    assert cierre == {
+        "lunes": "23:00–01:00", "martes": "23:00–01:00", "miércoles": "23:00–01:00", "jueves": "23:00–01:00",
+        "viernes": "23:00–02:00", "sábado": "23:00–02:00", "domingo": "23:00–01:00",
+    }
 
 
 def test_nivel_riesgo_respeta_umbrales(client):
@@ -119,8 +132,9 @@ def test_sugerencias(client):
             en_riesgo = {r for r, p in s["prob_por_rol"].items() if p >= 0.55}
             sugeridos = {x["rol_a_cubrir"] for x in sug if x["servicio"] == s["servicio"]}
             assert en_riesgo <= sugeridos, s["servicio"]
-    # 17-10, 13-15: falta la jefa programada (RST_008, ausente) → se sugiere otro jefe de turno
-    assert any(x["servicio"] == "13_15" and x["rol_a_cubrir"] == "jefe_turno" for x in sug)
+    # 17-10, cierre (23:00–02:00, viernes) en alerta por garzón → se sugiere cubrir garzón
+    assert any(x["servicio"] == "23_cierre" and x["rol_a_cubrir"] == "garzon" for x in sug)
+    assert all("23:00–02:00" in x["mensaje"] for x in sug if x["servicio"] == "23_cierre")
 
 
 def test_sugerencias_no_incluyen_ausentes(client):
@@ -136,7 +150,7 @@ def test_sugerencias_no_incluyen_ausentes(client):
 # ---------- empleados ----------
 def test_empleados(client):
     lista = client.get("/empleados").json()
-    assert len(lista) == 80
+    assert len(lista) == 86
     campos_prohibidos = {"gender", "genero", "bmi", "imc", "children", "hijos", "smoker", "edad", "age"}
     assert not campos_prohibidos & set(lista[0])
 
@@ -184,8 +198,8 @@ def test_flujo_solicitud_rechazada(client):
 
 
 def test_solicitud_sin_turno(client):
-    # RST_056 no trabaja el 2025-10-17 en 11_13 (dato fijo de los mocks)
-    r = client.post("/solicitudes-cambio", json={"solicitante_id": "RST_056", "fecha": HOY, "servicio": "11_13"})
+    # RST_056 no trabaja el 2025-10-17 en 13_15 (dato fijo de los mocks)
+    r = client.post("/solicitudes-cambio", json={"solicitante_id": "RST_056", "fecha": HOY, "servicio": "13_15"})
     assert r.status_code == 409
 
 
@@ -213,7 +227,7 @@ def test_solicitud_inexistente(client):
 # ---------- ausencias del día ----------
 def test_ausencias_del_dia(client):
     aus = client.get("/ausencias", params={"fecha": HOY}).json()
-    assert {a["empleado_id"] for a in aus} == {"RST_003", "RST_008", "RST_051", "RST_068", "RST_074"}  # dato fijo de los mocks
+    assert {a["empleado_id"] for a in aus} == {"RST_006", "RST_008", "RST_037", "RST_043", "RST_063", "RST_068"}  # dato fijo de los mocks
     assert all(a["motivo"] in {"personal", "salud"} for a in aus)
     assert [a["empleado_id"] for a in aus] == sorted(a["empleado_id"] for a in aus)
     # "servicios" = franjas en que esa persona tenía turno ese día
@@ -236,15 +250,17 @@ def test_recomendacion_en_lenguaje_normal(client):
 
 
 def test_recomendacion_explica_el_margen(client):
-    """AP-01: con más programados que requeridos, el riesgo alto se explica con el margen y el rol."""
+    """AP-01: la recomendación dice el margen (programados vs requeridos) y el rol más ajustado."""
     s = {x["servicio"]: x for x in client.get("/servicios", params={"fecha": HOY}).json()["servicios"]}
-    assert s["13_15"]["nivel_riesgo"] == "alto"
-    assert s["13_15"]["recomendacion"] == (
-        "Riesgo alto de quedar corto, sobre todo en jefe de turno. Hay 25 programados para 23: "
-        "alcanza si no faltan más de 2. Confirma quién viene y ten un reemplazo de jefe de turno listo."
+    assert s["23_cierre"]["nivel_riesgo"] == "alerta"
+    assert s["23_cierre"]["recomendacion"] == (
+        "Atento a garzón. Hay 12 programados para 11: alcanza si no faltan más de 1. "
+        "Si alguien avisa, confirma quién lo cubre."
     )
-    assert "sobre todo en garzón" in s["21_23"]["recomendacion"]
-    assert s["11_13"]["recomendacion"].startswith("Dotación suficiente: hay 12 programados para 10")
+    assert s["13_15"]["recomendacion"].startswith("Dotación suficiente: hay 25 programados para 23")
+    alto = {x["servicio"]: x for x in client.get("/servicios", params={"fecha": "2025-10-18"}).json()["servicios"]}["21_23"]
+    assert alto["nivel_riesgo"] == "alto"
+    assert alto["recomendacion"].startswith("Riesgo alto de quedar corto, sobre todo en garzón. Hay 16 programados para 15")
 
 
 def test_margen():

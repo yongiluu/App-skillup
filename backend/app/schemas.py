@@ -11,7 +11,9 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-Franja = Literal["11_13", "13_15", "19_21", "21_23"]
+# Horario de Luthier: lun–jue 13:00–01:00, vie–sáb 13:00–02:00. "23_cierre" termina a la 01:00 o a las 02:00
+# según el día (lo dice el campo `horario` de cada servicio).
+Franja = Literal["13_15", "19_21", "21_23", "23_cierre"]
 RolCritico = Literal["garzon", "cocinero_linea", "jefe_turno"]
 Rol = Literal[
     "garzon", "cocinero_linea", "jefe_turno", "runner", "host", "cajero", "ayudante_cocina", "copero"
@@ -93,7 +95,7 @@ class ProbPorRol(BaseModel):
 class Servicio(BaseModel):
     fecha: date
     servicio: Franja
-    horario: str = Field(examples=["13:00–15:00"])
+    horario: str = Field(examples=["13:00–15:00", "23:00–02:00"], description="Depende del día en 23_cierre")
     requeridos: int
     asignados: int
     dotacion_predicha: float

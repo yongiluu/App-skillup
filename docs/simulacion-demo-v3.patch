@@ -1,0 +1,106 @@
+--- a/config/restaurant_settings.py
++++ b/config/restaurant_settings.py
+@@ -16,10 +16,12 @@
+ RESTAURANT_START_DATE = "2025-07-01"
+ 
+ SERVICE_PERIODS = {
+-    "11_13": {"label": "11:00-13:00", "demand_factor": 0.72, "fatigue_factor": 0.9},
++    # SkillUp v3: horario de Luthier (lun-jue 13:00-01:00, vie-sab 13:00-02:00).
++    # Se cambia 11_13 (antes de abrir) por 23_cierre (01:00 lun-jue y dom, 02:00 vie-sab).
+     "13_15": {"label": "13:00-15:00", "demand_factor": 1.45, "fatigue_factor": 1.08},
+     "19_21": {"label": "19:00-21:00", "demand_factor": 1.35, "fatigue_factor": 1.2},
+     "21_23": {"label": "21:00-23:00", "demand_factor": 0.88, "fatigue_factor": 1.25},
++    "23_cierre": {"label": "23:00-cierre", "demand_factor": 0.80, "fatigue_factor": 1.35},
+ }
+ 
+ RESTAURANT_ROLES = {
+--- a/src/restaurant/generate.py
++++ b/src/restaurant/generate.py
+@@ -145,7 +145,7 @@
+ def generate_restaurant_demand(calendar_df: pd.DataFrame, seed: int = 42) -> pd.DataFrame:
+     logger.info("[restaurant] Generando demanda operativa")
+     rng = np.random.default_rng(seed)
+-    base_covers = {"11_13": 26, "13_15": 74, "19_21": 78, "21_23": 38}
++    base_covers = {"13_15": 74, "19_21": 78, "21_23": 38, "23_cierre": 30}  # v3: cervecería abierta hasta tarde
+     day_multiplier = {0: 0.92, 1: 0.94, 2: 0.98, 3: 1.03, 4: 1.18, 5: 1.28, 6: 1.12}
+     records = []
+ 
+@@ -153,18 +153,20 @@
+         date = pd.Timestamp(cal["date"])
+         is_weekend = date.dayofweek >= 5
+         for service_period in SERVICE_PERIODS:
+-            promo_flag = bool(rng.random() < (0.16 if service_period in {"11_13", "13_15"} else 0.10))
++            promo_flag = bool(rng.random() < (0.16 if service_period == "13_15" else 0.10))
+             local_event_flag = bool(rng.random() < (0.18 if date.dayofweek in {4, 5} else 0.07))
+             weather_impact = rng.normal(-0.03 if cal["season"] == "winter" else 0.01, 0.08)
+-            reservation_base = {"11_13": 7, "13_15": 28, "19_21": 34, "21_23": 15}[service_period]
++            reservation_base = {"13_15": 28, "19_21": 34, "21_23": 15, "23_cierre": 6}[service_period]
+             walk_in_ratio = float(np.clip(rng.normal(0.42 if service_period == "13_15" else (0.48 if service_period.startswith("19") else 0.58), 0.10), 0.20, 0.90))
+-            delivery_base = {"11_13": 7, "13_15": 18, "19_21": 24, "21_23": 14}[service_period]
++            delivery_base = {"13_15": 18, "19_21": 24, "21_23": 14, "23_cierre": 4}[service_period]
+ 
+             multiplier = day_multiplier[date.dayofweek]
+             if cal["is_holiday"]:
+                 multiplier += 0.22
+-            if cal["is_holiday_eve"] and service_period in {"19_21", "21_23"}:
++            if cal["is_holiday_eve"] and service_period in {"19_21", "21_23", "23_cierre"}:
+                 multiplier += 0.14
++            if service_period == "23_cierre" and date.dayofweek in {4, 5}:
++                multiplier += 0.25  # v3: viernes y sábado se cierra a las 02:00 y llega más gente tarde
+             if service_period == "13_15":
+                 multiplier += 0.08
+             if cal["is_payday_window"]:
+@@ -181,7 +183,7 @@
+             reservation_count = max(4, int(round(reservation_base * multiplier + rng.normal(0, reservation_noise))))
+             delivery_orders = max(2, int(round(delivery_base * (1.0 - weather_impact) + rng.normal(0, 3))))
+             actual_covers = max(18, int(round(forecast_covers * rng.normal(1.02 if service_period == "13_15" else 1.0, 0.12 if service_period == "13_15" else 0.10) + reservation_count * 0.08 + local_event_flag * 6)))
+-            avg_ticket = 18500 if service_period in {"19_21", "21_23"} else 14200
++            avg_ticket = 18500 if service_period in {"19_21", "21_23", "23_cierre"} else 14200
+             forecast_sales = int(round(forecast_covers * avg_ticket + delivery_orders * 9500))
+             actual_sales = int(round(actual_covers * avg_ticket * rng.normal(1.0, 0.06) + delivery_orders * 9800))
+ 
+@@ -216,8 +218,8 @@
+ def _preference_matches(service_period: str, shift_preference: str) -> bool:
+     if shift_preference == "mixed":
+         return True
+-    midday_periods = {"11_13", "13_15"}
+-    evening_periods = {"19_21", "21_23"}
++    midday_periods = {"13_15"}
++    evening_periods = {"19_21", "21_23", "23_cierre"}
+     if shift_preference == "midday":
+         return service_period in midday_periods
+     if shift_preference == "evening":
+@@ -285,10 +287,12 @@
+                         daily_period_count[emp_id] += 1
+ 
+                 demand_pressure = float(demand_row["forecast_covers"] / max(target_count, 1))
++                # v3: el cierre dura 3 h viernes y sábado (hasta las 02:00) y 2 h el resto
++                horas_franja = 3.0 if demand_row["service_period"] == "23_cierre" and pd.Timestamp(date).dayofweek in {4, 5} else 2.0
+                 for emp_id in selected:
+                     emp = employee_lookup.loc[emp_id]
+                     overtime_hours = 0.0
+-                    if demand_row["service_period"] == "21_23" and rng.random() < 0.35:
++                    if demand_row["service_period"] == "23_cierre" and rng.random() < 0.35:  # v3: el cierre es lo que se alarga
+                         overtime_hours = round(float(rng.uniform(0.2, 0.8)), 1)
+                     if demand_pressure > 24 and rng.random() < 0.12:
+                         overtime_hours = max(overtime_hours, round(float(rng.uniform(0.3, 0.9)), 1))
+@@ -298,8 +302,8 @@
+                         "date": date,
+                         "service_period": demand_row["service_period"],
+                         "role_assigned": role,
+-                        "scheduled_hours": 2.0,
+-                        "hours_worked": 2.0,
++                        "scheduled_hours": horas_franja,
++                        "hours_worked": horas_franja,
+                         "overtime_hours": overtime_hours,
+                         "consecutive_work_days": 0,
+                         "is_rest_day": False,
+@@ -364,7 +368,7 @@
+         overtime_hours=("overtime_hours", "sum"),
+         consecutive_work_days=("consecutive_work_days", "max"),
+         demand_pressure_score=("demand_pressure_score", "mean"),
+-        has_evening=("service_period", lambda s: int(any(period in {"19_21", "21_23"} for period in s))),
++        has_evening=("service_period", lambda s: int(any(period in {"19_21", "21_23", "23_cierre"} for period in s))),
+     )
+     employee_lookup = employees_df.set_index("employee_id")
+     records = []

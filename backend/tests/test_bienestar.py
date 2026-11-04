@@ -25,7 +25,7 @@ def _claves(obj) -> set[str]:
 # ---------- jefe: solo indicador ----------
 def test_jefe_ve_indicador_sin_datos_crudos(client):
     equipo = client.get("/bienestar/fatiga", params={"fecha": HOY}).json()
-    assert len(equipo) == 80
+    assert len(equipo) == 86
     assert not CRUDOS & _claves(equipo)
     con_dato = [e for e in equipo if e["estado"] == "ok"]
     assert con_dato and all(e["fatiga"]["nivel"] in {"bajo", "medio", "alto"} for e in con_dato)
