@@ -26,11 +26,12 @@ from pathlib import Path
 from threading import Lock
 
 from fastapi import HTTPException
-from psycopg import OperationalError
+from psycopg import OperationalError, errors
 from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool, PoolTimeout
 
 from app.config import get_settings
+from app.repositorio import PENDIENTE_DUPLICADA, ReglaNegocio
 
 log = logging.getLogger("skillup")
 _pool: ConnectionPool | None = None
@@ -380,10 +381,11 @@ class RepositorioDB:
         return [{**f, "fecha": _iso(f["fecha"]), "horas": _num(f["horas"]) or 0.0, "servicios": list(f["servicios"])}
                 for f in filas]
 
-    # ---------- solicitudes de cambio ----------
+    # ---------- solicitudes de cambio (las reglas las hace cumplir la base: migración 0003) ----------
     _SQL_SOLICITUD = """
         select sc.id, sc.solicitante_id, sc.fecha, sc.franja as servicio, sc.reemplazo_id, sc.motivo,
-               sc.estado, sc.comentario, u.empleado_id as resuelta_por, sc.creada_en, sc.actualizada_en
+               sc.estado, sc.respuesta_reemplazo, sc.respondida_en, sc.comentario,
+               u.empleado_id as resuelta_por, sc.creada_en, sc.actualizada_en
         from public.solicitud_cambio sc
         left join public.usuario u on u.id = sc.resuelta_por
     """
@@ -391,6 +393,20 @@ class RepositorioDB:
     @staticmethod
     def _solicitud_api(f: dict) -> dict:
         return {**f, "fecha": _iso(f["fecha"])}
+
+    @contextmanager
+    def _reglas(self):
+        """Traduce los rechazos de la base (trigger y regla única) a ReglaNegocio → 409."""
+        try:
+            yield
+        except errors.UniqueViolation as e:
+            if "solicitud_una_pendiente" in str(e):
+                raise ReglaNegocio(PENDIENTE_DUPLICADA) from None
+            raise
+        except errors.RaiseException as e:
+            raise ReglaNegocio(e.diag.message_primary or str(e)) from None
+        finally:
+            self._cache.clear()  # pudo cambiar un turno
 
     def listar_solicitudes(self) -> list[dict]:
         return [self._solicitud_api(f) for f in self._q(self._SQL_SOLICITUD + " order by sc.id")]
@@ -400,26 +416,57 @@ class RepositorioDB:
         return self._solicitud_api(f) if f else None
 
     def crear_solicitud(self, datos: dict) -> dict:
-        f = self._una(
-            """insert into public.solicitud_cambio (solicitante_id, fecha, franja, reemplazo_id, motivo)
-               values (%s, %s, %s, %s, %s) returning id""",
-            (datos["solicitante_id"], datos["fecha"], datos["servicio"], datos.get("reemplazo_id"), datos.get("motivo")),
-        )
+        with self._reglas():
+            f = self._una(
+                """insert into public.solicitud_cambio (solicitante_id, fecha, franja, reemplazo_id, motivo)
+                   values (%s, %s, %s, %s, %s) returning id""",
+                (datos["solicitante_id"], datos["fecha"], datos["servicio"], datos.get("reemplazo_id"),
+                 datos.get("motivo")),
+            )
         return self.obtener_solicitud(f["id"])
 
+    def cambiar_reemplazo(self, solicitud_id: int, reemplazo_id: str | None) -> dict:
+        with self._reglas():
+            self._q("update public.solicitud_cambio set reemplazo_id = %s where id = %s", (reemplazo_id, solicitud_id))
+        return self.obtener_solicitud(solicitud_id)
+
+    def responder_reemplazo(self, solicitud_id: int, acepta: bool) -> dict:
+        with self._reglas():
+            self._q(
+                "update public.solicitud_cambio set respuesta_reemplazo = %s where id = %s",
+                ("aceptada" if acepta else "rechazada", solicitud_id),
+            )
+        return self.obtener_solicitud(solicitud_id)
+
     def actualizar_solicitud(self, solicitud_id: int, cambios: dict) -> dict:
-        # En la tabla, resuelta_por es el id del usuario que aprobó (se busca por su nombre de usuario).
+        """Aprobar o rechazar. Al aprobar, el trigger de la base valida y mueve el turno en el mismo paso."""
+        # En la tabla, resuelta_por es el id del usuario que resolvió (se busca por su nombre de usuario).
         usuario = None
         if cambios.get("usuario"):
             fila = self._una("select id from public.usuario where nombre_usuario = %s", (cambios["usuario"],))
             usuario = fila["id"] if fila else None
-        self._q(
-            """update public.solicitud_cambio
-               set estado = %s, comentario = %s, resuelta_por = %s, actualizada_en = now()
-               where id = %s and estado = 'pendiente'""",
-            (cambios["estado"], cambios.get("comentario"), usuario, solicitud_id),
-        )
+        with self._reglas():
+            self._q(
+                """update public.solicitud_cambio set estado = %s, comentario = %s, resuelta_por = %s
+                   where id = %s""",
+                (cambios["estado"], cambios.get("comentario"), usuario, solicitud_id),
+            )
         return self.obtener_solicitud(solicitud_id)
+
+    def motivo_no_disponible(self, reemplazo: str, solicitante: str, fecha: date, franja: str) -> str | None:
+        f = self._una("select public.motivo_no_disponible(%s, %s, %s, %s) as motivo", (reemplazo, solicitante, fecha, franja))
+        return f["motivo"]
+
+    def disponibles(self, solicitante: str, fecha: date, franja: str) -> list[dict]:
+        # Consulta propuesta por Maxi (motivo vacío = disponible).
+        return self._q(
+            """select e.id as empleado_id, e.nombre, e.rol_principal as rol,
+                      public.motivo_no_disponible(e.id, %(sol)s, %(fecha)s, %(franja)s) as motivo
+               from public.empleado e
+               where e.id <> %(sol)s and e.activo and e.local_id = %(local)s
+               order by e.id""",
+            {"sol": solicitante, "fecha": fecha, "franja": franja, "local": self.local_id},
+        )
 
     # ---------- bienestar (esquema sensible) ----------
     def consentimiento_de(self, empleado_id: str) -> dict | None:

@@ -167,18 +167,20 @@ def _turno_de(client, emp="RST_056"):
     return client.get(f"/empleados/{emp}/turnos", params={"desde": HOY}).json()[0]
 
 
-def test_flujo_solicitud_aprobada(client):
+def test_flujo_solicitud_rechazada(client):
+    """Flujo corto: sin reemplazo no se puede aprobar, pero sí rechazar (el flujo completo, en test_cambios_turno.py)."""
     t = _turno_de(client)
     r = client.post(
         "/solicitudes-cambio",
         json={"solicitante_id": "RST_056", "fecha": t["fecha"], "servicio": t["servicio"], "motivo": "Examen"},
     )
-    assert r.status_code == 201 and r.json()["estado"] == "pendiente"
+    assert r.status_code == 201 and r.json()["estado"] == "pendiente" and r.json()["respuesta_reemplazo"] is None
     sid = r.json()["id"]
-    r = client.patch(f"/solicitudes-cambio/{sid}", json={"estado": "aprobada"})
-    assert r.status_code == 200 and r.json()["estado"] == "aprobada"
+    assert client.patch(f"/solicitudes-cambio/{sid}", json={"estado": "aprobada"}).status_code == 409
+    r = client.patch(f"/solicitudes-cambio/{sid}", json={"estado": "rechazada"})
+    assert r.status_code == 200 and r.json()["estado"] == "rechazada"
     # no se puede resolver dos veces
-    assert client.patch(f"/solicitudes-cambio/{sid}", json={"estado": "rechazada"}).status_code == 409
+    assert client.patch(f"/solicitudes-cambio/{sid}", json={"estado": "aprobada"}).status_code == 409
 
 
 def test_solicitud_sin_turno(client):

@@ -84,7 +84,7 @@ Todos exigen la cabecera `Authorization: Bearer <token>`, salvo `/auth/login` y 
 
 | Método | Ruta | Quién | Notas |
 |---|---|---|---|
-| `POST` | `/auth/login` | Todos | Usuarios de prueba `jefe` (RST_055, Catalina Flores) y `empleado` (RST_056, Cristóbal Silva), con la contraseña de `DEMO_PASSWORD`. Devuelve el token, el perfil, `expira_en` y `hoy` (la fecha de trabajo de la API) |
+| `POST` | `/auth/login` | Todos | Usuarios de prueba `jefe` (RST_055, Catalina Flores), `empleado` (RST_056, Cristóbal Silva) y `reemplazo` (RST_009, Ignacia Muñoz, garzón, libre para cubrir a Cristóbal el 17-10), con la contraseña de `DEMO_PASSWORD`. Devuelve el token, el perfil, `expira_en` y `hoy` (la fecha de trabajo de la API) |
 | `GET` | `/servicios?fecha=` | Jefe | El día con sus 4 servicios |
 | `GET` | `/semana?inicio=` | Jefe | 7 días × 4 servicios. Si se omite `inicio`, usa el lunes de "hoy" |
 | `GET` | `/calendario?mes=YYYY-MM` | Todos | Ventana de pago, feriados, vísperas y eventos por día |
@@ -93,9 +93,12 @@ Todos exigen la cabecera `Authorization: Bearer <token>`, salvo `/auth/login` y 
 | `GET` | `/empleados?rol=` | Todos | Solo datos básicos (sirven para elegir reemplazo) |
 | `GET` | `/empleados/{id}` | Jefe, o la misma persona | Ficha completa |
 | `GET` | `/empleados/{id}/turnos?desde=&hasta=` | Jefe, o la misma persona | Turnos de una persona |
-| `GET` | `/solicitudes-cambio?estado=` | Todos | **Nuevo.** El jefe ve todas; el empleado, solo las suyas |
-| `POST` | `/solicitudes-cambio` | Todos | El empleado solo puede pedir por sí mismo. Se valida que tenga ese turno |
-| `PATCH` | `/solicitudes-cambio/{id}` | Jefe | `aprobada` o `rechazada`. Queda registrado quién la resolvió (`resuelta_por`) |
+| `GET` | `/solicitudes-cambio?estado=` | Todos | El jefe ve todas; el empleado, las que pidió y en las que lo proponen como reemplazo |
+| `POST` | `/solicitudes-cambio` | Todos | El empleado solo pide por sí mismo; se valida que tenga ese turno. `reemplazo_id` es opcional; si viene, tiene que estar disponible. Una sola pendiente por persona y turno (409) |
+| `POST` | `/solicitudes-cambio/{id}/respuesta` | Reemplazo | **Nuevo.** `{"acepta": true\|false}`. Solo la persona propuesta (si no, 403). Si rechaza, sigue pendiente. Para aceptar tiene que estar disponible (409 `No puede aceptar: <motivo>`) |
+| `PATCH` | `/solicitudes-cambio/{id}/reemplazo` | Solicitante o jefe | **Nuevo.** `{"reemplazo_id": "RST_021"}`. Propone a otra persona; `respuesta_reemplazo` vuelve a `pendiente` |
+| `PATCH` | `/solicitudes-cambio/{id}` | Jefe | `aprobada` o `rechazada`. **Aprobar** solo si el reemplazo aceptó y sigue disponible; el turno pasa al reemplazo (mismo rol). Si no → 409 con el motivo. Queda registrado `resuelta_por` |
+| `GET` | `/disponibles?servicio=&fecha=&solicitante=` | Todos | **Nuevo.** Quién puede cubrir el turno de `solicitante` (por defecto, quien consulta). Empleado: solo sus turnos y solo los disponibles, sin motivo. Jefe: todos, con `motivo` si no pueden |
 | `POST` | `/eventos` | Jefe | Registra un evento. Aparece en `/calendario` |
 | `GET` | `/bienestar/fatiga?fecha=` | Jefe | **Nuevo.** Indicador de fatiga de cada persona: solo nivel y motivos |
 | `GET` | `/empleados/{id}/bienestar?desde=&hasta=` | **Solo la misma persona** | **Nuevo.** Datos crudos propios: pasos, sueño, pulso y encuesta. El jefe recibe `403` |
@@ -103,6 +106,15 @@ Todos exigen la cabecera `Authorization: Bearer <token>`, salvo `/auth/login` y 
 | `GET` | `/health` | Todos | Verifica que la API está arriba. No muestra datos |
 
 Respuestas de error: `401` sin sesión o con sesión vencida · `403` sin permiso · `404` no existe · `409` conflicto · `422` datos inválidos · `429` demasiados intentos de login.
+
+**Cambios de turno: textos de los 409** (iguales con mocks y con la base; vienen del trigger de Maxi, migración 0003). El frontend puede mostrar `detail` tal cual:
+
+- `Solo se puede aprobar si un reemplazo aceptó. Si nadie acepta, hay que rechazarla`
+- `No se puede aprobar: <motivo>` · `No puede aceptar: <motivo>` · `<Nombre> no está disponible: <motivo>` (al proponer)
+- `Ya hay una solicitud pendiente para ese turno` · `La solicitud ya está aprobada|rechazada`
+- `<motivo>` es uno de: `No sabe hacer el rol garzon` · `Ya trabaja en ese mismo servicio` · `Está ausente ese día` (nunca la causa) · `Quedaría con N días seguidos de trabajo (máximo 6)`
+
+Flujo de la demo: `empleado` pide cambiar su turno del 2025-10-17 `21_23` proponiendo a `RST_009` → entra `reemplazo` y acepta → entra `jefe` y aprueba → el turno queda a nombre de Ignacia.
 
 Los errores siempre vienen como `{"detail": "mensaje en español"}`.
 

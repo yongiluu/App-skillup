@@ -99,9 +99,12 @@ Todos los endpoints, salvo `/auth/login` y `/health`, exigen la cabecera `Author
 | `GET` | `/ausencias?fecha=YYYY-MM-DD` | Ausencias del día con los servicios afectados (jefe de turno) |
 | `GET` | `/empleados` · `/empleados/{id}` | Lista y ficha |
 | `GET` | `/empleados/{id}/turnos` | Turnos de una persona |
-| `GET` | `/solicitudes-cambio?estado=` | Listar solicitudes (jefe: todas; empleado: las suyas) |
-| `POST` | `/solicitudes-cambio` | Pedir un cambio de turno |
-| `PATCH` | `/solicitudes-cambio/{id}` | Aprobar o rechazar (jefe de turno) |
+| `GET` | `/solicitudes-cambio?estado=` | Listar solicitudes (jefe: todas; empleado: las que pidió o donde es reemplazo) |
+| `POST` | `/solicitudes-cambio` | Pedir un cambio de turno (con o sin reemplazo) |
+| `POST` | `/solicitudes-cambio/{id}/respuesta` | El reemplazo acepta o rechaza |
+| `PATCH` | `/solicitudes-cambio/{id}/reemplazo` | Proponer a otra persona (solicitante o jefe) |
+| `PATCH` | `/solicitudes-cambio/{id}` | Aprobar (solo si el reemplazo aceptó; mueve el turno) o rechazar (jefe de turno) |
+| `GET` | `/disponibles?servicio=&fecha=&solicitante=` | Quién puede cubrir un turno (empleado: solo disponibles; jefe: todos con motivo) |
 | `POST` | `/eventos` | Registrar un evento de la cervecería |
 | `GET` | `/bienestar/fatiga?fecha=` | Indicador de fatiga del equipo: solo nivel y motivo general (jefe de turno) |
 | `GET` | `/empleados/{id}/bienestar` | Datos de bienestar propios: solo la misma persona |
@@ -157,7 +160,7 @@ erDiagram
 - **ausencia**: fecha, motivo y si fue con aviso corto.
 - **prediccion**: probabilidad de déficit total y por rol crítico, y recomendación.
 - **calendario / evento**: feriados, días de pago y eventos del local.
-- **solicitud_cambio**: quién pide, quién cubre y estado (pendiente / aprobada / rechazada).
+- **solicitud_cambio**: quién pide, quién cubre, qué respondió el reemplazo (pendiente / aceptada / rechazada) y estado (pendiente / aprobada / rechazada).
 - **consentimiento** *(sensible)*: por empleado, si lo otorgó, cuándo y qué versión del texto aceptó.
 - **bienestar_diario** *(sensible, tabla separada y con acceso restringido)*: pasos, sueño, pulso medio y encuesta de fatiga al inicio y fin del turno. Solo existe para quien consintió.
 

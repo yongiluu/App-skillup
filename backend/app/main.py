@@ -8,8 +8,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.config import get_settings
+from app.repositorio import ReglaNegocio
 from app.routers import auth, bienestar, empleados, operacion, solicitudes
 
 settings = get_settings()
@@ -63,10 +65,17 @@ async def cabeceras_de_seguridad(request: Request, call_next):
     return resp
 
 
+@app.exception_handler(ReglaNegocio)
+async def regla_de_negocio(_request: Request, exc: ReglaNegocio):
+    """Una regla del negocio (por ejemplo, aprobar sin que el reemplazo aceptara) → 409 con el motivo."""
+    return JSONResponse(status_code=409, content={"detail": str(exc)})
+
+
 app.include_router(auth.router)
 app.include_router(operacion.router)
 app.include_router(empleados.router)
 app.include_router(solicitudes.router)
+app.include_router(solicitudes.router_disponibles)
 app.include_router(bienestar.router)
 
 

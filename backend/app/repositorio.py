@@ -13,13 +13,19 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
 from functools import lru_cache
 from pathlib import Path
-from threading import Lock
+from threading import RLock
 from typing import Any
 
 MOCKS = Path(__file__).resolve().parent / "mocks"
 
 # RepositorioMock y RepositorioDB tienen los mismos métodos; las anotaciones usan este alias.
 Repositorio = Any
+
+PENDIENTE_DUPLICADA = "Ya hay una solicitud pendiente para ese turno"
+
+
+class ReglaNegocio(Exception):
+    """Una regla del negocio impide la operación (la API responde 409 con este mensaje)."""
 
 
 def _cargar(nombre: str):
@@ -28,7 +34,7 @@ def _cargar(nombre: str):
 
 class RepositorioMock:
     def __init__(self) -> None:
-        self._lock = Lock()
+        self._lock = RLock()
         self.servicios: list[dict] = _cargar("servicios")
         self.calendario: dict[str, dict] = {d["fecha"]: d for d in _cargar("calendario")}
         self.eventos: list[dict] = _cargar("eventos")
@@ -36,6 +42,7 @@ class RepositorioMock:
         self.turnos: list[dict] = _cargar("turnos")
         self.ausencias: list[dict] = _cargar("ausencias")
         self.solicitudes: dict[int, dict] = {}
+        self.configuracion = {"max_dias_seguidos": 6}  # como public.configuracion [PENDIENTE CERVECERÍA]
         # Datos sensibles: se cargan aparte y solo se leen desde app/bienestar.py
         self.consentimientos: dict[str, dict] = {c["empleado_id"]: c for c in _cargar("consentimientos")}
         self._bienestar_por_empleado: dict[str, list[dict]] = defaultdict(list)
@@ -63,7 +70,11 @@ class RepositorioMock:
 
     # ---- lecturas ----
     def servicios_de(self, fecha: date) -> list[dict]:
-        return self._servicios_por_fecha.get(fecha.isoformat(), [])
+        # "asignados" se cuenta en vivo: cambia cuando se aprueba un cambio de turno (igual que en la base)
+        return [
+            {**s, "asignados": len(self._turnos_por_servicio.get((s["fecha"], s["servicio"]), []))}
+            for s in self._servicios_por_fecha.get(fecha.isoformat(), [])
+        ]
 
     def dia_calendario(self, fecha: date) -> dict | None:
         return self.calendario.get(fecha.isoformat())
@@ -86,13 +97,20 @@ class RepositorioMock:
         return {a["empleado_id"] for a in self.ausencias if a["fecha"] == f}
 
     def dias_seguidos_hasta(self, fecha: date) -> dict[str, int]:
-        """Días seguidos trabajados de cada persona, a su último turno hasta `fecha`."""
-        f = fecha.isoformat()
-        ultimo: dict[str, tuple[str, int]] = {}
-        for t in self.turnos:
-            if t["fecha"] <= f and (t["empleado_id"] not in ultimo or t["fecha"] >= ultimo[t["empleado_id"]][0]):
-                ultimo[t["empleado_id"]] = (t["fecha"], t["dias_seguidos"])
-        return {k: v[1] for k, v in ultimo.items()}
+        """Racha de días con turno que termina en el último día trabajado de cada persona (≤ fecha).
+        Se calcula desde los turnos (igual que la base), así refleja los cambios de turno aprobados."""
+        desde = fecha - timedelta(days=60)
+        racha = {}
+        for emp, turnos in self._turnos_por_empleado.items():
+            dias = {d for d in (date.fromisoformat(t["fecha"]) for t in turnos) if desde <= d <= fecha}
+            if not dias:
+                continue
+            d, n = max(dias), 0
+            while d in dias:
+                n += 1
+                d -= timedelta(days=1)
+            racha[emp] = n
+        return racha
 
     def horas_extra_7d(self, fecha: date) -> dict[str, float]:
         """Horas extra de cada persona en los 7 días que terminan en `fecha`."""
@@ -140,13 +158,58 @@ class RepositorioMock:
             self.eventos.append(nuevo)
             return nuevo
 
+    # ---- solicitudes de cambio: mismas reglas que la migración 0003 (trigger de Maxi) ----
+    def _pendiente(self, solicitud_id: int) -> dict:
+        s = self.solicitudes[solicitud_id]
+        if s["estado"] != "pendiente":
+            raise ReglaNegocio(f"La solicitud {solicitud_id} ya está {s['estado']}")
+        return s
+
+    def motivo_no_disponible(self, reemplazo: str, solicitante: str, fecha: date, franja: str) -> str | None:
+        """Copia en Python de public.motivo_no_disponible() (0003). Mismos textos y mismo orden."""
+        e = self.empleados.get(reemplazo)
+        if e is None:
+            return "El reemplazo no es un empleado activo"
+        turno = next((t for t in self.turnos_de_servicio(fecha, franja) if t["empleado_id"] == solicitante), None)
+        if turno is None:
+            return "Quien pide el cambio no tiene turno en esa fecha y franja"
+        rol = turno["rol"]
+        if rol != e["rol"] and rol not in e["puede_cubrir"]:
+            return f"No sabe hacer el rol {rol}"
+        if any(t["empleado_id"] == reemplazo for t in self.turnos_de_servicio(fecha, franja)):
+            return "Ya trabaja en ese mismo servicio"
+        if reemplazo in self.ausentes_en(fecha):
+            return "Está ausente ese día"
+        dias = {date.fromisoformat(t["fecha"]) for t in self.turnos_de_empleado(reemplazo)} | {fecha}
+        inicio = fin = fecha
+        while inicio - timedelta(days=1) in dias:
+            inicio -= timedelta(days=1)
+        while fin + timedelta(days=1) in dias:
+            fin += timedelta(days=1)
+        total, maximo = (fin - inicio).days + 1, self.configuracion["max_dias_seguidos"]
+        if total > maximo:
+            return f"Quedaría con {total} días seguidos de trabajo (máximo {maximo})"
+        return None
+
+    def disponibles(self, solicitante: str, fecha: date, franja: str) -> list[dict]:
+        return [
+            {"empleado_id": e["id"], "nombre": e["nombre"], "rol": e["rol"],
+             "motivo": self.motivo_no_disponible(e["id"], solicitante, fecha, franja)}
+            for e in sorted(self.empleados.values(), key=lambda x: x["id"]) if e["id"] != solicitante
+        ]
+
     def crear_solicitud(self, datos: dict) -> dict:
         with self._lock:
+            if any(x["estado"] == "pendiente" and (x["solicitante_id"], x["fecha"], x["servicio"])
+                   == (datos["solicitante_id"], datos["fecha"], datos["servicio"]) for x in self.solicitudes.values()):
+                raise ReglaNegocio(PENDIENTE_DUPLICADA)
             ahora = datetime.now(timezone.utc)
             nueva = {
                 "id": max(self.solicitudes, default=0) + 1,
                 **datos,
                 "estado": "pendiente",
+                "respuesta_reemplazo": "pendiente" if datos.get("reemplazo_id") else None,
+                "respondida_en": None,
                 "comentario": None,
                 "resuelta_por": None,
                 "creada_en": ahora,
@@ -155,11 +218,51 @@ class RepositorioMock:
             self.solicitudes[nueva["id"]] = nueva
             return nueva
 
-    def actualizar_solicitud(self, solicitud_id: int, cambios: dict) -> dict:
+    def cambiar_reemplazo(self, solicitud_id: int, reemplazo_id: str | None) -> dict:
         with self._lock:
-            s = self.solicitudes[solicitud_id]
+            s = self._pendiente(solicitud_id)
+            if reemplazo_id != s["reemplazo_id"]:
+                s.update(reemplazo_id=reemplazo_id, respuesta_reemplazo="pendiente" if reemplazo_id else None,
+                         respondida_en=None)
+            s["actualizada_en"] = datetime.now(timezone.utc)
+            return s
+
+    def responder_reemplazo(self, solicitud_id: int, acepta: bool) -> dict:
+        with self._lock:
+            s = self._pendiente(solicitud_id)
+            if s["reemplazo_id"] is None:
+                raise ReglaNegocio("La solicitud no tiene reemplazo que pueda responder")
+            if acepta:
+                motivo = self.motivo_no_disponible(s["reemplazo_id"], s["solicitante_id"],
+                                                   date.fromisoformat(s["fecha"]), s["servicio"])
+                if motivo:
+                    raise ReglaNegocio(f"No puede aceptar: {motivo}")
+            ahora = datetime.now(timezone.utc)
+            s.update(respuesta_reemplazo="aceptada" if acepta else "rechazada", respondida_en=ahora, actualizada_en=ahora)
+            return s
+
+    def actualizar_solicitud(self, solicitud_id: int, cambios: dict) -> dict:
+        """Aprobar o rechazar. Al aprobar, el turno pasa al reemplazo (como el trigger de la 0003)."""
+        with self._lock:
+            s = self._pendiente(solicitud_id)
+            if cambios["estado"] == "aprobada":
+                if s["reemplazo_id"] is None or s["respuesta_reemplazo"] != "aceptada":
+                    raise ReglaNegocio("Solo se puede aprobar si un reemplazo aceptó. Si nadie acepta, hay que rechazarla")
+                fecha = date.fromisoformat(s["fecha"])
+                motivo = self.motivo_no_disponible(s["reemplazo_id"], s["solicitante_id"], fecha, s["servicio"])
+                if motivo:
+                    raise ReglaNegocio(f"No se puede aprobar: {motivo}")
+                self._mover_turno(fecha, s["servicio"], s["solicitante_id"], s["reemplazo_id"])
             s.update({k: v for k, v in cambios.items() if k != "usuario"}, actualizada_en=datetime.now(timezone.utc))
             return s
+
+    def _mover_turno(self, fecha: date, servicio: str, de: str, a: str) -> None:
+        """Pasa el turno de `de` a `a`, con el mismo rol y horas."""
+        t = next(x for x in self._turnos_por_servicio[(fecha.isoformat(), servicio)] if x["empleado_id"] == de)
+        self._turnos_por_empleado[de].remove(t)
+        t["empleado_id"] = a
+        self._turnos_por_empleado[a].append(t)
+        self._turnos_por_empleado[a].sort(key=lambda x: (x["fecha"], x["servicio"]))
 
 
 @lru_cache
