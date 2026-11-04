@@ -47,10 +47,10 @@ describe('Planificador', () => {
     const tabla = screen.getByRole('table')
     expect(within(tabla).getAllByRole('columnheader')).toHaveLength(8) // "Servicio" + 7 días
     expect(within(tabla).getAllByRole('rowheader').map((r) => r.textContent)).toEqual([
-      '11:00–13:00',
       '13:00–15:00',
       '19:00–21:00',
       '21:00–23:00',
+      '23:00–cierre',
     ])
     expect(within(tabla).getAllByRole('cell')).toHaveLength(28)
   })

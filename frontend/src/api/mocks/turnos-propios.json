@@ -16,14 +16,7 @@
  {
   "empleado_id": "RST_056",
   "fecha": "2025-10-01",
-  "servicio": "19_21",
-  "rol": "garzon",
-  "horas_programadas": 2.0
- },
- {
-  "empleado_id": "RST_056",
-  "fecha": "2025-10-02",
-  "servicio": "19_21",
+  "servicio": "21_23",
   "rol": "garzon",
   "horas_programadas": 2.0
  },
@@ -50,6 +43,34 @@
  },
  {
   "empleado_id": "RST_056",
+  "fecha": "2025-10-05",
+  "servicio": "23_cierre",
+  "rol": "garzon",
+  "horas_programadas": 2.0
+ },
+ {
+  "empleado_id": "RST_056",
+  "fecha": "2025-10-06",
+  "servicio": "19_21",
+  "rol": "garzon",
+  "horas_programadas": 2.0
+ },
+ {
+  "empleado_id": "RST_056",
+  "fecha": "2025-10-06",
+  "servicio": "23_cierre",
+  "rol": "garzon",
+  "horas_programadas": 2.0
+ },
+ {
+  "empleado_id": "RST_056",
+  "fecha": "2025-10-07",
+  "servicio": "19_21",
+  "rol": "garzon",
+  "horas_programadas": 2.0
+ },
+ {
+  "empleado_id": "RST_056",
   "fecha": "2025-10-08",
   "servicio": "19_21",
   "rol": "garzon",
@@ -57,14 +78,14 @@
  },
  {
   "empleado_id": "RST_056",
-  "fecha": "2025-10-09",
-  "servicio": "19_21",
+  "fecha": "2025-10-08",
+  "servicio": "21_23",
   "rol": "garzon",
   "horas_programadas": 2.0
  },
  {
   "empleado_id": "RST_056",
-  "fecha": "2025-10-11",
+  "fecha": "2025-10-10",
   "servicio": "19_21",
   "rol": "garzon",
   "horas_programadas": 2.0
@@ -85,13 +106,6 @@
  },
  {
   "empleado_id": "RST_056",
-  "fecha": "2025-10-14",
-  "servicio": "21_23",
-  "rol": "garzon",
-  "horas_programadas": 2.0
- },
- {
-  "empleado_id": "RST_056",
   "fecha": "2025-10-15",
   "servicio": "19_21",
   "rol": "garzon",
@@ -99,6 +113,20 @@
  },
  {
   "empleado_id": "RST_056",
+  "fecha": "2025-10-15",
+  "servicio": "21_23",
+  "rol": "garzon",
+  "horas_programadas": 2.0
+ },
+ {
+  "empleado_id": "RST_056",
+  "fecha": "2025-10-16",
+  "servicio": "21_23",
+  "rol": "garzon",
+  "horas_programadas": 2.0
+ },
+ {
+  "empleado_id": "RST_056",
   "fecha": "2025-10-17",
   "servicio": "19_21",
   "rol": "garzon",
@@ -107,21 +135,35 @@
  {
   "empleado_id": "RST_056",
   "fecha": "2025-10-17",
-  "servicio": "21_23",
+  "servicio": "23_cierre",
+  "rol": "garzon",
+  "horas_programadas": 3.0
+ },
+ {
+  "empleado_id": "RST_056",
+  "fecha": "2025-10-18",
+  "servicio": "19_21",
   "rol": "garzon",
   "horas_programadas": 2.0
  },
  {
   "empleado_id": "RST_056",
   "fecha": "2025-10-18",
-  "servicio": "21_23",
+  "servicio": "23_cierre",
+  "rol": "garzon",
+  "horas_programadas": 3.0
+ },
+ {
+  "empleado_id": "RST_056",
+  "fecha": "2025-10-19",
+  "servicio": "19_21",
   "rol": "garzon",
   "horas_programadas": 2.0
  },
  {
   "empleado_id": "RST_056",
   "fecha": "2025-10-19",
-  "servicio": "19_21",
+  "servicio": "23_cierre",
   "rol": "garzon",
   "horas_programadas": 2.0
  },
@@ -155,6 +197,13 @@
  },
  {
   "empleado_id": "RST_056",
+  "fecha": "2025-10-23",
+  "servicio": "23_cierre",
+  "rol": "garzon",
+  "horas_programadas": 2.0
+ },
+ {
+  "empleado_id": "RST_056",
   "fecha": "2025-10-24",
   "servicio": "19_21",
   "rol": "garzon",
@@ -162,8 +211,15 @@
  },
  {
   "empleado_id": "RST_056",
-  "fecha": "2025-10-25",
+  "fecha": "2025-10-24",
   "servicio": "21_23",
+  "rol": "garzon",
+  "horas_programadas": 2.0
+ },
+ {
+  "empleado_id": "RST_056",
+  "fecha": "2025-10-25",
+  "servicio": "19_21",
   "rol": "garzon",
   "horas_programadas": 2.0
  },
@@ -178,6 +234,20 @@
   "empleado_id": "RST_056",
   "fecha": "2025-10-26",
   "servicio": "21_23",
+  "rol": "garzon",
+  "horas_programadas": 2.0
+ },
+ {
+  "empleado_id": "RST_056",
+  "fecha": "2025-10-27",
+  "servicio": "19_21",
+  "rol": "garzon",
+  "horas_programadas": 2.0
+ },
+ {
+  "empleado_id": "RST_056",
+  "fecha": "2025-10-28",
+  "servicio": "19_21",
   "rol": "garzon",
   "horas_programadas": 2.0
  },
@@ -204,15 +274,15 @@
  },
  {
   "empleado_id": "RST_056",
-  "fecha": "2025-10-31",
-  "servicio": "19_21",
+  "fecha": "2025-10-30",
+  "servicio": "21_23",
   "rol": "garzon",
   "horas_programadas": 2.0
  },
  {
   "empleado_id": "RST_056",
   "fecha": "2025-10-31",
-  "servicio": "21_23",
+  "servicio": "19_21",
   "rol": "garzon",
   "horas_programadas": 2.0
  },

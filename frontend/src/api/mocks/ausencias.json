@@ -1,15 +1,13 @@
 [
   {
-    "empleado_id": "RST_003",
-    "nombre": "Isidora Silva",
-    "rol": "garzon",
+    "empleado_id": "RST_006",
+    "nombre": "Sebastián Gutiérrez",
+    "rol": "cajero",
     "fecha": "2025-10-17",
     "motivo": "personal",
-    "horas": 6.0,
+    "horas": 2.0,
     "aviso_corto": false,
     "servicios": [
-      "11_13",
-      "13_15",
       "21_23"
     ]
   },
@@ -19,23 +17,47 @@
     "rol": "jefe_turno",
     "fecha": "2025-10-17",
     "motivo": "salud",
-    "horas": 4.0,
-    "aviso_corto": false,
+    "horas": 2.0,
+    "aviso_corto": true,
     "servicios": [
-      "11_13",
-      "13_15"
+      "19_21"
     ]
   },
   {
-    "empleado_id": "RST_051",
-    "nombre": "Isidora Reyes",
-    "rol": "cocinero_linea",
+    "empleado_id": "RST_037",
+    "nombre": "Agustín Valenzuela",
+    "rol": "host",
+    "fecha": "2025-10-17",
+    "motivo": "personal",
+    "horas": 3.0,
+    "aviso_corto": true,
+    "servicios": [
+      "23_cierre"
+    ]
+  },
+  {
+    "empleado_id": "RST_043",
+    "nombre": "Javiera Vásquez",
+    "rol": "ayudante_cocina",
+    "fecha": "2025-10-17",
+    "motivo": "personal",
+    "horas": 5.0,
+    "aviso_corto": true,
+    "servicios": [
+      "13_15",
+      "23_cierre"
+    ]
+  },
+  {
+    "empleado_id": "RST_063",
+    "nombre": "Felipe Castro",
+    "rol": "ayudante_cocina",
     "fecha": "2025-10-17",
     "motivo": "personal",
     "horas": 4.0,
-    "aviso_corto": false,
+    "aviso_corto": true,
     "servicios": [
-      "13_15",
+      "19_21",
       "21_23"
     ]
   },
@@ -47,18 +69,6 @@
     "motivo": "salud",
     "horas": 2.0,
     "aviso_corto": true,
-    "servicios": [
-      "19_21"
-    ]
-  },
-  {
-    "empleado_id": "RST_074",
-    "nombre": "Isidora Pérez",
-    "rol": "cajero",
-    "fecha": "2025-10-17",
-    "motivo": "personal",
-    "horas": 2.0,
-    "aviso_corto": false,
     "servicios": [
       "19_21"
     ]

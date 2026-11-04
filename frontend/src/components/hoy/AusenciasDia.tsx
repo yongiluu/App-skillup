@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { AusenciaDia, Rol } from '../../api/tipos'
-import { HORARIO_FRANJA, NOMBRE_ROL } from '../../lib/formato'
+import { NOMBRE_ROL, horario } from '../../lib/formato'
 import Avatar from '../ui/Avatar'
 import estilos from './Hoy.module.css'
 
@@ -25,7 +25,7 @@ export default function AusenciasDia({ ausencias }: { ausencias: AusenciaDia[] }
             · {NOMBRE_ROL[a.rol as Rol] ?? a.rol}
             <span className={estilos.detalle}>
               {a.servicios.length > 0
-                ? `Programado/a en ${a.servicios.map((s) => HORARIO_FRANJA[s]).join(', ')}`
+                ? `Programado/a en ${a.servicios.map((s) => horario(s, a.fecha)).join(', ')}`
                 : 'Sin turnos programados hoy'}
             </span>
           </span>

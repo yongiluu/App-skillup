@@ -11,6 +11,7 @@ import MisTurnos from './pages/MisTurnos'
 import MisSolicitudes from './pages/MisSolicitudes'
 import MiBienestar from './pages/MiBienestar'
 import Solicitudes from './pages/Solicitudes'
+import Analisis from './pages/Analisis'
 import NoEncontrado from './pages/NoEncontrado'
 import SistemaVisual from './pages/SistemaVisual'
 
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/equipo" element={<Equipo />} />
           <Route path="/equipo/:id" element={<Ficha />} />
           <Route path="/solicitudes" element={<Solicitudes />} />
+          <Route path="/analisis" element={<Analisis />} />
         </Route>
       </Route>
 

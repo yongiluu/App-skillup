@@ -3,7 +3,7 @@ import { getSolicitudes, resolverSolicitud } from '../api'
 import type { SolicitudCambio } from '../api/tipos'
 import { useDatos } from '../lib/useDatos'
 import { useEquipo } from '../lib/useNombres'
-import { HORARIO_FRANJA, NOMBRE_ROL } from '../lib/formato'
+import { NOMBRE_ROL, horario } from '../lib/formato'
 import { encabezadoDia } from '../lib/fechas'
 import EncabezadoPagina from '../components/ui/EncabezadoPagina'
 import Boton from '../components/ui/Boton'
@@ -52,7 +52,7 @@ function Pendiente({
         <EstadoSolicitud estado={s.estado} />
       </div>
       <p>
-        {encabezadoDia(s.fecha).largo} · {HORARIO_FRANJA[s.servicio]}
+        {encabezadoDia(s.fecha).largo} · {horario(s.servicio, s.fecha)}
       </p>
       <p className={estilos.detalle}>
         {s.reemplazo_id ? `Propone que lo cubra: ${nombre(s.reemplazo_id)}` : 'No propuso reemplazo'}
@@ -149,7 +149,7 @@ export default function Solicitudes() {
                   <EstadoSolicitud estado={s.estado} />
                 </div>
                 <p>
-                  {encabezadoDia(s.fecha).largo} · {HORARIO_FRANJA[s.servicio]}
+                  {encabezadoDia(s.fecha).largo} · {horario(s.servicio, s.fecha)}
                 </p>
                 {s.reemplazo_id && <p className={estilos.detalle}>Reemplazo: {nombre(s.reemplazo_id)}</p>}
                 {s.comentario && <p className={estilos.comentario}>{s.comentario}</p>}

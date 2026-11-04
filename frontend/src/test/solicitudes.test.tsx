@@ -26,11 +26,11 @@ describe('cambio de turno: el empleado pide y el jefe resuelve', () => {
     const u = userEvent.setup()
     montar()
     await ingresar(u, 'empleado')
-    // Cristóbal Silva (RST_056, garzón) trabaja hoy 17-10 de 19 a 21 y de 21 a 23
+    // Cristóbal Silva (RST_056, garzón) trabaja hoy 17-10 de 19 a 21 y en el cierre (23:00–02:00, viernes)
     const hoy = await screen.findByRole('heading', { level: 2, name: /viernes, 17 de octubre.*Hoy/i })
     const dia = hoy.closest('section')!
     expect(within(dia).getByText('19:00–21:00')).toBeInTheDocument()
-    expect(within(dia).getByText('21:00–23:00')).toBeInTheDocument()
+    expect(within(dia).getByText('23:00–02:00')).toBeInTheDocument()
     expect(within(dia).getAllByText('Garzón')).toHaveLength(2)
     // Nada antes de hoy
     expect(screen.queryByText(/16 de octubre/)).not.toBeInTheDocument()

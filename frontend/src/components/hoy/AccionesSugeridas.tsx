@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom'
 import type { Franja, Rol, RolCritico, Sugerencia } from '../../api/tipos'
-import { HORARIO_FRANJA, NOMBRE_ROL, porcentaje } from '../../lib/formato'
+import { FRANJAS, NOMBRE_ROL, horario, porcentaje } from '../../lib/formato'
 import Avatar from '../ui/Avatar'
 import estilos from './Hoy.module.css'
 
-const ORDEN: Franja[] = ['11_13', '13_15', '19_21', '21_23']
+const ORDEN: Franja[] = FRANJAS
 const rol = (r: string) => NOMBRE_ROL[r as Rol] ?? r
 
 interface Grupo {
+  fecha: string
   servicio: Franja
   rol: RolCritico
   prob: number
@@ -19,7 +20,7 @@ function agrupar(sugerencias: Sugerencia[]): Grupo[] {
   const grupos = new Map<string, Grupo>()
   for (const s of sugerencias) {
     const k = `${s.servicio}|${s.rol_a_cubrir}`
-    if (!grupos.has(k)) grupos.set(k, { servicio: s.servicio, rol: s.rol_a_cubrir, prob: s.prob_deficit_rol, items: [] })
+    if (!grupos.has(k)) grupos.set(k, { fecha: s.fecha, servicio: s.servicio, rol: s.rol_a_cubrir, prob: s.prob_deficit_rol, items: [] })
     grupos.get(k)!.items.push(s)
   }
   return [...grupos.values()].sort(
@@ -43,7 +44,7 @@ export default function AccionesSugeridas({ sugerencias }: { sugerencias: Sugere
         <section key={`${g.servicio}-${g.rol}`} className={estilos.grupo}>
           <header className={estilos.grupoCabecera}>
             <h3>
-              {HORARIO_FRANJA[g.servicio]} · {rol(g.rol)}
+              {horario(g.servicio, g.fecha)} · {rol(g.rol)}
             </h3>
             <span className={estilos.prob}>Prob. de que falte: {porcentaje(g.prob)}</span>
           </header>

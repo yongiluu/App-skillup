@@ -868,5 +868,67 @@
     "puede_cubrir": [],
     "tipo_contrato": "full_time",
     "preferencia_turno": "midday"
+  },
+  {
+    "id": "RST_081",
+    "nombre": "Matías Torres",
+    "rol": "ayudante_cocina",
+    "rol_respaldo": null,
+    "polivalente": false,
+    "puede_cubrir": [],
+    "tipo_contrato": "full_time",
+    "preferencia_turno": "evening"
+  },
+  {
+    "id": "RST_082",
+    "nombre": "Javiera Castro",
+    "rol": "garzon",
+    "rol_respaldo": null,
+    "polivalente": false,
+    "puede_cubrir": [],
+    "tipo_contrato": "full_time",
+    "preferencia_turno": "mixed"
+  },
+  {
+    "id": "RST_083",
+    "nombre": "Valentina Vásquez",
+    "rol": "garzon",
+    "rol_respaldo": null,
+    "polivalente": false,
+    "puede_cubrir": [],
+    "tipo_contrato": "full_time",
+    "preferencia_turno": "midday"
+  },
+  {
+    "id": "RST_084",
+    "nombre": "Fernanda Pérez",
+    "rol": "cajero",
+    "rol_respaldo": "host",
+    "polivalente": true,
+    "puede_cubrir": [
+      "host"
+    ],
+    "tipo_contrato": "full_time",
+    "preferencia_turno": "mixed"
+  },
+  {
+    "id": "RST_085",
+    "nombre": "Agustín Soto",
+    "rol": "garzon",
+    "rol_respaldo": null,
+    "polivalente": false,
+    "puede_cubrir": [],
+    "tipo_contrato": "full_time",
+    "preferencia_turno": "midday"
+  },
+  {
+    "id": "RST_086",
+    "nombre": "Ignacio Tapia",
+    "rol": "jefe_turno",
+    "rol_respaldo": null,
+    "polivalente": false,
+    "puede_cubrir": [],
+    "tipo_contrato": "full_time",
+    "preferencia_turno": "evening"
   }
 ]

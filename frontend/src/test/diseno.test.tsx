@@ -18,9 +18,9 @@ const enRouter = (ui: React.ReactNode) => render(<MemoryRouter>{ui}</MemoryRoute
 
 describe('anillo de fatiga (solo la propia persona)', () => {
   it('muestra el nivel que entrega la API, sin calcular otro puntaje', () => {
-    enRouter(<AnilloFatiga bienestar={deFicha('RST_003')} />)
+    enRouter(<AnilloFatiga bienestar={deFicha('RST_002')} />)
     expect(screen.getByText('Fatiga alta')).toBeInTheDocument()
-    expect(screen.getByText(/carga física y cansancio informado/)).toBeInTheDocument()
+    expect(screen.getByText(/carga física y jornada larga/)).toBeInTheDocument()
     expect(screen.getByText(/No es diagnóstico/)).toBeInTheDocument()
     expect(screen.queryByText(/de 100/)).not.toBeInTheDocument()
   })
@@ -43,7 +43,7 @@ describe('inicio del trabajador', () => {
     )
     const hoy = screen.getByRole('region', { name: 'Tu turno de hoy' })
     expect(within(hoy).getByText('19:00–21:00')).toBeInTheDocument()
-    expect(within(hoy).getByText('21:00–23:00')).toBeInTheDocument()
+    expect(within(hoy).getByText('23:00–02:00')).toBeInTheDocument()
     expect(within(hoy).getByText('Garzón')).toBeInTheDocument()
     const semana = screen.getByRole('region', { name: 'Tu semana' })
     expect(within(semana).getAllByRole('listitem')).toHaveLength(7)
@@ -59,7 +59,7 @@ describe('panel del jefe', () => {
   it('las cifras usan el servicio más crítico, las ausencias y las solicitudes pendientes', () => {
     enRouter(<Kpis servicios={dia.servicios} ausencias={ausencias as AusenciaDia[]} solicitudes={[]} />)
     const resumen = screen.getByRole('list', { name: 'Resumen del día' })
-    expect(within(resumen).getByText(/Crítico 13–15/)).toBeInTheDocument()
+    expect(within(resumen).getByText(/Crítico 23–02/)).toBeInTheDocument()
     expect(within(resumen).getByText(String(ausencias.length))).toBeInTheDocument()
     expect(within(resumen).getByRole('link', { name: /Solicitudes/ })).toHaveAttribute('href', '/solicitudes')
   })
@@ -69,8 +69,8 @@ describe('panel del jefe', () => {
     const tabla = screen.getByRole('table')
     expect(within(tabla).getAllByRole('row')).toHaveLength(4)
     expect(within(tabla).getAllByRole('cell')).toHaveLength(12)
-    // Jefe de turno 13–15 = 75 % → riesgo alto (umbral ≥ 0,75)
-    expect(within(tabla).getByText(/75\s%/).textContent).toMatch(/Riesgo alto/)
+    // Jefe de turno 19–21 = 0,549: se muestra 54 % y "Riesgo bajo" (nunca 55 % con riesgo bajo)
+    expect(within(tabla).getByText(/54\s%/).textContent).toMatch(/Riesgo bajo/)
   })
 })
 
@@ -103,16 +103,31 @@ describe('modo oscuro', () => {
 })
 
 describe('cobertura real (programados − ausentes)', () => {
-  it('13–15: 25 programados, 3 avisaron ausencia → vienen 22 de 23 y falta 1', async () => {
+  it('cierre del viernes: 12 programados, 2 avisaron ausencia → vienen 10 de 11 y falta 1', async () => {
     const { cobertura, rolMasEnRiesgo } = await import('../lib/cobertura')
-    const s = dia.servicios.find((x) => x.servicio === '13_15')!
-    expect(cobertura(s, ausencias as AusenciaDia[])).toEqual({ ausentes: 3, presentes: 22, faltan: 1 })
-    expect(rolMasEnRiesgo(s).rol).toBe('jefe_turno')
+    const s = dia.servicios.find((x) => x.servicio === '23_cierre')!
+    expect(cobertura(s, ausencias as AusenciaDia[])).toEqual({ ausentes: 2, presentes: 10, faltan: 1 })
+    expect(rolMasEnRiesgo(s).rol).toBe('garzon')
   })
 
   it('sin datos de ausencias usa los programados, sin inventar', async () => {
     const { cobertura } = await import('../lib/cobertura')
     const s = dia.servicios[0]
     expect(cobertura(s, null)).toEqual({ ausentes: null, presentes: s.asignados, faltan: Math.max(0, s.requeridos - s.asignados) })
+  })
+})
+
+describe('Análisis del modelo (jefe)', () => {
+  it('muestra la validación oficial, los niveles, la calibración y la regresión con datos reales del archivo', async () => {
+    const { default: Analisis } = await import('../pages/Analisis')
+    const datos = (await import('../data/analisis-modelo.json')).default
+    enRouter(<Analisis />)
+    expect(screen.getByRole('heading', { level: 1, name: 'Análisis del modelo' })).toBeInTheDocument()
+    expect(screen.getByText(/calibrado/)).toBeInTheDocument()
+    const alto = datos.niveles.find((n) => n.nivel === 'alto')!
+    expect(screen.getByText(new RegExp(`Alto · ${alto.servicios}`))).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /Calibración/ })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /Regresión de la dotación/ })).toBeInTheDocument()
+    expect(datos.regresion.puntos).toHaveLength(datos.ventana.servicios)
   })
 })

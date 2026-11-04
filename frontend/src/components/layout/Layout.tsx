@@ -79,7 +79,7 @@ export default function Layout() {
       <main id="contenido" className={estilos.contenido}>
         {USAR_MOCKS && (
           <p className={estilos.simulados} role="note">
-            Datos simulados · “hoy” es el 17 de octubre de 2025 · [PENDIENTE CERVECERÍA]
+            Datos simulados · “hoy” es el 17 de octubre de 2025
           </p>
         )}
         <Outlet />
