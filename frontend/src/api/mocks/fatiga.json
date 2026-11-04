@@ -5,10 +5,8 @@
   "rol": "runner",
   "estado": "ok",
   "fatiga": {
-   "nivel": "medio",
-   "motivos": [
-    "carga_fisica"
-   ],
+   "nivel": "bajo",
+   "motivos": [],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -19,8 +17,11 @@
   "rol": "runner",
   "estado": "ok",
   "fatiga": {
-   "nivel": "bajo",
-   "motivos": [],
+   "nivel": "alto",
+   "motivos": [
+    "carga_fisica",
+    "jornada"
+   ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -31,11 +32,8 @@
   "rol": "garzon",
   "estado": "ok",
   "fatiga": {
-   "nivel": "alto",
-   "motivos": [
-    "carga_fisica",
-    "autorreporte"
-   ],
+   "nivel": "bajo",
+   "motivos": [],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -53,8 +51,10 @@
   "rol": "garzon",
   "estado": "ok",
   "fatiga": {
-   "nivel": "bajo",
-   "motivos": [],
+   "nivel": "medio",
+   "motivos": [
+    "carga_fisica"
+   ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -65,10 +65,8 @@
   "rol": "cajero",
   "estado": "ok",
   "fatiga": {
-   "nivel": "medio",
-   "motivos": [
-    "descanso"
-   ],
+   "nivel": "bajo",
+   "motivos": [],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -79,8 +77,9 @@
   "rol": "garzon",
   "estado": "ok",
   "fatiga": {
-   "nivel": "medio",
+   "nivel": "alto",
    "motivos": [
+    "jornada",
     "carga_fisica"
    ],
    "calculado_al": "2025-10-17",
@@ -138,10 +137,8 @@
   "rol": "copero",
   "estado": "ok",
   "fatiga": {
-   "nivel": "medio",
-   "motivos": [
-    "jornada"
-   ],
+   "nivel": "bajo",
+   "motivos": [],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -171,11 +168,8 @@
   "rol": "garzon",
   "estado": "ok",
   "fatiga": {
-   "nivel": "alto",
-   "motivos": [
-    "carga_fisica",
-    "jornada"
-   ],
+   "nivel": "bajo",
+   "motivos": [],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -310,8 +304,10 @@
   "rol": "ayudante_cocina",
   "estado": "ok",
   "fatiga": {
-   "nivel": "bajo",
-   "motivos": [],
+   "nivel": "alto",
+   "motivos": [
+    "jornada"
+   ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -373,10 +369,8 @@
   "rol": "runner",
   "estado": "ok",
   "fatiga": {
-   "nivel": "medio",
-   "motivos": [
-    "carga_fisica"
-   ],
+   "nivel": "bajo",
+   "motivos": [],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -423,8 +417,11 @@
   "rol": "host",
   "estado": "ok",
   "fatiga": {
-   "nivel": "bajo",
-   "motivos": [],
+   "nivel": "alto",
+   "motivos": [
+    "jornada",
+    "autorreporte"
+   ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -462,7 +459,7 @@
    "nivel": "alto",
    "motivos": [
     "jornada",
-    "carga_fisica"
+    "autorreporte"
    ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
@@ -489,10 +486,8 @@
   "rol": "cocinero_linea",
   "estado": "ok",
   "fatiga": {
-   "nivel": "medio",
-   "motivos": [
-    "jornada"
-   ],
+   "nivel": "bajo",
+   "motivos": [],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -505,8 +500,8 @@
   "fatiga": {
    "nivel": "alto",
    "motivos": [
-    "jornada",
-    "descanso"
+    "descanso",
+    "autorreporte"
    ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
@@ -525,8 +520,10 @@
   "rol": "garzon",
   "estado": "ok",
   "fatiga": {
-   "nivel": "bajo",
-   "motivos": [],
+   "nivel": "alto",
+   "motivos": [
+    "carga_fisica"
+   ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -539,8 +536,8 @@
   "fatiga": {
    "nivel": "alto",
    "motivos": [
-    "descanso",
-    "jornada"
+    "jornada",
+    "autorreporte"
    ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
@@ -576,8 +573,10 @@
   "rol": "runner",
   "estado": "ok",
   "fatiga": {
-   "nivel": "bajo",
-   "motivos": [],
+   "nivel": "medio",
+   "motivos": [
+    "carga_fisica"
+   ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -588,9 +587,10 @@
   "rol": "cocinero_linea",
   "estado": "ok",
   "fatiga": {
-   "nivel": "medio",
+   "nivel": "alto",
    "motivos": [
-    "descanso"
+    "jornada",
+    "autorreporte"
    ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
@@ -621,10 +621,8 @@
   "rol": "cocinero_linea",
   "estado": "ok",
   "fatiga": {
-   "nivel": "medio",
-   "motivos": [
-    "descanso"
-   ],
+   "nivel": "bajo",
+   "motivos": [],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -635,8 +633,11 @@
   "rol": "cocinero_linea",
   "estado": "ok",
   "fatiga": {
-   "nivel": "bajo",
-   "motivos": [],
+   "nivel": "alto",
+   "motivos": [
+    "jornada",
+    "autorreporte"
+   ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -659,7 +660,7 @@
   "rol": "garzon",
   "estado": "ok",
   "fatiga": {
-   "nivel": "medio",
+   "nivel": "alto",
    "motivos": [
     "descanso"
    ],
@@ -723,10 +724,8 @@
   "rol": "garzon",
   "estado": "ok",
   "fatiga": {
-   "nivel": "medio",
-   "motivos": [
-    "carga_fisica"
-   ],
+   "nivel": "bajo",
+   "motivos": [],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -739,8 +738,8 @@
   "fatiga": {
    "nivel": "alto",
    "motivos": [
-    "autorreporte",
-    "jornada"
+    "jornada",
+    "autorreporte"
    ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
@@ -773,8 +772,8 @@
   "fatiga": {
    "nivel": "alto",
    "motivos": [
-    "jornada",
-    "carga_fisica"
+    "autorreporte",
+    "jornada"
    ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
@@ -800,10 +799,8 @@
   "rol": "copero",
   "estado": "ok",
   "fatiga": {
-   "nivel": "medio",
-   "motivos": [
-    "descanso"
-   ],
+   "nivel": "bajo",
+   "motivos": [],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -814,8 +811,10 @@
   "rol": "cocinero_linea",
   "estado": "ok",
   "fatiga": {
-   "nivel": "bajo",
-   "motivos": [],
+   "nivel": "medio",
+   "motivos": [
+    "jornada"
+   ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -826,8 +825,11 @@
   "rol": "garzon",
   "estado": "ok",
   "fatiga": {
-   "nivel": "bajo",
-   "motivos": [],
+   "nivel": "alto",
+   "motivos": [
+    "jornada",
+    "carga_fisica"
+   ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -838,11 +840,8 @@
   "rol": "garzon",
   "estado": "ok",
   "fatiga": {
-   "nivel": "alto",
-   "motivos": [
-    "carga_fisica",
-    "jornada"
-   ],
+   "nivel": "bajo",
+   "motivos": [],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -884,10 +883,8 @@
   "rol": "garzon",
   "estado": "ok",
   "fatiga": {
-   "nivel": "medio",
-   "motivos": [
-    "carga_fisica"
-   ],
+   "nivel": "bajo",
+   "motivos": [],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -905,8 +902,11 @@
   "rol": "cocinero_linea",
   "estado": "ok",
   "fatiga": {
-   "nivel": "bajo",
-   "motivos": [],
+   "nivel": "alto",
+   "motivos": [
+    "jornada",
+    "descanso"
+   ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3
   }
@@ -931,10 +931,87 @@
   "rol": "host",
   "estado": "ok",
   "fatiga": {
+   "nivel": "bajo",
+   "motivos": [],
+   "calculado_al": "2025-10-17",
+   "dias_considerados": 3
+  }
+ },
+ {
+  "empleado_id": "RST_081",
+  "nombre": "Matías Torres",
+  "rol": "ayudante_cocina",
+  "estado": "ok",
+  "fatiga": {
+   "nivel": "medio",
+   "motivos": [
+    "jornada"
+   ],
+   "calculado_al": "2025-10-17",
+   "dias_considerados": 3
+  }
+ },
+ {
+  "empleado_id": "RST_082",
+  "nombre": "Javiera Castro",
+  "rol": "garzon",
+  "estado": "ok",
+  "fatiga": {
+   "nivel": "medio",
+   "motivos": [
+    "carga_fisica"
+   ],
+   "calculado_al": "2025-10-17",
+   "dias_considerados": 3
+  }
+ },
+ {
+  "empleado_id": "RST_083",
+  "nombre": "Valentina Vásquez",
+  "rol": "garzon",
+  "estado": "ok",
+  "fatiga": {
+   "nivel": "bajo",
+   "motivos": [],
+   "calculado_al": "2025-10-17",
+   "dias_considerados": 3
+  }
+ },
+ {
+  "empleado_id": "RST_084",
+  "nombre": "Fernanda Pérez",
+  "rol": "cajero",
+  "estado": "ok",
+  "fatiga": {
    "nivel": "alto",
    "motivos": [
-    "jornada",
-    "autorreporte"
+    "jornada"
+   ],
+   "calculado_al": "2025-10-17",
+   "dias_considerados": 3
+  }
+ },
+ {
+  "empleado_id": "RST_085",
+  "nombre": "Agustín Soto",
+  "rol": "garzon",
+  "estado": "ok",
+  "fatiga": {
+   "nivel": "bajo",
+   "motivos": [],
+   "calculado_al": "2025-10-17",
+   "dias_considerados": 3
+  }
+ },
+ {
+  "empleado_id": "RST_086",
+  "nombre": "Ignacio Tapia",
+  "rol": "jefe_turno",
+  "estado": "ok",
+  "fatiga": {
+   "nivel": "medio",
+   "motivos": [
+    "jornada"
    ],
    "calculado_al": "2025-10-17",
    "dias_considerados": 3

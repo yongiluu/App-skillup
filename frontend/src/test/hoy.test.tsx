@@ -15,10 +15,8 @@ describe('acciones sugeridas', () => {
       </MemoryRouter>,
     )
     const titulos = screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)
-    // Ordenadas por franja (las sugerencias del 17-10 parten en 13:00–15:00)
-    expect(titulos[0]).toMatch(/^13:00–15:00/)
-    const inicios = titulos.map((t) => t!.slice(0, 5))
-    expect(inicios).toEqual([...inicios].sort())
+    // Las sugerencias del 17-10 son para el cierre del viernes (23:00–02:00)
+    expect(titulos[0]).toMatch(/^23:00–02:00 · Garzón/)
     // Cada sugerencia aparece una vez con su acción
     expect(screen.getAllByText(/^(Mover|Llamar)$/)).toHaveLength(sugerencias.length)
     // "Llamar" y "Mover" abren la ficha de la persona (AP-09)

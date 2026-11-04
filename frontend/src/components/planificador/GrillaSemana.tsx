@@ -1,5 +1,5 @@
 import type { DiaServicios, Franja, Semana, Servicio } from '../../api/tipos'
-import { HORARIO_FRANJA, porcentaje } from '../../lib/formato'
+import { FRANJAS, HORARIO_FRANJA, horario, porcentaje } from '../../lib/formato'
 import { ETIQUETA_RIESGO } from '../../lib/riesgo'
 import { encabezadoDia, rangoSemana } from '../../lib/fechas'
 import { ETIQUETA_CORTA, marcasDelDia } from '../../lib/calendario'
@@ -7,7 +7,6 @@ import InsigniaRiesgo from '../ui/InsigniaRiesgo'
 import Icono from '../ui/Icono'
 import estilos from './Planificador.module.css'
 
-const FRANJAS: Franja[] = ['11_13', '13_15', '19_21', '21_23']
 const ICONO = { bajo: 'ok', alerta: 'alerta', alto: 'alto' } as const
 
 const servicioDe = (d: DiaServicios, f: Franja) => d.servicios.find((s) => s.servicio === f)
@@ -116,7 +115,7 @@ export default function GrillaSemana({ semana, hoy }: { semana: Semana; hoy?: st
                 const s = servicioDe(d, f)
                 return (
                   <li key={f}>
-                    <span className={estilos.franjaMovil}>{HORARIO_FRANJA[f]}</span>
+                    <span className={estilos.franjaMovil}>{horario(f, d.fecha)}</span>
                     {s ? (
                       <>
                         <span className={estilos.dotacionMovil}>

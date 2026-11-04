@@ -3,7 +3,7 @@ import { getSolicitudes } from '../api'
 import type { SolicitudCambio } from '../api/tipos'
 import { useDatos } from '../lib/useDatos'
 import { useEquipo } from '../lib/useNombres'
-import { HORARIO_FRANJA } from '../lib/formato'
+import { horario } from '../lib/formato'
 import { encabezadoDia } from '../lib/fechas'
 import EncabezadoPagina from '../components/ui/EncabezadoPagina'
 import Aviso from '../components/ui/Aviso'
@@ -42,7 +42,7 @@ export default function MisSolicitudes() {
                 <li key={s.id} className={estilos.tarjeta}>
                   <div className={estilos.cabeceraSolicitud}>
                     <b>
-                      {encabezadoDia(s.fecha).largo} · {HORARIO_FRANJA[s.servicio]}
+                      {encabezadoDia(s.fecha).largo} · {horario(s.servicio, s.fecha)}
                     </b>
                     <EstadoSolicitud estado={s.estado} />
                   </div>
@@ -68,7 +68,7 @@ export default function MisSolicitudes() {
                   <li key={s.id} className={estilos.tarjeta}>
                     <div className={estilos.cabeceraSolicitud}>
                       <b>
-                        {encabezadoDia(s.fecha).largo} · {HORARIO_FRANJA[s.servicio]}
+                        {encabezadoDia(s.fecha).largo} · {horario(s.servicio, s.fecha)}
                       </b>
                       <EstadoSolicitud estado={s.estado} />
                     </div>

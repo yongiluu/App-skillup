@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getFicha } from '../api'
 import { useDatos } from '../lib/useDatos'
-import { HORARIO_FRANJA, NOMBRE_ROL, fechaBreve, fechaCorta } from '../lib/formato'
+import { NOMBRE_ROL, fechaBreve, fechaCorta, horario } from '../lib/formato'
 import type { Rol } from '../api/tipos'
 import EncabezadoPagina from '../components/ui/EncabezadoPagina'
 import Tarjeta from '../components/ui/Tarjeta'
@@ -67,7 +67,7 @@ export default function Ficha() {
                           <li key={`${t.fecha}-${t.servicio}-${t.rol}`}>
                             <span>{fechaBreve(t.fecha)}</span>
                             <span>
-                              {HORARIO_FRANJA[t.servicio]} · {rol(t.rol)}
+                              {horario(t.servicio, t.fecha)} · {rol(t.rol)}
                             </span>
                           </li>
                         ))}

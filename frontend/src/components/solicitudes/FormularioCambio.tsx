@@ -2,7 +2,7 @@ import { useId, useState } from 'react'
 import type { FormEvent } from 'react'
 import { crearSolicitud } from '../../api'
 import type { Empleado, SolicitudCambio, Turno } from '../../api/tipos'
-import { HORARIO_FRANJA, NOMBRE_ROL } from '../../lib/formato'
+import { NOMBRE_ROL, horario } from '../../lib/formato'
 import { encabezadoDia } from '../../lib/fechas'
 import Boton from '../ui/Boton'
 import Aviso from '../ui/Aviso'
@@ -57,7 +57,7 @@ export default function FormularioCambio({ turno, equipo, alEnviar, alCancelar }
   return (
     <form className={estilos.formulario} onSubmit={enviar} aria-labelledby={`${id}-titulo`}>
       <h3 id={`${id}-titulo`}>
-        Pedir cambio · {encabezadoDia(turno.fecha).largo}, {HORARIO_FRANJA[turno.servicio]}
+        Pedir cambio · {encabezadoDia(turno.fecha).largo}, {horario(turno.servicio, turno.fecha)}
       </h3>
       {error && <Aviso tipo="error">{error}</Aviso>}
 

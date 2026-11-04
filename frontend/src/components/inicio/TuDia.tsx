@@ -1,5 +1,5 @@
 import type { Rol, Turno } from '../../api/tipos'
-import { HORARIO_FRANJA, NOMBRE_ROL } from '../../lib/formato'
+import { NOMBRE_ROL, horario } from '../../lib/formato'
 import { encabezadoDia, sumarDias } from '../../lib/fechas'
 import Icono from '../ui/Icono'
 import type { NombreIcono } from '../ui/Icono'
@@ -39,7 +39,7 @@ export function TuTurnoHoy({ turnos, hoy }: { turnos: Turno[]; hoy: string }) {
             {deHoy.map((t) => (
               <li key={t.servicio}>
                 <Icono nombre="reloj" tamano={16} />
-                {HORARIO_FRANJA[t.servicio]}
+                {horario(t.servicio, t.fecha)}
               </li>
             ))}
           </ul>
@@ -83,7 +83,7 @@ export function TuSemana({ turnos, hoy }: { turnos: Turno[]; hoy: string }) {
                 {d === hoy && <span className="solo-lector"> (hoy)</span>}
               </span>
               {del.length > 0 ? (
-                del.map((t) => <span key={t.servicio}>{corto(HORARIO_FRANJA[t.servicio])}</span>)
+                del.map((t) => <span key={t.servicio}>{corto(horario(t.servicio, t.fecha))}</span>)
               ) : (
                 <span>libre</span>
               )}

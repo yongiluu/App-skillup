@@ -50,10 +50,10 @@ describe('navegación', () => {
     await ingresar('jefe')
     const servicios = await screen.findByRole('region', { name: 'Servicios del día' })
     const tarjetas = within(servicios).getAllByRole('heading', { level: 2, name: /^\d\d:00–\d\d:00$/ })
-    expect(tarjetas.map((t) => t.textContent)).toEqual(['11:00–13:00', '13:00–15:00', '19:00–21:00', '21:00–23:00'])
+    expect(tarjetas.map((t) => t.textContent)).toEqual(['13:00–15:00', '19:00–21:00', '21:00–23:00', '23:00–02:00'])
     // Cada servicio con su nivel de riesgo y la recomendación en lenguaje normal
     expect(within(servicios).getAllByText(/^(Riesgo alto|Alerta|Riesgo bajo)/, { selector: 'span' })).toHaveLength(4)
-    expect(within(servicios).getAllByText(/refuerza|mantén|monitoreo|reemplazo/i, { selector: 'p' }).length).toBeGreaterThan(0)
+    expect(within(servicios).getAllByText(/refuerza|mantén|monitoreo|reemplazo|alcanza|atento/i, { selector: 'p' }).length).toBeGreaterThan(0)
   })
 
   it('el empleado entra a sus turnos y tiene su propia navegación', async () => {
@@ -107,7 +107,7 @@ describe('navegación', () => {
     await screen.findByRole('link', { name: /Cristóbal Silva/ })
     await u.type(screen.getByLabelText('Buscar por nombre'), 'cristobal silva')
     expect(screen.getAllByRole('link', { name: /Cristóbal/ })).toHaveLength(1)
-    expect(screen.getByText('1 de 80 personas')).toBeInTheDocument()
+    expect(screen.getByText('1 de 86 personas')).toBeInTheDocument()
     await u.clear(screen.getByLabelText('Buscar por nombre'))
     await u.selectOptions(screen.getByLabelText('Rol'), 'jefe_turno')
     const jefes = screen.getAllByRole('link', { name: /Jefe de turno/ })

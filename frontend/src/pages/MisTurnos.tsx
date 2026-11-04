@@ -5,7 +5,7 @@ import { getBienestarPropio, getSolicitudes, getTurnos } from '../api'
 import type { SolicitudCambio, Turno } from '../api/tipos'
 import { useDatos } from '../lib/useDatos'
 import { useEquipo } from '../lib/useNombres'
-import { HORARIO_FRANJA, NOMBRE_ROL, fechaBreve } from '../lib/formato'
+import { NOMBRE_ROL, fechaBreve, horario } from '../lib/formato'
 import { encabezadoDia } from '../lib/fechas'
 import EncabezadoPagina from '../components/ui/EncabezadoPagina'
 import Boton from '../components/ui/Boton'
@@ -68,7 +68,7 @@ export default function MisTurnos() {
       {enviada && (
         <div className={estilos.confirmacion}>
           <Aviso>
-            Solicitud enviada para el {encabezadoDia(enviada.fecha).largo}, {HORARIO_FRANJA[enviada.servicio]}. Tu jefe
+            Solicitud enviada para el {encabezadoDia(enviada.fecha).largo}, {horario(enviada.servicio, enviada.fecha)}. Tu jefe
             de turno la va a revisar. Puedes seguirla en <Link to="/mis-solicitudes">Solicitudes</Link>.
           </Aviso>
         </div>
@@ -112,7 +112,7 @@ export default function MisTurnos() {
                     <li key={clave(t)}>
                       <div className={estilos.turno}>
                         <span>
-                          <b>{HORARIO_FRANJA[t.servicio]}</b>
+                          <b>{horario(t.servicio, t.fecha)}</b>
                           <span className={estilos.detalle}>{NOMBRE_ROL[t.rol]}</span>
                         </span>
                         {s && <EstadoSolicitud estado={s.estado} />}

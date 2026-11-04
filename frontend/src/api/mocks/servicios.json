@@ -13,79 +13,79 @@
   "servicios": [
     {
       "fecha": "2025-10-17",
-      "servicio": "11_13",
-      "horario": "11:00–13:00",
-      "requeridos": 10,
-      "asignados": 12,
-      "dotacion_predicha": 10.3,
-      "cubiertos_previstos": 30,
-      "reservas": 4,
-      "pedidos_delivery": 9,
-      "prob_deficit": 0.283,
-      "nivel_riesgo": "bajo",
-      "prob_por_rol": {
-        "garzon": 0.012,
-        "cocinero_linea": 0.016,
-        "jefe_turno": 0.384
-      },
-      "recomendacion": "Dotación suficiente: no hace falta hacer nada por ahora."
-    },
-    {
-      "fecha": "2025-10-17",
       "servicio": "13_15",
       "horario": "13:00–15:00",
       "requeridos": 23,
       "asignados": 25,
-      "dotacion_predicha": 21.4,
-      "cubiertos_previstos": 91,
-      "reservas": 37,
-      "pedidos_delivery": 14,
-      "prob_deficit": 0.867,
-      "nivel_riesgo": "alto",
+      "dotacion_predicha": 23.8,
+      "cubiertos_previstos": 90,
+      "reservas": 27,
+      "pedidos_delivery": 21,
+      "prob_deficit": 0.524,
+      "nivel_riesgo": "bajo",
       "prob_por_rol": {
-        "garzon": 0.329,
-        "cocinero_linea": 0.076,
-        "jefe_turno": 0.751
+        "garzon": 0.263,
+        "cocinero_linea": 0.063,
+        "jefe_turno": 0.007
       },
-      "recomendacion": "Riesgo alto: busca reemplazo ya y refuerza jefe de turno de 13:00–15:00."
+      "recomendacion": "Dotación suficiente: hay 25 programados para 23: alcanza si no faltan más de 2. No hace falta hacer nada por ahora."
     },
     {
       "fecha": "2025-10-17",
       "servicio": "19_21",
       "horario": "19:00–21:00",
-      "requeridos": 22,
-      "asignados": 26,
-      "dotacion_predicha": 24.1,
-      "cubiertos_previstos": 79,
-      "reservas": 39,
-      "pedidos_delivery": 22,
-      "prob_deficit": 0.314,
+      "requeridos": 23,
+      "asignados": 27,
+      "dotacion_predicha": 24.0,
+      "cubiertos_previstos": 91,
+      "reservas": 42,
+      "pedidos_delivery": 20,
+      "prob_deficit": 0.359,
       "nivel_riesgo": "bajo",
       "prob_por_rol": {
-        "garzon": 0.048,
-        "cocinero_linea": 0.038,
-        "jefe_turno": 0.058
+        "garzon": 0.086,
+        "cocinero_linea": 0.036,
+        "jefe_turno": 0.549
       },
-      "recomendacion": "Dotación suficiente: no hace falta hacer nada por ahora."
+      "recomendacion": "Dotación suficiente: hay 27 programados para 23: alcanza si no faltan más de 4. No hace falta hacer nada por ahora."
     },
     {
       "fecha": "2025-10-17",
       "servicio": "21_23",
       "horario": "21:00–23:00",
-      "requeridos": 12,
+      "requeridos": 10,
       "asignados": 13,
-      "dotacion_predicha": 10.9,
-      "cubiertos_previstos": 40,
-      "reservas": 18,
-      "pedidos_delivery": 8,
-      "prob_deficit": 0.867,
-      "nivel_riesgo": "alto",
+      "dotacion_predicha": 11.2,
+      "cubiertos_previstos": 36,
+      "reservas": 19,
+      "pedidos_delivery": 11,
+      "prob_deficit": 0.194,
+      "nivel_riesgo": "bajo",
       "prob_por_rol": {
-        "garzon": 0.713,
-        "cocinero_linea": 0.018,
-        "jefe_turno": 0.079
+        "garzon": 0.061,
+        "cocinero_linea": 0.05,
+        "jefe_turno": 0.096
       },
-      "recomendacion": "Riesgo alto: busca reemplazo ya y refuerza garzón de 21:00–23:00."
+      "recomendacion": "Dotación suficiente: hay 13 programados para 10: alcanza si no faltan más de 3. No hace falta hacer nada por ahora."
+    },
+    {
+      "fecha": "2025-10-17",
+      "servicio": "23_cierre",
+      "horario": "23:00–02:00",
+      "requeridos": 11,
+      "asignados": 12,
+      "dotacion_predicha": 10.1,
+      "cubiertos_previstos": 37,
+      "reservas": 8,
+      "pedidos_delivery": 2,
+      "prob_deficit": 0.559,
+      "nivel_riesgo": "alerta",
+      "prob_por_rol": {
+        "garzon": 0.079,
+        "cocinero_linea": 0.038,
+        "jefe_turno": 0.025
+      },
+      "recomendacion": "Atento a garzón. Hay 12 programados para 11: alcanza si no faltan más de 1. Si alguien avisa, confirma quién lo cubre."
     }
   ]
 }

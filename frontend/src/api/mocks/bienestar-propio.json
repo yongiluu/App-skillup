@@ -6,7 +6,7 @@
   "version_texto": "borrador-v0"
  },
  "fatiga": {
-  "nivel": "medio",
+  "nivel": "alto",
   "motivos": [
    "descanso"
   ],
@@ -21,112 +21,112 @@
  "registros": [
   {
    "fecha": "2025-10-04",
-   "pasos": null,
-   "sueno_horas": null,
-   "pulso_medio_bpm": null,
-   "encuesta_fatiga_inicio": 4,
-   "encuesta_fatiga_fin": 6
+   "pasos": 11372,
+   "sueno_horas": 6.6,
+   "pulso_medio_bpm": 73.7,
+   "encuesta_fatiga_inicio": 2,
+   "encuesta_fatiga_fin": 4
   },
   {
    "fecha": "2025-10-05",
-   "pasos": 15096,
-   "sueno_horas": 6.8,
-   "pulso_medio_bpm": 76.1,
-   "encuesta_fatiga_inicio": 4,
-   "encuesta_fatiga_fin": 5
+   "pasos": 13785,
+   "sueno_horas": 5.9,
+   "pulso_medio_bpm": 73.9,
+   "encuesta_fatiga_inicio": 2,
+   "encuesta_fatiga_fin": 3
   },
   {
    "fecha": "2025-10-06",
-   "pasos": 9646,
-   "sueno_horas": 7.3,
-   "pulso_medio_bpm": 74.9,
-   "encuesta_fatiga_inicio": 2,
-   "encuesta_fatiga_fin": 2
+   "pasos": 13679,
+   "sueno_horas": 6.2,
+   "pulso_medio_bpm": 74.4,
+   "encuesta_fatiga_inicio": 3,
+   "encuesta_fatiga_fin": 3
   },
   {
    "fecha": "2025-10-07",
-   "pasos": 7196,
-   "sueno_horas": 7.3,
-   "pulso_medio_bpm": 73.1,
-   "encuesta_fatiga_inicio": 2,
-   "encuesta_fatiga_fin": 2
+   "pasos": 13486,
+   "sueno_horas": 6.1,
+   "pulso_medio_bpm": 76.7,
+   "encuesta_fatiga_inicio": 3,
+   "encuesta_fatiga_fin": 3
   },
   {
    "fecha": "2025-10-08",
-   "pasos": 10733,
-   "sueno_horas": 6.6,
-   "pulso_medio_bpm": 76.7,
-   "encuesta_fatiga_inicio": 1,
-   "encuesta_fatiga_fin": 3
+   "pasos": 13969,
+   "sueno_horas": 6.0,
+   "pulso_medio_bpm": 79.8,
+   "encuesta_fatiga_inicio": 2,
+   "encuesta_fatiga_fin": 4
   },
   {
    "fecha": "2025-10-09",
-   "pasos": 11152,
-   "sueno_horas": 6.5,
-   "pulso_medio_bpm": 76.3,
-   "encuesta_fatiga_inicio": 1,
-   "encuesta_fatiga_fin": 3
-  },
-  {
-   "fecha": "2025-10-10",
-   "pasos": 7571,
-   "sueno_horas": 6.8,
-   "pulso_medio_bpm": 74.9,
+   "pasos": 8244,
+   "sueno_horas": 6.0,
+   "pulso_medio_bpm": 74.2,
    "encuesta_fatiga_inicio": 1,
    "encuesta_fatiga_fin": 2
   },
   {
-   "fecha": "2025-10-11",
-   "pasos": 10705,
-   "sueno_horas": 6.6,
-   "pulso_medio_bpm": 74.5,
-   "encuesta_fatiga_inicio": 1,
+   "fecha": "2025-10-10",
+   "pasos": 9927,
+   "sueno_horas": 6.1,
+   "pulso_medio_bpm": 74.4,
+   "encuesta_fatiga_inicio": 2,
    "encuesta_fatiga_fin": 3
   },
   {
+   "fecha": "2025-10-11",
+   "pasos": 6806,
+   "sueno_horas": 6.7,
+   "pulso_medio_bpm": 74.2,
+   "encuesta_fatiga_inicio": 1,
+   "encuesta_fatiga_fin": 2
+  },
+  {
    "fecha": "2025-10-12",
-   "pasos": 11621,
-   "sueno_horas": 6.8,
-   "pulso_medio_bpm": 75.9,
+   "pasos": 10764,
+   "sueno_horas": 6.9,
+   "pulso_medio_bpm": 74.3,
    "encuesta_fatiga_inicio": 2,
    "encuesta_fatiga_fin": 4
   },
   {
    "fecha": "2025-10-13",
-   "pasos": 8696,
+   "pasos": 7932,
    "sueno_horas": 6.0,
-   "pulso_medio_bpm": 82.1,
+   "pulso_medio_bpm": 79.3,
    "encuesta_fatiga_inicio": 4,
    "encuesta_fatiga_fin": 4
   },
   {
    "fecha": "2025-10-14",
-   "pasos": 7480,
-   "sueno_horas": 5.3,
-   "pulso_medio_bpm": 84.5,
+   "pasos": 4543,
+   "sueno_horas": 6.1,
+   "pulso_medio_bpm": 80.9,
+   "encuesta_fatiga_inicio": 2,
+   "encuesta_fatiga_fin": 3
+  },
+  {
+   "fecha": "2025-10-15",
+   "pasos": null,
+   "sueno_horas": null,
+   "pulso_medio_bpm": null,
    "encuesta_fatiga_inicio": 3,
    "encuesta_fatiga_fin": 4
   },
   {
-   "fecha": "2025-10-15",
-   "pasos": 7190,
-   "sueno_horas": 5.2,
-   "pulso_medio_bpm": 85.5,
-   "encuesta_fatiga_inicio": 4,
-   "encuesta_fatiga_fin": 5
-  },
-  {
    "fecha": "2025-10-16",
-   "pasos": 5254,
-   "sueno_horas": 6.3,
-   "pulso_medio_bpm": 78.7,
+   "pasos": 10407,
+   "sueno_horas": 5.8,
+   "pulso_medio_bpm": 80.1,
    "encuesta_fatiga_inicio": 1,
-   "encuesta_fatiga_fin": 3
+   "encuesta_fatiga_fin": 4
   },
   {
    "fecha": "2025-10-17",
-   "pasos": 10909,
-   "sueno_horas": 6.3,
+   "pasos": 12583,
+   "sueno_horas": 5.8,
    "pulso_medio_bpm": 78.5,
    "encuesta_fatiga_inicio": 3,
    "encuesta_fatiga_fin": 4

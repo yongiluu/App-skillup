@@ -17,6 +17,7 @@ export const SECCIONES: Record<Perfil, Seccion[]> = {
     { ruta: '/planificador', nombre: 'Planificador', icono: 'planificador' },
     { ruta: '/equipo', nombre: 'Equipo', icono: 'equipo' },
     { ruta: '/solicitudes', nombre: 'Solicitudes', icono: 'solicitudes' },
+    { ruta: '/analisis', nombre: 'Análisis', icono: 'grafico' },
   ],
   empleado: [
     { ruta: '/mi-turno', nombre: 'Mis turnos', icono: 'planificador' },

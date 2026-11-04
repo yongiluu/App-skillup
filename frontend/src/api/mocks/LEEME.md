@@ -1,6 +1,6 @@
 # Datos simulados del frontend
 
-Son respuestas reales de la API de Diego (simulación v2, PR #23, con `FUENTE_DATOS=mock`), capturadas con
+Son respuestas reales de la API de Diego (simulación v3 con el horario de Luthier, PR #30, con `FUENTE_DATOS=mock`), capturadas con
 `scripts/capturar_mocks.py`. Así tienen exactamente la misma forma y los mismos datos que la API.
 
 | Archivo | Endpoint | Usuario |
@@ -12,7 +12,7 @@ Son respuestas reales de la API de Diego (simulación v2, PR #23, con `FUENTE_DA
 | `ausencias.json` | `GET /ausencias` | jefe |
 | `empleados.json` | `GET /empleados` | jefe |
 | `fatiga.json` | `GET /bienestar/fatiga` | jefe |
-| `fichas.json` | `GET /empleados/{id}` de las 80 personas (máx. 5 ausencias y 5 próximos turnos cada una) | jefe |
+| `fichas.json` | `GET /empleados/{id}` de las 86 personas (máx. 5 ausencias y 5 próximos turnos cada una) | jefe |
 | `turnos-propios.json` | `GET /empleados/RST_001/turnos` | empleado |
 | `bienestar-propio.json` | `GET /empleados/RST_001/bienestar` | empleado |
 

@@ -9,9 +9,9 @@ const de = (id: string) => (fichas as unknown as Record<string, { bienestar: Bie
 
 describe('bienestar en la ficha (vista del jefe)', () => {
   it('con datos: muestra nivel, motivo y aviso de consentimiento', () => {
-    render(<BienestarFicha vista="jefe" bienestar={de('RST_003')} />)
+    render(<BienestarFicha vista="jefe" bienestar={de('RST_002')} />)
     expect(screen.getByText('Fatiga alta')).toBeInTheDocument()
-    expect(screen.getByText(/Motivo: carga física y cansancio informado/i)).toBeInTheDocument()
+    expect(screen.getByText(/Motivo: carga física y jornada larga/i)).toBeInTheDocument()
     expect(screen.getByText(/Autorizó el uso de datos de bienestar el 15-09-2025/)).toBeInTheDocument()
   })
 

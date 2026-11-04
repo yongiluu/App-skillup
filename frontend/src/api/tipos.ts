@@ -3,7 +3,8 @@
  * Si Diego cambia el contrato, este archivo se actualiza en el mismo PR o en uno inmediato.
  */
 
-export type Franja = '11_13' | '13_15' | '19_21' | '21_23'
+/** Horario de Luthier (PR #30): "23_cierre" termina a la 01:00 o a las 02:00 según el día */
+export type Franja = '13_15' | '19_21' | '21_23' | '23_cierre'
 export type RolCritico = 'garzon' | 'cocinero_linea' | 'jefe_turno'
 export type Rol =
   | RolCritico

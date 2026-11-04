@@ -1,46 +1,24 @@
 [
   {
     "fecha": "2025-10-17",
-    "servicio": "13_15",
-    "rol_a_cubrir": "jefe_turno",
-    "prob_deficit_rol": 0.751,
-    "accion": "llamar",
-    "empleado_id": "RST_014",
-    "empleado_nombre": "Francisca Reyes",
-    "rol_actual": null,
-    "mensaje": "Llamar a Francisca Reyes (jefe de turno) para cubrir jefe de turno en 13:00–15:00"
-  },
-  {
-    "fecha": "2025-10-17",
-    "servicio": "13_15",
-    "rol_a_cubrir": "jefe_turno",
-    "prob_deficit_rol": 0.751,
-    "accion": "llamar",
-    "empleado_id": "RST_023",
-    "empleado_nombre": "Daniela Martínez",
-    "rol_actual": null,
-    "mensaje": "Llamar a Daniela Martínez (jefe de turno) para cubrir jefe de turno en 13:00–15:00"
-  },
-  {
-    "fecha": "2025-10-17",
-    "servicio": "21_23",
+    "servicio": "23_cierre",
     "rol_a_cubrir": "garzon",
-    "prob_deficit_rol": 0.713,
+    "prob_deficit_rol": 0.079,
     "accion": "mover",
-    "empleado_id": "RST_004",
-    "empleado_nombre": "Antonia Pérez",
-    "rol_actual": "host",
-    "mensaje": "Mover a Antonia Pérez (host) a garzón en 21:00–23:00"
-  },
-  {
-    "fecha": "2025-10-17",
-    "servicio": "21_23",
-    "rol_a_cubrir": "garzon",
-    "prob_deficit_rol": 0.713,
-    "accion": "mover",
-    "empleado_id": "RST_075",
-    "empleado_nombre": "Antonia Gutiérrez",
+    "empleado_id": "RST_001",
+    "empleado_nombre": "Agustín Díaz",
     "rol_actual": "runner",
-    "mensaje": "Mover a Antonia Gutiérrez (runner) a garzón en 21:00–23:00"
+    "mensaje": "Mover a Agustín Díaz (runner) a garzón en 23:00–02:00"
+  },
+  {
+    "fecha": "2025-10-17",
+    "servicio": "23_cierre",
+    "rol_a_cubrir": "garzon",
+    "prob_deficit_rol": 0.079,
+    "accion": "llamar",
+    "empleado_id": "RST_003",
+    "empleado_nombre": "Isidora Silva",
+    "rol_actual": null,
+    "mensaje": "Llamar a Isidora Silva (garzón) para cubrir garzón en 23:00–02:00"
   }
 ]
