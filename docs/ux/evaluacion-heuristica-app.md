@@ -18,11 +18,11 @@
 - **AP-14 · Solicitudes:** cambiar "Todavía no pides cambios" por "Todavía no has pedido cambios".
 
 **Urgente, pero depende de backend:**
-- **AP-03 · Pedir cambio:** mostrar solo a quienes están disponibles. Se hace cuando Diego tenga `/disponibles` (diseño en el boceto E1).
+- ~~AP-03 · Pedir cambio: mostrar solo a quienes están disponibles.~~ **Resuelto:** el endpoint `/disponibles` ya está (Diego, 04-11). Pendiente que Manuel lo conecte.
 
 **Por conversar antes de cambiar:**
-- **AP-01:** con Diego, por qué un servicio con dotación completa sale en riesgo alto.
-- **AP-04:** con el equipo y la cervecería, cómo retira una persona su autorización.
+- **AP-01:** respuesta de Diego abajo (sección 9); falta confirmar si se ajusta la alerta visual.
+- **AP-04:** el retiro de la autorización ya está (Diego, 04-11). Falta la decisión con la cervecería sobre los datos ya guardados.
 - **AP-11:** revisar en un celular real si conviene poner el turno antes que la fatiga.
 
 ---
@@ -77,10 +77,10 @@ Se recorrieron las tareas principales de cada perfil y se registró cada problem
 
 | ID | Heur. | Perfil · dispositivo | Problema | Sev. | Recomendación | Captura |
 |---|---|---|---|---|---|---|
-| AP-01 | H1 · H2 | Jefe · ambos | Servicios con **más personas que las requeridas** aparecen en "Riesgo alto" y con "busca reemplazo ya". Ejemplo: 13–15 tiene "25 de 23 programados" y riesgo alto de 87 %; 21–23, "13 de 12" y 87 %. El número grande en rojo y la barra llena dicen "está completo", pero la alerta dice "falta gente". El riesgo viene de un rol específico (jefe de turno 75 %, garzón 71 %), y eso solo se entiende cruzando con "Riesgo por rol". Lo mismo pasa en la cifra "Crítico 13–15: 25 de 23" y en el Planificador. | 3 | Encabezar la alerta con el rol en riesgo ("Riesgo alto en jefe de turno · 75 %") y mostrar "25 de 23" en color neutro, aclarando que el total alcanza pero puede faltar un rol. Revisar con Diego si el riesgo del servicio debería salir del rol más crítico (ya se había preguntado por la calibración del modelo). | `app-pc_jefe_hoy.png`, `app-pc_jefe_planificador.png` |
+| AP-01 | H1 · H2 | Jefe · ambos | Servicios con **más personas que las requeridas** aparecen en "Riesgo alto" y con "busca reemplazo ya". Ejemplo: 13–15 tiene "25 de 23 programados" y riesgo alto de 87 %; 21–23, "13 de 12" y 87 %. El número grande en rojo y la barra llena dicen "está completo", pero la alerta dice "falta gente". El riesgo viene de un rol específico (jefe de turno 75 %, garzón 71 %), y eso solo se entiende cruzando con "Riesgo por rol". Lo mismo pasa en la cifra "Crítico 13–15: 25 de 23" y en el Planificador. **Resuelto (Manuel, 04-11).** | 3 | Encabezar la alerta con el rol en riesgo ("Riesgo alto en jefe de turno · 75 %") y mostrar "25 de 23" en color neutro, aclarando que el total alcanza pero puede faltar un rol. | `app-pc_jefe_hoy.png`, `app-pc_jefe_planificador.png` |
 | AP-02 | H4 · H8 | Jefe · celular | **Hoy se desborda hacia el lado.** La página mide 505 px en una pantalla de 390 px: las tarjetas quedan cortadas y en la barra inferior la pestaña "Solicitudes" aparece cortada. La causa es la tabla "Riesgo por rol": su contenedor tiene desplazamiento propio, pero no tiene el ancho limitado. | 3 | Limitar el ancho del contenedor de la tabla (`min-width: 0` / `max-width: 100%`) para que solo la tabla se desplace hacia el lado. Revisar las demás pantallas en 360–390 px. | `app-mob_jefe_hoy_rol.png` |
-| AP-03 | H5 | Trabajador · celular | En "Pedir cambio", el selector "¿Quién te podría cubrir?" muestra a **30 personas** (todas las que saben el rol), incluidas las que no pueden: ausentes, que ya trabajan en ese servicio o que pasarían de 6 días seguidos. Con datos simulados se pudo proponer a Agustín Díaz, que quedaría con 7 días seguidos. | 3 | Mostrar solo a los disponibles (`GET /disponibles`, regla de la migración 0003), como en el boceto E1. Depende del endpoint de Diego. | `app-i_pedir.png` |
-| AP-04 | H3 | Trabajador · ambos | En Bienestar, la persona ve que autorizó el uso de sus datos, pero **no puede retirar esa autorización ni borrar sus datos** desde la app. La base ya lo contempla (`revocado_en` y el borrado de `bienestar_diario`). Al ser datos de salud, el control debería estar a la vista. | 3 | Agregar "Retirar mi autorización" (y, si se decide, "Borrar mis datos") con una confirmación que explique qué pasa después. Necesita endpoint: pedido para Diego y Maxi. Coordinar con el texto del consentimiento [PENDIENTE CERVECERÍA / revisión legal]. | `app-mob_emp_mi-bienestar.png` |
+| AP-03 | H5 | Trabajador · celular | En "Pedir cambio", el selector "¿Quién te podría cubrir?" muestra a **30 personas** (todas las que saben el rol), incluidas las que no pueden: ausentes, que ya trabajan en ese servicio o que pasarían de 6 días seguidos. Con datos simulados se pudo proponer a Agustín Díaz, que quedaría con 7 días seguidos. **Resuelto (04-11):** Diego ya hizo `/disponibles`. | 3 | Mostrar solo a los disponibles (`GET /disponibles`, regla de la migración 0003), como en el boceto E1. Falta que Manuel lo conecte en el frontend. | `app-i_pedir.png` |
+| AP-04 | H3 | Trabajador · ambos | En Bienestar, la persona ve que autorizó el uso de sus datos, pero **no puede retirar esa autorización ni borrar sus datos** desde la app. La base ya lo contempla (`revocado_en` y el borrado de `bienestar_diario`). Al ser datos de salud, el control debería estar a la vista. **Resuelto en parte (04-11):** Diego ya hizo el endpoint para retirar la autorización. Falta decidir con la cervecería qué pasa con los datos ya guardados. | 3 | Agregar "Retirar mi autorización" en la pantalla (Manuel). Coordinar con el texto del consentimiento [PENDIENTE CERVECERÍA / revisión legal]. | `app-mob_emp_mi-bienestar.png` |
 | AP-05 | Privacidad · H2 | Jefe · computador | En Equipo, el jefe ve la etiqueta **"Sin consentimiento"** junto a cada persona que no autorizó. Así se entera de quién dijo que no, lo que puede presionar a esas personas a autorizar. | 2 | Usar la misma etiqueta neutra para "sin consentimiento" y "sin datos" (por ejemplo, "Sin indicador"). Decidirlo con el equipo, porque toca las reglas de datos de salud. | `app-pc_jefe_equipo.png` |
 | AP-06 | H7 | Jefe · computador | Equipo muestra a las 80 personas en tres columnas, **sin buscador, sin filtro por rol y sin orden alfabético**. Encontrar a alguien obliga a recorrer toda la lista. | 2 | Agregar buscador por nombre, filtro por rol y orden alfabético (o por nivel de fatiga). | `app-pc_jefe_equipo.png` |
 | AP-07 | H4 | Jefe · computador | En el calendario del Planificador, pago o quincena, feriado o víspera y evento se distinguen **solo por el color del punto**. Incumple la regla del equipo (color + ícono + palabra) y no sirve para personas que no distinguen colores. | 2 | Usar marcas con forma o letra distinta, o etiquetas cortas como en la grilla semanal ("Pago", "Evento"). | `app-pc_jefe_planificador.png` |
@@ -125,7 +125,7 @@ Se recorrieron las tareas principales de cada perfil y se registró cada problem
 
 1. **"Demanda prevista" sigue en Hoy.** Según `decisiones-frontend-etapa-4.md`, ese gráfico se sacó en la revisión del equipo, pero aparece en la versión del kit. Hay que confirmar con Manuel cuál es la versión vigente.
 2. **Días seguidos en los datos simulados.** Cristóbal trabaja del 17-10 al 26-10 (10 días seguidos), más que el máximo de 6 de la regla [PENDIENTE CERVECERÍA]. Ya está anotado en las decisiones del backend. En la prueba con usuarios conviene que los datos no contradigan la regla.
-3. **AP-03 y AP-04 necesitan backend:** `/disponibles` (ya planificado) y un endpoint para retirar el consentimiento (nuevo).
+3. **AP-03 y AP-04 ya tienen backend** (Diego, 04-11): `/disponibles` y el endpoint para retirar la autorización. Falta que Manuel los conecte en el frontend.
 
 ---
 
@@ -133,17 +133,17 @@ Se recorrieron las tareas principales de cada perfil y se registró cada problem
 
 1. ✅ Cata revisó los hallazgos (sección 9).
 2. Segunda evaluación independiente y unión de resultados.
-3. Con Manuel: AP-03 antes de la prueba con usuarios, y AP-06 y AP-09. Con Diego: AP-01. Con el equipo y la cervecería: AP-04. Con el equipo: el texto de AP-05.
+3. Con Manuel: conectar AP-03 y AP-04 (endpoints ya listos) antes de la prueba con usuarios, y AP-06 y AP-09. Con el equipo y la cervecería: qué pasa con los datos ya guardados al retirar la autorización (AP-04). Con el equipo: el texto de AP-05. AP-01 ya resuelto.
 4. Usar esta evaluación como comentario de revisión en el PR de `frontend/diseno-kit`, donde Cata figura como revisora.
 
 ## 9. Registro de revisión de Cata
 
 | ID | Estado | Urgencia | Comentario |
 |---|---|---|---|
-| AP-01 | Pendiente de consulta | — | Se ve confuso. Consultar con Diego por qué un servicio con dotación completa sale en riesgo alto. |
+| AP-01 | Resuelto | — | Diego explicó el cálculo (riesgo = probabilidad de que falte gente de un rol, ya con el margen en el texto). Manuel ajustó también la alerta visual. |
 | AP-02 | Omitido | — | Cata lo considera un detalle visual. El jefe trabaja sobre todo en el computador. Nota: la corrección es de una línea de código, por si Manuel quiere hacerla al pasar. |
-| AP-03 | Confirmado | **Antes de la prueba** | Puede confundir, porque no todos están disponibles siempre. Se resuelve con `/disponibles` (boceto E1). |
-| AP-04 | Pendiente (equipo y cervecería) | — | Por la ley de datos personales es un tema delicado. Cata lo conversará con el equipo, porque borrar los datos de una persona implica cambios en el código, y después se acordará con la cervecería. Pregunta para la reunión: ¿cómo retira una persona su autorización? |
+| AP-03 | Resuelto (backend) | Falta conectar en frontend | El endpoint `/disponibles` ya está (Diego, 04-11). |
+| AP-04 | Resuelto en parte | Falta la cervecería | El endpoint para retirar la autorización ya está (Diego, 04-11). Queda pendiente con la cervecería qué pasa con los datos ya guardados. |
 | AP-05 | Ajustado | Baja | Se mantiene que el jefe sepa si hay indicador o no, pero con palabras más suaves que "Sin consentimiento". Opciones a probar: "Sin indicador", "No comparte datos" o "Indicador no activado". |
 | AP-06 | Confirmado | Necesario | Buscador, filtro por rol y orden, para que la lista no se vea tan saturada. |
 | AP-07 | Ajustado | Baja | Cambiar los colores de los puntos para que se distingan mejor entre sí. |
