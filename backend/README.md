@@ -22,7 +22,7 @@ uvicorn app.main:app --reload
   1. `POST /auth/login` con `{"usuario": "jefe", "password": "<tu DEMO_PASSWORD>"}`
   2. Copia el `access_token`, aprieta **Authorize** (arriba a la derecha) y pégalo.
   3. Ya puedes probar los demás endpoints.
-- Pruebas: `pytest` → 82 pruebas con los mocks (incluye seguridad y bienestar), más 29 de integración con Postgres si defines `TEST_DATABASE_URL` (ver abajo).
+- Pruebas: `pytest` → 103 pruebas con los mocks (incluye seguridad, bienestar y cambios de turno), más 38 de integración con Postgres si defines `TEST_DATABASE_URL` (ver abajo).
 
 ## Fuente de datos
 
@@ -102,6 +102,7 @@ Todos exigen la cabecera `Authorization: Bearer <token>`, salvo `/auth/login` y 
 | `POST` | `/eventos` | Jefe | Registra un evento. Aparece en `/calendario` |
 | `GET` | `/bienestar/fatiga?fecha=` | Jefe | **Nuevo.** Indicador de fatiga de cada persona: solo nivel y motivos |
 | `GET` | `/empleados/{id}/bienestar?desde=&hasta=` | **Solo la misma persona** | **Nuevo.** Datos crudos propios: pasos, sueño, pulso y encuesta. El jefe recibe `403` |
+| `POST` | `/empleados/{id}/consentimiento` | **Solo la misma persona** | **Nuevo (AP-04).** `{"acepta": false}` retira la autorización de bienestar; `{"acepta": true}` la vuelve a dar. Desde ese momento nadie ve su indicador (el jefe ve `sin_consentimiento`). No se borra el registro: se llena `revocado_en`. 409 si ya estaba así. Qué pasa con los datos ya guardados está [PENDIENTE CERVECERÍA / revisión legal] |
 | `GET` | `/bienestar/preguntas` | Todos | **Nuevo.** Preguntas propuestas para los tests (estado `pendiente`) |
 | `GET` | `/health` | Todos | Verifica que la API está arriba. No muestra datos |
 
@@ -113,6 +114,10 @@ Respuestas de error: `401` sin sesión o con sesión vencida · `403` sin permis
 - `No se puede aprobar: <motivo>` · `No puede aceptar: <motivo>` · `<Nombre> no está disponible: <motivo>` (al proponer)
 - `Ya hay una solicitud pendiente para ese turno` · `La solicitud ya está aprobada|rechazada`
 - `<motivo>` es uno de: `No sabe hacer el rol garzon` · `Ya trabaja en ese mismo servicio` · `Está ausente ese día` (nunca la causa) · `Quedaría con N días seguidos de trabajo (máximo 6)`
+
+Cada solicitud trae además `propuesto_en` (cuándo se propuso al reemplazo actual, para "sin respuesta hace 3 h") y `rechazaron` (`[{empleado_id, rechazado_en}]`, quiénes ya dijeron que no; no se pierde al proponer a otra persona). Con la base, los llena la migración **0004** (borrador para Maxi).
+
+**Recomendación de cada servicio (AP-01):** el riesgo del modelo es la probabilidad de que *los que lleguen* sean menos que los requeridos, después de las ausencias. Por eso un servicio con más programados que requeridos puede salir en alto. La recomendación lo explica con el margen y el rol más ajustado, por ejemplo: "Riesgo alto de quedar corto, sobre todo en jefe de turno. Hay 25 programados para 23: alcanza si no faltan más de 2. Confirma quién viene y ten un reemplazo de jefe de turno listo."
 
 Flujo de la demo: `empleado` pide cambiar su turno del 2025-10-17 `21_23` proponiendo a `RST_009` → entra `reemplazo` y acepta → entra `jefe` y aprueba → el turno queda a nombre de Ignacia.
 

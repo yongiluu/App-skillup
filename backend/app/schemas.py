@@ -168,6 +168,10 @@ class Consentimiento(BaseModel):
     version_texto: str
 
 
+class ConsentimientoIn(Entrada):
+    acepta: bool = Field(description="true = autorizo compartir mis datos de bienestar; false = retiro la autorización")
+
+
 class IndicadorFatiga(BaseModel):
     """Lo único que ve el jefe de turno: nivel y motivos generales, nunca los datos crudos."""
 
@@ -276,6 +280,11 @@ class Disponible(BaseModel):
     motivo: str | None = Field(description="Por qué no puede (solo lo ve el jefe de turno)")
 
 
+class Rechazo(BaseModel):
+    empleado_id: str
+    rechazado_en: datetime
+
+
 class SolicitudCambio(SolicitudCambioIn):
     model_config = ConfigDict(extra="ignore")
 
@@ -285,6 +294,12 @@ class SolicitudCambio(SolicitudCambioIn):
         default=None, description="Lo que respondió el reemplazo propuesto (vacío si no hay reemplazo)"
     )
     respondida_en: datetime | None = None
+    propuesto_en: datetime | None = Field(
+        default=None, description="Cuándo se propuso al reemplazo actual (para 'sin respuesta hace 3 h')"
+    )
+    rechazaron: list[Rechazo] = Field(
+        default_factory=list, description="Quiénes ya dijeron que no a esta solicitud, en orden"
+    )
     comentario: str | None = None
     resuelta_por: str | None = Field(default=None, description="Jefe de turno que la resolvió")
     creada_en: datetime

@@ -95,9 +95,13 @@ def revisar_rechazo_y_otro_reemplazo(jefe, empleado, reemplazo):
     assert _responder(empleado, sid, True).status_code == 403
     assert _responder(jefe, sid, True).status_code == 403
 
+    creada = jefe.get("/solicitudes-cambio").json()[0]
+    assert creada["propuesto_en"] is not None and creada["rechazaron"] == []
     r = _responder(reemplazo, sid, False)
     assert r.status_code == 200
     assert r.json()["estado"] == "pendiente" and r.json()["respuesta_reemplazo"] == "rechazada"
+    assert [x["empleado_id"] for x in r.json()["rechazaron"]] == [REEMPLAZO]  # J2: queda registro
+    assert _responder(reemplazo, sid, False).json()["rechazaron"] == r.json()["rechazaron"]  # no se duplica
     assert _resolver(jefe, sid, "aprobada").status_code == 409
 
     # quien pidió propone a otra persona
@@ -105,6 +109,8 @@ def revisar_rechazo_y_otro_reemplazo(jefe, empleado, reemplazo):
     assert r.status_code == 200
     assert r.json()["reemplazo_id"] == OTRO_GARZON_LIBRE and r.json()["respuesta_reemplazo"] == "pendiente"
     assert r.json()["respondida_en"] is None
+    assert r.json()["propuesto_en"] >= creada["propuesto_en"]  # J1: la hora de la nueva propuesta
+    assert [x["empleado_id"] for x in r.json()["rechazaron"]] == [REEMPLAZO]  # no se pierde al cambiar
     assert _responder(reemplazo, sid, True).status_code == 403  # ya no es el reemplazo propuesto
     assert sid not in [x["id"] for x in reemplazo.get("/solicitudes-cambio").json()]
 
@@ -123,6 +129,7 @@ def revisar_sin_reemplazo(jefe, empleado, reemplazo):
     """Sin reemplazo no se puede aprobar; el jefe propone a alguien, acepta y se aprueba."""
     r = _pedir(empleado)
     assert r.status_code == 201 and r.json()["respuesta_reemplazo"] is None
+    assert r.json()["propuesto_en"] is None and r.json()["rechazaron"] == []
     sid = r.json()["id"]
     r = _resolver(jefe, sid, "aprobada")
     assert r.status_code == 409 and "Si nadie acepta, hay que rechazarla" in r.json()["detail"]
