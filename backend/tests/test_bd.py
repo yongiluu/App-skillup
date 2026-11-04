@@ -242,12 +242,12 @@ def test_cambios_de_turno_en_bd(modo_bd):
 
 # Turnos variados: el de la demo, otros garzones, cocina, y casos con días seguidos.
 TURNOS_DISPONIBLES = [
-    ("RST_056", "2025-10-17", "21_23"),
+    ("RST_056", "2025-10-17", "23_cierre"),
     ("RST_056", "2025-10-17", "19_21"),
     ("RST_003", "2025-10-17", "13_15"),
-    ("RST_003", "2025-10-28", "19_21"),
-    ("RST_015", "2025-10-30", "11_13"),
-    ("RST_040", "2025-10-29", "21_23"),
+    ("RST_005", "2025-10-28", "19_21"),
+    ("RST_050", "2025-10-30", "23_cierre"),
+    ("RST_008", "2025-10-20", "13_15"),
 ]
 
 

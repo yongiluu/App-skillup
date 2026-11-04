@@ -1,4 +1,40 @@
-# Datos simulados para la demo (v2)
+# Datos simulados para la demo (v3: horario de Luthier)
+
+## Por qué
+La simulación usaba las franjas 11–13, 13–15, 19–21 y 21–23. Luthier abre de **13:00 a 01:00 de lunes a jueves** y de **13:00 a 02:00 viernes y sábado**: 11–13 queda antes de abrir y faltaba el cierre.
+
+## Qué cambió (sobre la v2)
+- **Franjas:** se saca `11_13` y se agrega **`23_cierre`**, que termina a la 01:00, o a las 02:00 viernes y sábado (3 horas de turno esos días). Las otras tres no cambian. Domingo: se asume igual que lunes a jueves `[PENDIENTE CERVECERÍA]`.
+- **Demanda del cierre** (supuestos de cervecería, por validar): 30 cubiertos base, pocas reservas (6) y delivery (4), ticket de la noche, +25 % viernes y sábado, más fatiga que las otras franjas y es la franja que se alarga (horas extra).
+- **Preferencia de turno:** "mediodía" = 13–15; "noche" = 19–21, 21–23 y cierre.
+- **86 personas** en vez de 80. Las 80 primeras no cambian (mismos nombres y roles), así que los usuarios demo siguen siendo los mismos. Con 80, el cierre dejaba al 43 % de los servicios con faltas; con 86 queda parecido a la v2.
+- El cambio está en `simulacion-demo-v3.patch`, que se aplica **después** de `simulacion-demo.patch`.
+
+## Resultado
+
+| | v2 | **v3 (Luthier)** |
+|---|---|---|
+| Servicios con déficit real | 31,5 % | **28,9 %** |
+| Riesgo alto / alerta / bajo (180 días) | 8,5 / 20,1 / 71,4 % | **9,3 / 13,5 / 77,2 %** |
+| Ventana de la demo (29-sep a 2-nov, 140 servicios) | 26 alto, 45 alerta, 69 bajo | **18 alto, 22 alerta, 100 bajo** |
+| AUC-ROC (calibrado / XGBoost) | 0,68 / 0,71 | **0,71 / 0,73** |
+| Déficit por franja | — | 13–15: 51 % · 19–21: 26 % · 21–23: 21 % · cierre: 18 % |
+
+**Viernes 17-10 (el "hoy" de la demo):** 13–15, 19–21 y 21–23 en bajo; **cierre (23:00–02:00) en alerta por garzón**. Cristóbal (RST_056) trabaja ese día 19–21 y el cierre; Ignacia (RST_009, usuario `reemplazo`) puede cubrirlo. El sábado 18-10, 21–23 sale en alto por garzón.
+
+Ojo, dato de la simulación: Cristóbal tiene turnos **19 días seguidos** (del 15 de octubre al 2 de noviembre). Con la regla de 6 días no aparece disponible para cubrir a nadie en esas fechas.
+
+## Cómo reproducirlo
+```bash
+git apply simulacion-demo.patch simulacion-demo-v3.patch   # dentro de una copia de skillup-dotacion-laboral
+MARGEN_CRITICOS=1 uv run python scripts/run_pipeline.py --domain restaurant --stage full --employees 86 --days 180 --seed 42
+python scripts/build_mocks.py --origen <copia>/data/restaurant   # en App-skillup/backend
+```
+Después: Maxi aplica la 0005 (franjas) y recarga la semilla; Manuel cambia el tipo `Franja` y vuelve a capturar sus mocks.
+
+---
+
+# Versión anterior (v2)
 
 ## Por qué se regeneraron
 En la primera versión la app salía casi toda en rojo: 106 de 140 servicios (76 %) en riesgo alto. **El modelo no estaba mal:** en el restaurante simulado del proyecto anterior faltó gente en el **82,6 %** de los servicios. Había 72 personas y el simulador programaba **justo** la dotación requerida, sin margen, así que cualquier ausencia ya dejaba al servicio con déficit.
