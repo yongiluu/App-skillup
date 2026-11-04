@@ -10,7 +10,8 @@ La base de datos vive en **Supabase** (PostgreSQL). Piensa en ella como un Excel
 database/
 ├── migrations/
 │   ├── 0001_esquema_inicial.sql   # crea todas las hojas (tablas) y sus reglas
-│   └── 0002_cuenta_backend_y_login.sql  # etapa 3: cuenta del backend e intentos de login
+│   ├── 0002_cuenta_backend_y_login.sql  # etapa 3: cuenta del backend e intentos de login
+│   └── 0003_reemplazo_acepta_y_mover_turno.sql  # solicitudes: el reemplazo acepta y el turno se mueve
 ├── seed/                          # semilla: datos SIMULADOS para la demo
 │   ├── generar_semilla.py         # genera los 3 archivos SQL desde backend/app/mocks/
 │   ├── 01_datos_base.sql
@@ -32,7 +33,7 @@ Los nombres y valores coinciden con la API de Diego (`backend/app/schemas.py` y 
 - Bienestar en una sola hoja `bienestar_diario`, una fila por persona y día, con los mismos nombres de columnas que el backend (encuesta de fatiga en escala 1 a 7).
 - Eventos con varias franjas, impacto esperado y notas.
 
-Se probó cargando todos los datos de ejemplo del backend (72 empleados, 140 servicios, 2.481 turnos, 2.065 días de bienestar) y entran sin problemas.
+Se probó cargando todos los datos de ejemplo del backend (80 empleados, 140 servicios, 2.773 turnos, 2.275 días de bienestar) y entran sin problemas.
 
 ## Cómo crear la base desde cero (una sola vez)
 
@@ -44,17 +45,17 @@ Se probó cargando todos los datos de ejemplo del backend (72 empleados, 140 ser
 
 ## Cargar los datos simulados (semilla)
 
-Para la demo, la base se llena con los datos de ejemplo del backend (nombres ficticios): 72 empleados, 140 servicios (2025-09-29 a 2025-11-02, "hoy" = 2025-10-17), 2.481 turnos, 181 ausencias, 26 eventos, 59 consentimientos y 2.065 días de bienestar.
+Para la demo, la base se llena con los datos de ejemplo del backend (nombres ficticios): 80 empleados (simulación v2 de Diego), 140 servicios (2025-09-29 a 2025-11-02, "hoy" = 2025-10-17), 2.773 turnos, 65 consentimientos y 2.275 días de bienestar.
 
 1. En el **SQL Editor**, un *snippet* nuevo por archivo, en este orden: `seed/01_datos_base.sql`, `seed/02_turnos.sql` y `seed/03_bienestar.sql`. Cada uno se pega completo y se ejecuta con **Run**.
 2. Cada archivo se carga entero o no se carga nada. Si ya se había cargado, avisa y no duplica.
-3. Se carga sobre el esquema recién creado (`migrations/0001_esquema_inicial.sql`).
+3. Se carga sobre el esquema recién creado (`migrations/`). Para **recargarla** sobre una base que ya tiene datos, primero hay que vaciar las tablas de datos (sin borrar las tablas).
 
 Decisiones (las mismas que `backend/scripts/cargar_mocks_en_bd.py`, por lo que ambos cargan exactamente lo mismo):
 - Si los mocks traen turnos repetidos (misma persona dos veces en un servicio), se omiten y queda el primero.
 - `fecha_ingreso` se calcula desde la antigüedad en años de los mocks.
 - Solo hay bienestar de quien dio consentimiento.
-- Usuarios demo `jefe` (RST_055, Catalina Flores) y `empleado` (RST_001) con un hash de relleno que no sirve para entrar: el login demo usa `DEMO_PASSWORD` en el backend.
+- Usuarios demo `jefe` (RST_055, Catalina Flores) y `empleado` (RST_056, Cristóbal Silva) con un hash de relleno que no sirve para entrar: el login demo usa `DEMO_PASSWORD` en el backend.
 
 Si cambian los mocks: desde la raíz del repo, `python database/seed/generar_semilla.py` (solo usa la librería estándar) y se suben los archivos nuevos.
 
@@ -77,6 +78,19 @@ Si cambian los mocks: desde la raíz del repo, `python database/seed/generar_sem
 
 El backend sigue funcionando como antes hasta que Diego cambie su `DATABASE_URL`. Si una tabla nueva (`0003`, …) debe usarla el backend, su migración tiene que darle permisos a `skillup_backend` y crear su regla `acceso_backend`.
 
+## Solicitudes de cambio: el reemplazo acepta y el turno se mueve
+
+`migrations/0003_reemplazo_acepta_y_mover_turno.sql` (decidido por Maxi). **Se aplica y se fusiona junto con el cambio del backend**: con la `0003`, el backend actual no puede aprobar si el reemplazo no aceptó.
+
+1. El empleado pide el cambio y propone un reemplazo. `respuesta_reemplazo` queda en `pendiente`.
+2. El reemplazo responde `aceptada` o `rechazada` (se guarda `respondida_en`). Si rechaza, la solicitud sigue pendiente y se puede proponer a otra persona: al cambiar `reemplazo_id`, la respuesta vuelve a `pendiente`.
+3. El jefe **solo puede aprobar si el reemplazo aceptó y sigue disponible**. Si nadie acepta, solo puede rechazar.
+4. Al aprobar, el turno pasa al reemplazo en el mismo paso (mismo servicio y rol). Una solicitud resuelta ya no se modifica.
+5. **Disponible** = sabe hacer el rol, no trabaja ya en ese servicio, no está ausente ese día y no supera `max_dias_seguidos` (hoja `configuracion`, por defecto 6, [PENDIENTE CERVECERÍA]).
+6. Solo puede haber una solicitud pendiente por persona y turno.
+
+La función `motivo_no_disponible(reemplazo, solicitante, fecha, franja)` devuelve el motivo en palabras (o vacío si está disponible), para que la app lo muestre antes de aceptar.
+
 ## Las hojas, en simple
 
 | Hoja | Qué guarda |
@@ -93,7 +107,8 @@ El backend sigue funcionando como antes hasta que Diego cambie su `DATABASE_URL`
 | prediccion | Probabilidad de déficit (total y por rol), dotación predicha, recomendación y nivel de riesgo |
 | calendario_dia | Ventanas de pago, feriados, vísperas y fines de semana largos |
 | evento | Partidos, conciertos, promociones del local |
-| solicitud_cambio | Pedidos de cambio de turno y su resolución |
+| solicitud_cambio | Pedidos de cambio de turno, respuesta del reemplazo y resolución del jefe |
+| configuracion | Valores ajustables (ej: máximo de días seguidos) |
 | intento_login | Intentos de entrar a la app (para el bloqueo tras 5 fallidos) |
 
 **Carpeta `sensible` (datos protegidos)**
