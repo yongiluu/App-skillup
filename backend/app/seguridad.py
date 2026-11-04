@@ -31,6 +31,9 @@ _ITERACIONES = 600_000
 USUARIOS_DEMO = {
     "jefe": {"perfil": "jefe_turno", "empleado_id": "RST_055"},  # Catalina Flores: no está ausente el 17-10
     "empleado": {"perfil": "empleado", "empleado_id": "RST_056"},  # Cristóbal Silva, garzón: trabaja el 17-10 (19–21 y 21–23)
+    # Ignacia Muñoz, garzón: libre y disponible para reemplazar a Cristóbal el 17-10 (19–21 y 21–23).
+    # Sirve para mostrar el flujo completo: Cristóbal pide → Ignacia acepta → el jefe aprueba.
+    "reemplazo": {"perfil": "empleado", "empleado_id": "RST_009"},
 }
 
 

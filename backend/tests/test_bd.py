@@ -177,13 +177,16 @@ def test_crear_evento_en_bd(jefe_bd):
 def test_flujo_solicitud_en_bd(jefe_bd, empleado_bd):
     t = empleado_bd.get("/empleados/RST_056/turnos", params={"desde": HOY}).json()[0]
     r = empleado_bd.post("/solicitudes-cambio", json={"solicitante_id": "RST_056", "fecha": t["fecha"], "servicio": t["servicio"]})
-    assert r.status_code == 201 and r.json()["estado"] == "pendiente"
+    assert r.status_code == 201 and r.json()["estado"] == "pendiente" and r.json()["respuesta_reemplazo"] is None
     sid = r.json()["id"]
     assert [s["id"] for s in empleado_bd.get("/solicitudes-cambio").json()] == [sid]
-    r = jefe_bd.patch(f"/solicitudes-cambio/{sid}", json={"estado": "aprobada", "comentario": "ok"})
+    # sin reemplazo que aceptó, el trigger no deja aprobar
+    r = jefe_bd.patch(f"/solicitudes-cambio/{sid}", json={"estado": "aprobada"})
+    assert r.status_code == 409 and r.json()["detail"].startswith("Solo se puede aprobar si un reemplazo aceptó")
+    r = jefe_bd.patch(f"/solicitudes-cambio/{sid}", json={"estado": "rechazada", "comentario": "no"})
     assert r.status_code == 200
-    assert r.json()["estado"] == "aprobada" and r.json()["resuelta_por"] == "RST_055"
-    assert jefe_bd.patch(f"/solicitudes-cambio/{sid}", json={"estado": "rechazada"}).status_code == 409
+    assert r.json()["estado"] == "rechazada" and r.json()["resuelta_por"] == "RST_055"
+    assert jefe_bd.patch(f"/solicitudes-cambio/{sid}", json={"estado": "aprobada"}).status_code == 409
 
 
 # ---------- base vacía ----------
@@ -198,3 +201,43 @@ def test_base_vacia_responde_404_claro(modo_bd):
         assert c.get("/empleados").json() == []
     finally:
         _recrear_base()
+
+
+# ---------- cambios de turno en la base (mismas reglas que con mocks) ----------
+def test_cambios_de_turno_en_bd(modo_bd):
+    """Las reglas las hace cumplir el trigger de Maxi (0003); deben dar lo mismo que los mocks."""
+    from tests.test_cambios_turno import REVISIONES
+
+    try:
+        for revisar in REVISIONES:
+            _recrear_base()  # cada caso parte con los datos originales
+            limitador.limpiar()
+            revisar(_cliente("jefe"), _cliente("empleado"), _cliente("reemplazo"))
+    finally:
+        _recrear_base()
+
+
+# Turnos variados: el de la demo, otros garzones, cocina, y casos con días seguidos.
+TURNOS_DISPONIBLES = [
+    ("RST_056", "2025-10-17", "21_23"),
+    ("RST_056", "2025-10-17", "19_21"),
+    ("RST_003", "2025-10-17", "13_15"),
+    ("RST_003", "2025-10-28", "19_21"),
+    ("RST_015", "2025-10-30", "11_13"),
+    ("RST_040", "2025-10-29", "21_23"),
+]
+
+
+@pytest.mark.parametrize(("solicitante", "fecha", "servicio"), TURNOS_DISPONIBLES)
+def test_disponibles_iguales_a_mock(jefe_bd, solicitante, fecha, servicio):
+    """La función motivo_no_disponible de Maxi y la copia en Python dan los mismos motivos, persona por persona."""
+    params = {"fecha": fecha, "servicio": servicio, "solicitante": solicitante}
+    en_bd = jefe_bd.get("/disponibles", params=params)
+    assert en_bd.status_code == 200, en_bd.text
+    en_mock = _mock("/disponibles", **params)
+    assert en_bd.json() == en_mock
+
+
+def test_hay_casos_de_dias_seguidos(jefe_bd):
+    filas = jefe_bd.get("/disponibles", params={"fecha": HOY, "servicio": "13_15", "solicitante": "RST_003"}).json()
+    assert any(f["motivo"] and f["motivo"].startswith("Quedaría con") for f in filas)

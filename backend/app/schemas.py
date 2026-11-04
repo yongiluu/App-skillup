@@ -258,11 +258,33 @@ class SolicitudCambioPatch(Entrada):
     comentario: str | None = Field(default=None, max_length=300)
 
 
+class RespuestaReemplazoIn(Entrada):
+    acepta: bool = Field(description="true = acepta cubrir el turno; false = lo rechaza")
+
+
+class CambioReemplazoIn(Entrada):
+    reemplazo_id: str = Field(max_length=20, description="La nueva persona propuesta como reemplazo")
+
+
+class Disponible(BaseModel):
+    """Posible reemplazo para un turno. `motivo` vacío = disponible."""
+
+    empleado_id: str
+    nombre: str
+    rol: Rol
+    disponible: bool
+    motivo: str | None = Field(description="Por qué no puede (solo lo ve el jefe de turno)")
+
+
 class SolicitudCambio(SolicitudCambioIn):
     model_config = ConfigDict(extra="ignore")
 
     id: int
     estado: EstadoSolicitud
+    respuesta_reemplazo: Literal["pendiente", "aceptada", "rechazada"] | None = Field(
+        default=None, description="Lo que respondió el reemplazo propuesto (vacío si no hay reemplazo)"
+    )
+    respondida_en: datetime | None = None
     comentario: str | None = None
     resuelta_por: str | None = Field(default=None, description="Jefe de turno que la resolvió")
     creada_en: datetime
