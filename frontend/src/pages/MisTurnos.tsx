@@ -4,7 +4,6 @@ import { useSesion } from '../auth/sesion'
 import { getBienestarPropio, getSolicitudes, getTurnos } from '../api'
 import type { SolicitudCambio, Turno } from '../api/tipos'
 import { useDatos } from '../lib/useDatos'
-import { useEquipo } from '../lib/useNombres'
 import { NOMBRE_ROL, fechaBreve, horario } from '../lib/formato'
 import { encabezadoDia } from '../lib/fechas'
 import EncabezadoPagina from '../components/ui/EncabezadoPagina'
@@ -46,7 +45,6 @@ export default function MisTurnos() {
   const cargarBienestar = useCallback(() => getBienestarPropio(id), [id])
   const bienestar = useDatos(cargarBienestar)
   const solicitudes = useDatos(cargarSolicitudes)
-  const { empleados } = useEquipo()
 
   const [abierto, setAbierto] = useState<string | null>(null)
   const [enviada, setEnviada] = useState<SolicitudCambio | null>(null)
@@ -125,7 +123,6 @@ export default function MisTurnos() {
                       {abierto === clave(t) && (
                         <FormularioCambio
                           turno={t}
-                          equipo={empleados}
                           alCancelar={() => setAbierto(null)}
                           alEnviar={(nueva) => {
                             setAbierto(null)

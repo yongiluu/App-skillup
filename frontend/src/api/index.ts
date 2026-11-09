@@ -9,10 +9,13 @@ import type {
   AusenciaDia,
   BienestarPropio,
   Calendario,
+  Consentimiento,
   DiaServicios,
+  Disponible,
   Empleado,
   EmpleadoFicha,
   FatigaEquipo,
+  Franja,
   LoginIn,
   LoginOut,
   Semana,
@@ -31,6 +34,7 @@ import mockFichas from './mocks/fichas.json'
 import mockBienestarPropio from './mocks/bienestar-propio.json'
 import mockAusencias from './mocks/ausencias.json'
 import mockTurnosPropios from './mocks/turnos-propios.json'
+import mockDisponibles from './mocks/disponibles.json'
 
 export const USAR_MOCKS = import.meta.env.VITE_USAR_MOCKS === 'true'
 
@@ -127,9 +131,47 @@ export function getBienestarPropio(id: string): Promise<BienestarPropio> {
     if (id !== mockBienestarPropio.empleado_id) {
       return Promise.reject(new ErrorApi(403, 'Los datos de bienestar solo los puede ver la propia persona'))
     }
-    return simularRed(mockBienestarPropio as BienestarPropio)
+    const propio = mockBienestarPropio as BienestarPropio
+    // Si retiró la autorización en esta sesión simulada, se ve igual que en la API: sin nada.
+    if (consentimientoMock && !consentimientoMock.otorgado) {
+      return simularRed<BienestarPropio>({ ...propio, consentimiento: consentimientoMock, estado: 'sin_consentimiento', fatiga: null, registros: [] })
+    }
+    return simularRed(consentimientoMock ? { ...propio, consentimiento: consentimientoMock } : propio)
   }
   return pedir<BienestarPropio>(`/empleados/${encodeURIComponent(id)}/bienestar`)
+}
+
+/*
+ * En modo simulado, el cambio de autorización vive en memoria (se pierde al recargar),
+ * igual que las solicitudes. null = sin cambios respecto de bienestar-propio.json.
+ */
+let consentimientoMock: Consentimiento | null = null
+
+/**
+ * Solo la propia persona: da (acepta=true) o retira (acepta=false) su autorización de bienestar
+ * (POST /empleados/{id}/consentimiento, AP-04). Al retirarla, desde ese momento nadie ve su
+ * indicador y la app deja de usar sus datos. 409 si ya estaba en ese estado.
+ */
+export function cambiarConsentimiento(id: string, acepta: boolean): Promise<Consentimiento> {
+  if (USAR_MOCKS) {
+    if (id !== mockBienestarPropio.empleado_id) {
+      return Promise.reject(new ErrorApi(403, 'Solo la propia persona puede dar o retirar su autorización'))
+    }
+    const vigente = consentimientoMock ?? (mockBienestarPropio.consentimiento as Consentimiento)
+    if (vigente.otorgado === acepta) {
+      return Promise.reject(
+        new ErrorApi(409, acepta ? 'Ya tienes una autorización vigente' : 'No tienes una autorización vigente que retirar'),
+      )
+    }
+    consentimientoMock = acepta
+      ? { otorgado: true, fecha: MOCK_HOY, version_texto: vigente.version_texto }
+      : { ...vigente, otorgado: false, fecha: null }
+    return simularRed(consentimientoMock)
+  }
+  return pedir<Consentimiento>(`/empleados/${encodeURIComponent(id)}/consentimiento`, {
+    method: 'POST',
+    body: JSON.stringify({ acepta }),
+  })
 }
 
 // ---------- Ausencias del día ----------
@@ -170,10 +212,27 @@ export function getTurnos(empleadoId: string, desde?: string): Promise<Turno[]> 
 let solicitudesMock: SolicitudCambio[] = []
 let siguienteId = 1
 
-/** Solo para las pruebas: vuelve a dejar las solicitudes simuladas vacías. */
+/** Solo para las pruebas: vuelve a dejar las solicitudes (y la autorización) simuladas como al inicio. */
 export function reiniciarSolicitudesMock() {
   solicitudesMock = []
   siguienteId = 1
+  consentimientoMock = null
+}
+
+/**
+ * Quiénes pueden cubrir un turno (GET /disponibles, AP-03). Sin `solicitante`, es el turno de
+ * quien consulta. El empleado recibe solo a los disponibles; el jefe, a todos con el motivo.
+ */
+export function getDisponibles(servicio: Franja, fecha: string, solicitante?: string): Promise<Disponible[]> {
+  if (USAR_MOCKS) {
+    const lista = (mockDisponibles as Record<string, Disponible[]>)[`${fecha}|${servicio}`]
+    return lista
+      ? simularRed(lista)
+      : Promise.reject(new ErrorApi(409, `Sin datos de ejemplo de disponibles para el ${fecha} en ${servicio}.`))
+  }
+  const q = new URLSearchParams({ servicio, fecha })
+  if (solicitante) q.set('solicitante', solicitante)
+  return pedir<Disponible[]>(`/disponibles?${q}`)
 }
 
 /** El jefe ve todas; el empleado, las que pidió o en las que lo proponen como reemplazo. */

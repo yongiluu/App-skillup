@@ -48,7 +48,7 @@ export default function BienestarFicha(props: Props) {
           <p className={estilos.motivos}>
             {bienestar.estado === 'sin_consentimiento'
               ? propia
-                ? 'No autorizaste el uso de tus datos de bienestar, así que no se guarda ni se calcula nada.'
+                ? 'No compartes tus datos de bienestar: no se calcula tu indicador y nadie lo ve.'
                 : 'Esta persona no comparte datos de bienestar. No se muestra ni se calcula nada, y eso no la favorece ni la perjudica en las sugerencias.'
               : propia
                 ? 'Autorizaste el uso de tus datos, pero no hay registros de los últimos días (por ejemplo, si no usaste el reloj).'

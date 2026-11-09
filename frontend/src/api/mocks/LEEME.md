@@ -13,8 +13,9 @@ Son respuestas reales de la API de Diego (simulación v3 con el horario de Luthi
 | `empleados.json` | `GET /empleados` | jefe |
 | `fatiga.json` | `GET /bienestar/fatiga` | jefe |
 | `fichas.json` | `GET /empleados/{id}` de las 86 personas (máx. 5 ausencias y 5 próximos turnos cada una) | jefe |
-| `turnos-propios.json` | `GET /empleados/RST_001/turnos` | empleado |
-| `bienestar-propio.json` | `GET /empleados/RST_001/bienestar` | empleado |
+| `turnos-propios.json` | `GET /empleados/RST_056/turnos` | empleado |
+| `bienestar-propio.json` | `GET /empleados/RST_056/bienestar` | empleado |
+| `disponibles.json` | `GET /disponibles?servicio=&fecha=` de cada turno propio desde "hoy" (clave `fecha\|servicio`; solo disponibles, sin motivo) | empleado |
 
 Usuarios de prueba (iguales al backend): `jefe` = Catalina Flores (RST_055) y `empleado` = Cristóbal Silva (RST_056, garzón).
 "Hoy" simulado: 17-10-2025.
@@ -23,7 +24,7 @@ Usuarios de prueba (iguales al backend): `jefe` = Catalina Flores (RST_055) y `e
 `fichas.json`, para poder ver ese caso en la ficha (los datos de ejemplo no traen ninguno para el "hoy").
 Todo el bienestar es **simulado**.
 
-**Solicitudes de cambio:** no hay archivo. En modo simulado viven en memoria (parten vacías y se pierden al recargar), igual que en el backend con `FUENTE_DATOS=mock`.
+**Solicitudes de cambio:** no hay archivo. En modo simulado viven en memoria (parten vacías y se pierden al recargar), igual que en el backend con `FUENTE_DATOS=mock`. Lo mismo pasa al retirar o volver a dar la autorización de bienestar.
 
 ## Cómo volver a capturarlos
 Con el backend corriendo en modo mock (ver `backend/README.md`):

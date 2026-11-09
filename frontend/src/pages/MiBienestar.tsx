@@ -6,6 +6,7 @@ import EncabezadoPagina from '../components/ui/EncabezadoPagina'
 import Tarjeta from '../components/ui/Tarjeta'
 import Aviso from '../components/ui/Aviso'
 import BienestarFicha from '../components/bienestar/Bienestar'
+import Autorizacion from '../components/bienestar/Autorizacion'
 
 /** Bienestar propio del empleado (datos crudos: solo los ve la propia persona). */
 export default function MiBienestar() {
@@ -20,7 +21,12 @@ export default function MiBienestar() {
       <Tarjeta>
         {datos.estado === 'cargando' && <p role="status">Cargando…</p>}
         {datos.estado === 'error' && <Aviso tipo="error">{datos.mensaje}</Aviso>}
-        {datos.estado === 'listo' && <BienestarFicha vista="propia" bienestar={datos.datos} />}
+        {datos.estado === 'listo' && (
+          <>
+            <BienestarFicha vista="propia" bienestar={datos.datos} />
+            <Autorizacion empleadoId={id} consentimiento={datos.datos.consentimiento} alCambiar={datos.recargar} />
+          </>
+        )}
       </Tarjeta>
     </>
   )

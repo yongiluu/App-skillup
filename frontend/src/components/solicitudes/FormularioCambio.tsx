@@ -1,7 +1,8 @@
-import { useId, useState } from 'react'
+import { useCallback, useId, useState } from 'react'
 import type { FormEvent } from 'react'
-import { crearSolicitud } from '../../api'
-import type { Empleado, SolicitudCambio, Turno } from '../../api/tipos'
+import { crearSolicitud, getDisponibles } from '../../api'
+import type { SolicitudCambio, Turno } from '../../api/tipos'
+import { useDatos } from '../../lib/useDatos'
 import { NOMBRE_ROL, horario } from '../../lib/formato'
 import { encabezadoDia } from '../../lib/fechas'
 import Boton from '../ui/Boton'
@@ -12,27 +13,29 @@ const MAX_MOTIVO = 300
 
 interface Props {
   turno: Turno
-  /** Equipo completo, para proponer reemplazo */
-  equipo: Empleado[]
   alEnviar: (s: SolicitudCambio) => void
   alCancelar: () => void
 }
 
 /**
- * Pedir cambio de un turno propio (POST /solicitudes-cambio). El reemplazo es opcional:
- * se ofrecen las personas que tienen ese rol o lo pueden cubrir. La API valida el resto
- * (por ejemplo, que el reemplazo no esté ya en ese servicio) y su mensaje se muestra tal cual.
+ * Pedir cambio de un turno propio (POST /solicitudes-cambio). El reemplazo es opcional y solo
+ * se ofrece a quienes la API dice que están disponibles (GET /disponibles, evaluación AP-03):
+ * saben el rol, no están ausentes, no trabajan ya en ese servicio y no pasarían del máximo de
+ * días seguidos. El empleado no ve por qué alguien no aparece.
  */
-export default function FormularioCambio({ turno, equipo, alEnviar, alCancelar }: Props) {
+export default function FormularioCambio({ turno, alEnviar, alCancelar }: Props) {
   const id = useId()
   const [reemplazo, setReemplazo] = useState('')
   const [motivo, setMotivo] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
 
-  const candidatos = equipo
-    .filter((e) => e.id !== turno.empleado_id && (e.rol === turno.rol || e.puede_cubrir.includes(turno.rol)))
-    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
+  const cargar = useCallback(() => getDisponibles(turno.servicio, turno.fecha), [turno.servicio, turno.fecha])
+  const disponibles = useDatos(cargar)
+  const candidatos =
+    disponibles.estado === 'listo'
+      ? disponibles.datos.filter((d) => d.disponible).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
+      : []
 
   async function enviar(ev: FormEvent) {
     ev.preventDefault()
@@ -63,14 +66,30 @@ export default function FormularioCambio({ turno, equipo, alEnviar, alCancelar }
 
       <label className={estilos.campo}>
         <span>¿Quién te podría cubrir? (opcional)</span>
-        <select value={reemplazo} onChange={(e) => setReemplazo(e.target.value)}>
+        <select
+          value={reemplazo}
+          onChange={(e) => setReemplazo(e.target.value)}
+          disabled={disponibles.estado === 'cargando'}
+          aria-describedby={`${id}-disponibles`}
+        >
           <option value="">Que lo decida mi jefe de turno</option>
-          {candidatos.map((e) => (
-            <option key={e.id} value={e.id}>
-              {e.nombre} ({NOMBRE_ROL[e.rol]})
+          {candidatos.map((d) => (
+            <option key={d.empleado_id} value={d.empleado_id}>
+              {d.nombre} ({NOMBRE_ROL[d.rol]})
             </option>
           ))}
         </select>
+        <small id={`${id}-disponibles`} role={disponibles.estado === 'error' ? 'alert' : undefined}>
+          {disponibles.estado === 'cargando' && 'Buscando quién está disponible…'}
+          {disponibles.estado === 'error' &&
+            `No se pudo cargar quién está disponible (${disponibles.mensaje}). Puedes enviar la solicitud igual y tu jefe de turno lo decide.`}
+          {disponibles.estado === 'listo' &&
+            (candidatos.length > 1
+              ? `Solo aparecen las ${candidatos.length} personas disponibles para ese turno.`
+              : candidatos.length === 1
+                ? 'Solo aparece la persona disponible para ese turno.'
+                : 'No hay nadie disponible para ese turno. Tu jefe de turno buscará a alguien.')}
+        </small>
       </label>
 
       <label className={estilos.campo}>
