@@ -226,6 +226,15 @@ export interface AusenciaDia {
 
 // ---------- Solicitudes de cambio de turno ----------
 export type EstadoSolicitud = 'pendiente' | 'aprobada' | 'rechazada'
+/** Lo que contestó la persona propuesta como reemplazo */
+export type RespuestaReemplazo = 'pendiente' | 'aceptada' | 'rechazada'
+
+/** Alguien que ya dijo que no a cubrir ese turno */
+export interface Rechazo {
+  empleado_id: string
+  /** Fecha y hora ISO */
+  rechazado_en: string
+}
 
 export interface SolicitudCambioIn {
   solicitante_id: string
@@ -243,6 +252,14 @@ export interface SolicitudCambio {
   fecha: string
   servicio: Franja
   reemplazo_id: string | null
+  /** null si no hay reemplazo propuesto. El jefe solo puede aprobar si es 'aceptada'. */
+  respuesta_reemplazo: RespuestaReemplazo | null
+  /** Cuándo contestó el reemplazo */
+  respondida_en: string | null
+  /** Desde cuándo está propuesto el reemplazo actual */
+  propuesto_en: string | null
+  /** Quiénes ya dijeron que no, en orden */
+  rechazaron: Rechazo[]
   motivo: string | null
   estado: EstadoSolicitud
   comentario: string | null

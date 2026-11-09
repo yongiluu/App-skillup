@@ -43,18 +43,20 @@ const simularRed = <T>(datos: T): Promise<T> =>
 export function login(datos: LoginIn): Promise<LoginOut> {
   if (USAR_MOCKS) {
     // Solo para desarrollo sin backend: acepta los usuarios de prueba con cualquier contraseña.
-    const usuario = datos.usuario.trim().toLowerCase()
-    if (usuario !== 'jefe' && usuario !== 'empleado') {
-      return Promise.reject(new Error('Usuario o contraseña incorrectos'))
+    // Mismos usuarios de prueba que el backend (USUARIOS_DEMO en backend/app/seguridad.py).
+    // "reemplazo" es la persona a la que le piden cubrir un turno.
+    const usuarios: Record<string, Pick<LoginOut, 'perfil' | 'empleado_id' | 'nombre'>> = {
+      jefe: { perfil: 'jefe_turno', empleado_id: 'RST_055', nombre: 'Catalina Flores' },
+      empleado: { perfil: 'empleado', empleado_id: 'RST_056', nombre: 'Cristóbal Silva' },
+      reemplazo: { perfil: 'empleado', empleado_id: 'RST_009', nombre: 'Ignacia Muñoz' },
     }
+    const usuario = usuarios[datos.usuario.trim().toLowerCase()]
+    if (!usuario) return Promise.reject(new Error('Usuario o contraseña incorrectos'))
     return simularRed<LoginOut>({
       access_token: 'token-simulado',
       token_type: 'bearer',
       expira_en: 8 * 60 * 60,
-      perfil: usuario === 'jefe' ? 'jefe_turno' : 'empleado',
-      // Mismos usuarios de prueba que el backend (USUARIOS_DEMO en backend/app/seguridad.py)
-      empleado_id: usuario === 'jefe' ? 'RST_055' : 'RST_056',
-      nombre: usuario === 'jefe' ? 'Catalina Flores' : 'Cristóbal Silva',
+      ...usuario,
       hoy: MOCK_HOY,
     })
   }
@@ -197,6 +199,10 @@ export function crearSolicitud(datos: SolicitudCambioIn): Promise<SolicitudCambi
       fecha: datos.fecha,
       servicio: datos.servicio,
       reemplazo_id: datos.reemplazo_id ?? null,
+      respuesta_reemplazo: datos.reemplazo_id ? 'pendiente' : null,
+      respondida_en: null,
+      propuesto_en: datos.reemplazo_id ? ahora : null,
+      rechazaron: [],
       motivo: datos.motivo ?? null,
       estado: 'pendiente',
       comentario: null,
@@ -210,25 +216,106 @@ export function crearSolicitud(datos: SolicitudCambioIn): Promise<SolicitudCambi
   return pedir<SolicitudCambio>('/solicitudes-cambio', { method: 'POST', body: JSON.stringify(datos) })
 }
 
-/** Solo jefe de turno. Solo se pueden resolver solicitudes pendientes. */
+/** Modo simulado: la solicitud pendiente con ese id, o el mismo error que da la API. */
+function pendienteMock(id: number): SolicitudCambio {
+  const s = solicitudesMock.find((x) => x.id === id)
+  if (!s) throw new ErrorApi(404, `No existe la solicitud ${id}`)
+  if (s.estado !== 'pendiente') throw new ErrorApi(409, `La solicitud ya está ${s.estado}`)
+  return s
+}
+
+function guardarMock(actualizada: SolicitudCambio): Promise<SolicitudCambio> {
+  solicitudesMock = solicitudesMock.map((x) => (x.id === actualizada.id ? actualizada : x))
+  return simularRed(actualizada)
+}
+
+/**
+ * Solo la persona propuesta como reemplazo: acepta o rechaza cubrir el turno
+ * (POST /solicitudes-cambio/{id}/respuesta). Si rechaza, la solicitud sigue pendiente y queda
+ * anotada en `rechazaron`. En modo simulado no se revisa quién responde (no hay sesión real).
+ */
+export function responderReemplazo(id: number, acepta: boolean): Promise<SolicitudCambio> {
+  if (USAR_MOCKS) {
+    try {
+      const s = pendienteMock(id)
+      if (!s.reemplazo_id) throw new ErrorApi(403, 'Solo la persona propuesta como reemplazo puede responder')
+      const ahora = new Date().toISOString()
+      const anotar = !acepta && s.respuesta_reemplazo !== 'rechazada'
+      return guardarMock({
+        ...s,
+        respuesta_reemplazo: acepta ? 'aceptada' : 'rechazada',
+        respondida_en: ahora,
+        rechazaron: anotar ? [...s.rechazaron, { empleado_id: s.reemplazo_id, rechazado_en: ahora }] : s.rechazaron,
+        actualizada_en: ahora,
+      })
+    } catch (e) {
+      return Promise.reject(e)
+    }
+  }
+  return pedir<SolicitudCambio>(`/solicitudes-cambio/${id}/respuesta`, {
+    method: 'POST',
+    body: JSON.stringify({ acepta }),
+  })
+}
+
+/**
+ * Quien pidió el cambio o el jefe: propone a otra persona, por ejemplo después de un rechazo
+ * (PATCH /solicitudes-cambio/{id}/reemplazo). La respuesta del reemplazo vuelve a "pendiente".
+ * La API responde 409 con el motivo si esa persona no está disponible.
+ */
+export function cambiarReemplazo(id: number, reemplazoId: string): Promise<SolicitudCambio> {
+  if (USAR_MOCKS) {
+    try {
+      const s = pendienteMock(id)
+      if (reemplazoId === s.solicitante_id) {
+        throw new ErrorApi(409, 'El reemplazo no puede ser la misma persona que pide el cambio')
+      }
+      const ahora = new Date().toISOString()
+      if (reemplazoId === s.reemplazo_id) return guardarMock({ ...s, actualizada_en: ahora })
+      return guardarMock({
+        ...s,
+        reemplazo_id: reemplazoId,
+        respuesta_reemplazo: 'pendiente',
+        respondida_en: null,
+        propuesto_en: ahora,
+        actualizada_en: ahora,
+      })
+    } catch (e) {
+      return Promise.reject(e)
+    }
+  }
+  return pedir<SolicitudCambio>(`/solicitudes-cambio/${id}/reemplazo`, {
+    method: 'PATCH',
+    body: JSON.stringify({ reemplazo_id: reemplazoId }),
+  })
+}
+
+/**
+ * Solo jefe de turno. Solo se pueden resolver solicitudes pendientes.
+ * Aprobar exige que el reemplazo haya aceptado (409 si no); rechazar se puede siempre.
+ */
 export function resolverSolicitud(
   id: number,
   estado: 'aprobada' | 'rechazada',
   comentario?: string,
 ): Promise<SolicitudCambio> {
   if (USAR_MOCKS) {
-    const s = solicitudesMock.find((x) => x.id === id)
-    if (!s) return Promise.reject(new ErrorApi(404, `No existe la solicitud ${id}`))
-    if (s.estado !== 'pendiente') return Promise.reject(new ErrorApi(409, `La solicitud ya está ${s.estado}`))
-    const actualizada: SolicitudCambio = {
-      ...s,
-      estado,
-      comentario: comentario || null,
-      resuelta_por: 'RST_055',
-      actualizada_en: new Date().toISOString(),
+    try {
+      const s = pendienteMock(id)
+      if (estado === 'aprobada' && s.respuesta_reemplazo !== 'aceptada') {
+        // Mismo texto que la API (backend/app/repositorio.py)
+        throw new ErrorApi(409, 'Solo se puede aprobar si un reemplazo aceptó. Si nadie acepta, hay que rechazarla')
+      }
+      return guardarMock({
+        ...s,
+        estado,
+        comentario: comentario || null,
+        resuelta_por: 'RST_055',
+        actualizada_en: new Date().toISOString(),
+      })
+    } catch (e) {
+      return Promise.reject(e)
     }
-    solicitudesMock = solicitudesMock.map((x) => (x.id === id ? actualizada : x))
-    return simularRed(actualizada)
   }
   return pedir<SolicitudCambio>(`/solicitudes-cambio/${id}`, {
     method: 'PATCH',
