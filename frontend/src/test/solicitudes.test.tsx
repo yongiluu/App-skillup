@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { SesionProvider } from '../auth/SesionContext'
 import App from '../App'
+import { responderReemplazo } from '../api'
 
 function montar(ruta = '/') {
   return render(
@@ -55,6 +56,8 @@ describe('cambio de turno: el empleado pide y el jefe resuelve', () => {
     expect(await within(hoy).findByText('Pendiente')).toBeInTheDocument()
     // El otro turno del mismo día todavía se puede pedir
     expect(within(hoy).getAllByRole('button', { name: 'Pedir cambio' })).toHaveLength(1)
+    // La persona propuesta acepta. Su pantalla espera el diseño de Cata: por ahora, directo por la API.
+    await responderReemplazo(1, true)
 
     // 2. El jefe la aprueba con un comentario
     await u.click(screen.getByRole('button', { name: 'Salir' }))
