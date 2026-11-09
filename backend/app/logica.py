@@ -54,42 +54,79 @@ def rol_mas_en_riesgo(s: dict) -> str:
     return max(CRITICOS, key=lambda r: s["prob_por_rol"][r])
 
 
-def margen(asignados: int, requeridos: int) -> str:
-    """Cuánta ausencia aguanta el servicio, en palabras."""
+def _cuantos(n: int, singular: str, plural: str) -> str:
+    return f"{n} {singular if n == 1 else plural}"
+
+
+def margen(asignados: int, requeridos: int, ausentes: int = 0) -> str:
+    """Cuánta ausencia aguanta el servicio, en palabras, descontando a quienes ya avisaron."""
     base = f"Hay {asignados} programados para {requeridos}"
-    if asignados > requeridos:
-        holgura = asignados - requeridos
-        return f"{base}: alcanza si no faltan más de {holgura}"
-    if asignados == requeridos:
-        return f"{base}: cualquier ausencia lo deja corto"
-    return f"{base}: faltan {requeridos - asignados} desde ya"
+    if ausentes:
+        base += f" y {_cuantos(ausentes, 'ya avisó que no viene', 'ya avisaron que no vienen')}"
+    vienen = asignados - ausentes
+    if vienen > requeridos:
+        return f"{base}: alcanza si no faltan más de {vienen - requeridos}"
+    if vienen == requeridos:
+        return f"{base}: {'cualquier otra ausencia' if ausentes else 'cualquier ausencia'} lo deja corto"
+    falta = requeridos - vienen
+    return f"{base}: {'falta' if falta == 1 else 'faltan'} {falta} desde ya"
 
 
-def recomendacion(s: dict) -> str:
+def _lista(nombres: list[str]) -> str:
+    return nombres[0] if len(nombres) == 1 else ", ".join(nombres[:-1]) + " y " + nombres[-1]
+
+
+def recomendacion(s: dict, roles_ausentes: list[str] | None = None) -> str:
     """Qué hacer con el servicio, explicado (AP-01 de Cata).
 
     El riesgo del modelo es la probabilidad de que **los que lleguen** sean menos que los
     requeridos (después de las ausencias). Por eso un servicio con más programados que
     requeridos puede estar en riesgo alto: se dice el margen y el rol más ajustado.
+    `roles_ausentes`: el rol de cada persona que ya avisó que no viene a este servicio
+    (se descuentan; si con eso ya falta gente, eso va primero).
     """
+    roles_ausentes = roles_ausentes or []
     rol = NOMBRE_ROL[rol_mas_en_riesgo(s)]
-    texto_margen = margen(s["asignados"], s["requeridos"])
+    texto_margen = margen(s["asignados"], s["requeridos"], len(roles_ausentes))
+    vienen = s["asignados"] - len(roles_ausentes)
     nivel = nivel_riesgo(s["prob_deficit"])
+    if vienen < s["requeridos"]:
+        cubrir = _lista(sorted({NOMBRE_ROL.get(r, r) for r in roles_ausentes})) if roles_ausentes else rol
+        return f"Ya falta gente. {texto_margen}. Busca reemplazo de {cubrir} ahora."
+    # Aunque alcance en total, si avisó alguien de un rol crítico hay que cubrir ese puesto.
+    criticos = sorted({NOMBRE_ROL[r] for r in roles_ausentes if r in CRITICOS})
+    if len(criticos) == 1:
+        ojo = f" Ojo: falta {criticos[0]} (avisó que no viene); confirma quién cubre ese puesto."
+    elif criticos:
+        ojo = f" Ojo: faltan {_lista(criticos)} (avisaron que no vienen); confirma quién cubre esos puestos."
+    else:
+        ojo = ""
     if nivel == "alto":
-        return f"Riesgo alto de quedar corto, sobre todo en {rol}. {texto_margen}. Confirma quién viene y ten un reemplazo de {rol} listo."
+        return f"Riesgo alto de quedar corto, sobre todo en {rol}. {texto_margen}. Confirma quién viene y ten un reemplazo de {rol} listo.{ojo}"
     if nivel == "alerta":
-        return f"Atento a {rol}. {texto_margen}. Si alguien avisa, confirma quién lo cubre."
-    if s["asignados"] < s["requeridos"]:
-        return f"{texto_margen}. Riesgo bajo según el modelo, pero revisa {rol}."
-    return f"Dotación suficiente: {texto_margen.lower()}. No hace falta hacer nada por ahora."
+        return f"Atento a {rol}. {texto_margen}. Si alguien más avisa, confirma quién lo cubre.{ojo}"
+    if criticos:
+        return f"{texto_margen}.{ojo}"
+    return f"Dotación suficiente: {texto_margen[0].lower()}{texto_margen[1:]}. No hace falta hacer nada por ahora."
 
 
-def armar_servicio(s: dict) -> dict:
+def armar_servicio(s: dict, roles_ausentes: list[str] | None = None) -> dict:
     return {
         **s,
         "horario": horario(s["servicio"], _fecha(s["fecha"])),
         "nivel_riesgo": nivel_riesgo(s["prob_deficit"]),
-        "recomendacion": recomendacion(s),
+        "recomendacion": recomendacion(s, roles_ausentes),
+    }
+
+
+def roles_ausentes_por_servicio(repo: Repositorio, fecha: date) -> dict[str, list[str]]:
+    """franja → rol del turno de cada persona que ya avisó que no viene ese día."""
+    ausentes = repo.ausentes_en(fecha)
+    if not ausentes:
+        return {}
+    return {
+        franja: [t["rol"] for t in repo.turnos_de_servicio(fecha, franja) if t["empleado_id"] in ausentes]
+        for franja in HORARIOS
     }
 
 
@@ -112,10 +149,11 @@ def armar_dia_servicios(repo: Repositorio, fecha: date) -> dict | None:
     servicios = repo.servicios_de(fecha)
     if not servicios:
         return None
+    ausentes = roles_ausentes_por_servicio(repo, fecha)
     return {
         "fecha": fecha,
         "calendario": armar_dia_calendario(repo, fecha),
-        "servicios": [armar_servicio(s) for s in servicios],
+        "servicios": [armar_servicio(s, ausentes.get(s["servicio"])) for s in servicios],
     }
 
 
