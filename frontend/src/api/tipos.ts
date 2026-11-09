@@ -251,3 +251,15 @@ export interface SolicitudCambio {
   creada_en: string
   actualizada_en: string
 }
+
+/**
+ * Posible reemplazo para un turno (GET /disponibles). El empleado recibe solo a los disponibles
+ * y sin motivo; el jefe de turno recibe a todos, con `motivo` cuando no pueden.
+ */
+export interface Disponible {
+  empleado_id: string
+  nombre: string
+  rol: Rol
+  disponible: boolean
+  motivo: string | null
+}

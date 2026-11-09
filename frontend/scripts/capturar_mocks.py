@@ -90,5 +90,14 @@ fichas["RST_004"]["bienestar"].update(estado="sin_datos", fatiga=None)
 guardar("fatiga.json", fatiga, sangria=1)
 guardar("fichas.json", fichas, sangria=None)
 guardar("bienestar-propio.json", pedir(f"/empleados/{yo}/bienestar", empleado), sangria=1)
-guardar("turnos-propios.json", pedir(f"/empleados/{yo}/turnos", empleado), sangria=1)
+turnos_propios = pedir(f"/empleados/{yo}/turnos", empleado)
+guardar("turnos-propios.json", turnos_propios, sangria=1)
+
+# AP-03: quiénes pueden cubrir cada turno propio desde "hoy", tal como los ve el empleado
+# (solo disponibles, sin motivos). Clave "fecha|servicio".
+hoy_sim = pedir("/servicios", jefe)["fecha"]
+guardar("disponibles.json", {
+    f"{t['fecha']}|{t['servicio']}": pedir(f"/disponibles?servicio={t['servicio']}&fecha={t['fecha']}", empleado)
+    for t in turnos_propios if t["fecha"] >= hoy_sim
+}, sangria=None)
 print("Listo. Revisa los cambios con git diff antes de subirlos.")

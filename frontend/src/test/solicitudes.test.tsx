@@ -46,8 +46,10 @@ describe('cambio de turno: el empleado pide y el jefe resuelve', () => {
     await u.click(within(hoy).getAllByRole('button', { name: 'Pedir cambio' })[0])
     const form = within(hoy).getByRole('form', { name: /Pedir cambio/ })
     const select = within(form).getByLabelText(/Quién te podría cubrir/)
-    expect(within(select).getByRole('option', { name: /Camila Gutiérrez/ })).toBeInTheDocument()
-    await u.selectOptions(select, within(select).getByRole('option', { name: /Camila Gutiérrez/ }))
+    // AP-03: solo aparecen los disponibles (GET /disponibles); Camila no puede ese día
+    expect(await within(form).findByText(/Solo aparecen las 18 personas disponibles/)).toBeInTheDocument()
+    expect(within(select).queryByRole('option', { name: /Camila Gutiérrez/ })).not.toBeInTheDocument()
+    await u.selectOptions(select, within(select).getByRole('option', { name: /Ignacia Muñoz/ }))
     await u.type(within(form).getByLabelText(/Motivo/), 'Trámite personal')
     await u.click(within(form).getByRole('button', { name: 'Enviar solicitud' }))
 
@@ -62,9 +64,9 @@ describe('cambio de turno: el empleado pide y el jefe resuelve', () => {
     await u.click(await screen.findByRole('link', { name: 'Solicitudes' }))
     expect(await screen.findByRole('button', { name: 'Pendientes (1)' })).toBeInTheDocument()
     const tarjeta = (await screen.findByText(/Cristóbal Silva/)).closest('li')!
-    expect(within(tarjeta).getByText(/Propone que lo cubra: Camila Gutiérrez/)).toBeInTheDocument()
+    expect(within(tarjeta).getByText(/Propone que lo cubra: Ignacia Muñoz/)).toBeInTheDocument()
     expect(within(tarjeta).getByText(/Motivo: Trámite personal/)).toBeInTheDocument()
-    await u.type(within(tarjeta).getByLabelText(/Comentario/), 'Ok, avisa a Camila')
+    await u.type(within(tarjeta).getByLabelText(/Comentario/), 'Ok, avisa a Ignacia')
     await u.click(within(tarjeta).getByRole('button', { name: 'Aprobar' }))
     expect(await screen.findByText(/Solicitud de Cristóbal Silva aprobada/)).toBeInTheDocument()
     expect(await screen.findByRole('button', { name: 'Resueltas (1)' })).toBeInTheDocument()
@@ -74,7 +76,7 @@ describe('cambio de turno: el empleado pide y el jefe resuelve', () => {
     await ingresar(u, 'empleado')
     await u.click(await screen.findByRole('link', { name: 'Solicitudes' }))
     expect(await screen.findByText('Aprobada')).toBeInTheDocument()
-    expect(screen.getByText('Ok, avisa a Camila')).toBeInTheDocument()
+    expect(screen.getByText('Ok, avisa a Ignacia')).toBeInTheDocument()
     unmount()
   })
 

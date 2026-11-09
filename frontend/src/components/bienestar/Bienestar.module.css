@@ -102,3 +102,40 @@
 .escala b {
   font-weight: var(--peso-fuerte);
 }
+
+/* Control de la autorización (AP-04): separado del indicador por una línea */
+.autorizacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  margin-top: var(--esp-4);
+  padding-top: var(--esp-4);
+  border-top: 1px solid var(--color-borde);
+}
+
+.autorizacion h3 {
+  font-size: var(--texto-md);
+}
+
+.confirmar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  padding: var(--esp-3) var(--esp-4);
+  border: 1px solid var(--color-borde-campo);
+  border-radius: var(--radio-md);
+  background: var(--color-hundido);
+  font-size: var(--texto-sm);
+}
+
+.confirmar ul {
+  display: grid;
+  gap: var(--esp-1);
+  padding-left: 1.2em;
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
