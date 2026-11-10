@@ -28,7 +28,7 @@
         "cocinero_linea": 0.063,
         "jefe_turno": 0.007
       },
-      "recomendacion": "Dotación suficiente: hay 25 programados para 23: alcanza si no faltan más de 2. No hace falta hacer nada por ahora."
+      "recomendacion": "Dotación suficiente: hay 25 programados para 23 y 1 ya avisó que no viene: alcanza si no faltan más de 1. No hace falta hacer nada por ahora."
     },
     {
       "fecha": "2025-10-17",
@@ -47,7 +47,7 @@
         "cocinero_linea": 0.036,
         "jefe_turno": 0.549
       },
-      "recomendacion": "Dotación suficiente: hay 27 programados para 23: alcanza si no faltan más de 4. No hace falta hacer nada por ahora."
+      "recomendacion": "Hay 27 programados para 23 y 3 ya avisaron que no vienen: alcanza si no faltan más de 1. Ojo: faltan cocinero de línea y jefe de turno (avisaron que no vienen); confirma quién cubre esos puestos."
     },
     {
       "fecha": "2025-10-17",
@@ -66,7 +66,7 @@
         "cocinero_linea": 0.05,
         "jefe_turno": 0.096
       },
-      "recomendacion": "Dotación suficiente: hay 13 programados para 10: alcanza si no faltan más de 3. No hace falta hacer nada por ahora."
+      "recomendacion": "Dotación suficiente: hay 13 programados para 10 y 2 ya avisaron que no vienen: alcanza si no faltan más de 1. No hace falta hacer nada por ahora."
     },
     {
       "fecha": "2025-10-17",
@@ -85,7 +85,7 @@
         "cocinero_linea": 0.038,
         "jefe_turno": 0.025
       },
-      "recomendacion": "Atento a garzón. Hay 12 programados para 11: alcanza si no faltan más de 1. Si alguien avisa, confirma quién lo cubre."
+      "recomendacion": "Ya falta gente. Hay 12 programados para 11 y 2 ya avisaron que no vienen: falta 1 desde ya. Busca reemplazo de ayudante de cocina y host ahora."
     }
   ]
 }
