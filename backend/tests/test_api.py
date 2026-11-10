@@ -250,17 +250,40 @@ def test_recomendacion_en_lenguaje_normal(client):
 
 
 def test_recomendacion_explica_el_margen(client):
-    """AP-01: la recomendación dice el margen (programados vs requeridos) y el rol más ajustado."""
+    """AP-01: la recomendación dice el margen, descuenta a quienes ya avisaron y nombra el rol."""
     s = {x["servicio"]: x for x in client.get("/servicios", params={"fecha": HOY}).json()["servicios"]}
-    assert s["23_cierre"]["nivel_riesgo"] == "alerta"
+    # cierre del viernes: 12 programados para 11, pero 2 ya avisaron (host y ayudante de cocina)
     assert s["23_cierre"]["recomendacion"] == (
-        "Atento a garzón. Hay 12 programados para 11: alcanza si no faltan más de 1. "
-        "Si alguien avisa, confirma quién lo cubre."
+        "Ya falta gente. Hay 12 programados para 11 y 2 ya avisaron que no vienen: falta 1 desde ya. "
+        "Busca reemplazo de ayudante de cocina y host ahora."
     )
-    assert s["13_15"]["recomendacion"].startswith("Dotación suficiente: hay 25 programados para 23")
-    alto = {x["servicio"]: x for x in client.get("/servicios", params={"fecha": "2025-10-18"}).json()["servicios"]}["21_23"]
-    assert alto["nivel_riesgo"] == "alto"
-    assert alto["recomendacion"].startswith("Riesgo alto de quedar corto, sobre todo en garzón. Hay 16 programados para 15")
+    # 19–21: alcanza en total, pero avisaron el jefe de turno y un cocinero de línea (roles críticos)
+    assert s["19_21"]["recomendacion"] == (
+        "Hay 27 programados para 23 y 3 ya avisaron que no vienen: alcanza si no faltan más de 1. "
+        "Ojo: faltan cocinero de línea y jefe de turno (avisaron que no vienen); confirma quién cubre esos puestos."
+    )
+    assert s["13_15"]["recomendacion"] == (
+        "Dotación suficiente: hay 25 programados para 23 y 1 ya avisó que no viene: alcanza si no faltan más de 1. "
+        "No hace falta hacer nada por ahora."
+    )
+    # sin ausencias avisadas, se usa la predicción del modelo
+    cierre_sab = {x["servicio"]: x for x in client.get("/servicios", params={"fecha": "2025-10-18"}).json()["servicios"]}["23_cierre"]
+    assert cierre_sab["recomendacion"] == (
+        "Dotación suficiente: hay 14 programados para 12: alcanza si no faltan más de 2. No hace falta hacer nada por ahora."
+    )
+
+
+def test_recomendacion_coincide_con_las_ausencias(client):
+    """Lo que descuenta la recomendación es lo mismo que muestra /ausencias para ese día y servicio."""
+    for fecha in ("2025-10-13", "2025-10-17", "2025-10-25"):
+        aus = client.get("/ausencias", params={"fecha": fecha}).json()
+        for s in client.get("/servicios", params={"fecha": fecha}).json()["servicios"]:
+            n = sum(s["servicio"] in a["servicios"] for a in aus)
+            r = s["recomendacion"]
+            if n == 0:
+                assert "avis" not in r.split("Ojo")[0]
+            else:
+                assert (f"y {n} ya avisó que no viene" if n == 1 else f"y {n} ya avisaron que no vienen") in r
 
 
 def test_margen():
@@ -269,6 +292,8 @@ def test_margen():
     assert margen(25, 23).endswith("alcanza si no faltan más de 2")
     assert margen(12, 12).endswith("cualquier ausencia lo deja corto")
     assert margen(10, 12).endswith("faltan 2 desde ya")
+    assert margen(12, 11, 2).endswith("y 2 ya avisaron que no vienen: falta 1 desde ya")
+    assert margen(12, 11, 1).endswith("y 1 ya avisó que no viene: cualquier otra ausencia lo deja corto")
 
 
 def test_jefe_demo_no_esta_ausente_hoy(client):

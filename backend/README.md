@@ -117,7 +117,12 @@ Respuestas de error: `401` sin sesión o con sesión vencida · `403` sin permis
 
 Cada solicitud trae además `propuesto_en` (cuándo se propuso al reemplazo actual, para "sin respuesta hace 3 h") y `rechazaron` (`[{empleado_id, rechazado_en}]`, quiénes ya dijeron que no; no se pierde al proponer a otra persona). Con la base, los llena la migración **0004** (borrador para Maxi).
 
-**Recomendación de cada servicio (AP-01):** el riesgo del modelo es la probabilidad de que *los que lleguen* sean menos que los requeridos, después de las ausencias. Por eso un servicio con más programados que requeridos puede salir en alto. La recomendación lo explica con el margen y el rol más ajustado, por ejemplo: "Riesgo alto de quedar corto, sobre todo en jefe de turno. Hay 25 programados para 23: alcanza si no faltan más de 2. Confirma quién viene y ten un reemplazo de jefe de turno listo."
+**Recomendación de cada servicio (AP-01):** el riesgo del modelo es la probabilidad de que *los que lleguen* sean menos que los requeridos, después de las ausencias. La recomendación lo explica con el margen y **descuenta a quienes ya avisaron que no vienen** (las mismas ausencias de `GET /ausencias`):
+- si con eso ya falta gente, va primero: "Ya falta gente. Hay 12 programados para 11 y 2 ya avisaron que no vienen: falta 1 desde ya. Busca reemplazo de ayudante de cocina y host ahora.";
+- si alcanza en total pero avisó alguien de un rol crítico: "… Ojo: falta jefe de turno (avisó que no viene); confirma quién cubre ese puesto.";
+- si no, el margen y el rol más ajustado según el modelo: "Riesgo alto de quedar corto, sobre todo en garzón. Hay 16 programados para 15: alcanza si no faltan más de 1. …".
+
+`nivel_riesgo` sigue siendo la predicción del modelo (no cambia con las ausencias avisadas).
 
 Flujo de la demo: `empleado` pide cambiar su turno del viernes 2025-10-17 en el cierre (`23_cierre`, de 23:00 a 02:00) proponiendo a `RST_009` → entra `reemplazo` y acepta → entra `jefe` y aprueba → el turno queda a nombre de Ignacia.
 
