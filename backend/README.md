@@ -93,9 +93,9 @@ Todos exigen la cabecera `Authorization: Bearer <token>`, salvo `/auth/login` y 
 | `GET` | `/empleados?rol=` | Todos | Solo datos básicos (sirven para elegir reemplazo) |
 | `GET` | `/empleados/{id}` | Jefe, o la misma persona | Ficha completa |
 | `GET` | `/empleados/{id}/turnos?desde=&hasta=` | Jefe, o la misma persona | Turnos de una persona |
-| `GET` | `/solicitudes-cambio?estado=` | Todos | El jefe ve todas; el empleado, las que pidió y en las que lo proponen como reemplazo |
+| `GET` | `/solicitudes-cambio?estado=` | Todos | El jefe ve todas; el empleado, las que pidió y en las que lo proponen como reemplazo. **Al reemplazo** le llegan sin `motivo` y con `rechazaron` vacío (privacidad de quien pide). Si le proponen a otra persona, la solicitud deja de aparecerle |
 | `POST` | `/solicitudes-cambio` | Todos | El empleado solo pide por sí mismo; se valida que tenga ese turno. `reemplazo_id` es opcional; si viene, tiene que estar disponible. Una sola pendiente por persona y turno (409) |
-| `POST` | `/solicitudes-cambio/{id}/respuesta` | Reemplazo | **Nuevo.** `{"acepta": true\|false}`. Solo la persona propuesta (si no, 403). Si rechaza, sigue pendiente. Para aceptar tiene que estar disponible (409 `No puede aceptar: <motivo>`) |
+| `POST` | `/solicitudes-cambio/{id}/respuesta` | Reemplazo | **Nuevo.** `{"acepta": true\|false}`. Solo la persona propuesta (si no, 403). Puede cambiar su respuesta mientras siga pendiente; resuelta, 409. Si rechaza, sigue pendiente. Para aceptar tiene que estar disponible (409 `No puede aceptar: <motivo>`) |
 | `PATCH` | `/solicitudes-cambio/{id}/reemplazo` | Solicitante o jefe | **Nuevo.** `{"reemplazo_id": "RST_021"}`. Propone a otra persona; `respuesta_reemplazo` vuelve a `pendiente` |
 | `PATCH` | `/solicitudes-cambio/{id}` | Jefe | `aprobada` o `rechazada`. **Aprobar** solo si el reemplazo aceptó y sigue disponible; el turno pasa al reemplazo (mismo rol). Si no → 409 con el motivo. Queda registrado `resuelta_por` |
 | `GET` | `/disponibles?servicio=&fecha=&solicitante=` | Todos | **Nuevo.** Quién puede cubrir el turno de `solicitante` (por defecto, quien consulta). Empleado: solo sus turnos y solo los disponibles, sin motivo. Jefe: todos, con `motivo` si no pueden |
@@ -119,7 +119,7 @@ Cada solicitud trae además `propuesto_en` (cuándo se propuso al reemplazo actu
 
 **Recomendación de cada servicio (AP-01):** el riesgo del modelo es la probabilidad de que *los que lleguen* sean menos que los requeridos, después de las ausencias. La recomendación lo explica con el margen y **descuenta a quienes ya avisaron que no vienen** (las mismas ausencias de `GET /ausencias`):
 - si con eso ya falta gente, va primero: "Ya falta gente. Hay 12 programados para 11 y 2 ya avisaron que no vienen: falta 1 desde ya. Busca reemplazo de ayudante de cocina y host ahora.";
-- si alcanza en total pero avisó alguien de un rol crítico: "… Ojo: falta jefe de turno (avisó que no viene); confirma quién cubre ese puesto.";
+- si alcanza en total pero avisaron **todos** los programados de un rol crítico (AP-20): "… Ojo: avisó el único jefe de turno, así que no queda ninguno; confirma quién cubre ese puesto." Si quedan otros de ese rol no se menciona, porque no se sabe cuántos se requieren por rol;
 - si no, el margen y el rol más ajustado según el modelo: "Riesgo alto de quedar corto, sobre todo en garzón. Hay 16 programados para 15: alcanza si no faltan más de 1. …".
 
 `nivel_riesgo` sigue siendo la predicción del modelo (no cambia con las ausencias avisadas).

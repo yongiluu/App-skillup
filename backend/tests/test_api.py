@@ -257,10 +257,11 @@ def test_recomendacion_explica_el_margen(client):
         "Ya falta gente. Hay 12 programados para 11 y 2 ya avisaron que no vienen: falta 1 desde ya. "
         "Busca reemplazo de ayudante de cocina y host ahora."
     )
-    # 19–21: alcanza en total, pero avisaron el jefe de turno y un cocinero de línea (roles críticos)
+    # 19–21 (AP-20): alcanza en total, pero avisó la única jefa de turno programada. De cocinero de
+    # línea avisó 1 de 6: quedan 5, así que no se menciona (no se sabe cuántos se requieren por rol).
     assert s["19_21"]["recomendacion"] == (
         "Hay 27 programados para 23 y 3 ya avisaron que no vienen: alcanza si no faltan más de 1. "
-        "Ojo: faltan cocinero de línea y jefe de turno (avisaron que no vienen); confirma quién cubre esos puestos."
+        "Ojo: avisó el único jefe de turno, así que no queda ninguno; confirma quién cubre ese puesto."
     )
     assert s["13_15"]["recomendacion"] == (
         "Dotación suficiente: hay 25 programados para 23 y 1 ya avisó que no viene: alcanza si no faltan más de 1. "
@@ -284,6 +285,15 @@ def test_recomendacion_coincide_con_las_ausencias(client):
                 assert "avis" not in r.split("Ojo")[0]
             else:
                 assert (f"y {n} ya avisó que no viene" if n == 1 else f"y {n} ya avisaron que no vienen") in r
+
+
+def test_sin_nadie_de_un_rol():
+    from app.logica import _sin_nadie
+
+    assert _sin_nadie({}, ["cocinero_linea"], ["cocinero_linea"] * 6) == ""  # quedan 5
+    assert "avisaron los 2 jefes de turno" in _sin_nadie({}, ["jefe_turno"] * 2, ["jefe_turno"] * 2 + ["garzon"])
+    assert "no queda ningún garzón ni jefe de turno" in _sin_nadie({}, ["garzon", "jefe_turno"], ["garzon", "jefe_turno", "host"])
+    assert _sin_nadie({}, ["host"], ["host"]) == ""  # solo roles críticos
 
 
 def test_margen():
