@@ -1,8 +1,8 @@
 # Evaluación heurística (Nielsen) · App SkillUp con el diseño del kit v14
 
 **Responsable:** Catalina (UX e investigación con usuarios)
-**Rama:** `docs/ux-catalina`
-**Estado:** revisado por Cata (los 14 hallazgos tienen decisión; ver la sección 9)
+**Rama:** docs/ux-autorizacion
+**Estado:** revisado por Cata (14 hallazgos con decisión y 5 nuevos por revisar, AP-15 a AP-19; ver la sección 9)
 **Fecha:** 03-11-2026
 
 ---
@@ -16,6 +16,7 @@
 - **AP-07 · Planificador:** usar colores que se distingan mejor en los puntos del calendario.
 - **AP-12 · Bienestar:** poner la explicación de la escala de cansancio antes de la tabla, más destacada.
 - **AP-14 · Solicitudes:** cambiar "Todavía no pides cambios" por "Todavía no has pedido cambios".
+- **AP-16 a AP-19 · Mi bienestar:** textos y foco de la confirmación al retirar la autorización (quitar "Pendiente cervecería", botones claros, "La app no mostrará los datos ya guardados", mover el foco y mensaje de error fijo).
 
 **Urgente, pero depende de backend:**
 - ~~AP-03 · Pedir cambio: mostrar solo a quienes están disponibles.~~ **Resuelto:** el endpoint `/disponibles` ya está (Diego, 04-11). Pendiente que Manuel lo conecte.
@@ -24,6 +25,7 @@
 - **AP-01:** respuesta de Diego abajo (sección 9); falta confirmar si se ajusta la alerta visual.
 - **AP-04:** el retiro de la autorización ya está (Diego, 04-11). Falta la decisión con la cervecería sobre los datos ya guardados.
 - **AP-11:** revisar en un celular real si conviene poner el turno antes que la fatiga.
+- **AP-15:** el texto para autorizar no dice que la fatiga influye en los reemplazos. Hay que confirmarlo con Diego, Maxi, la cervecería y la revisión legal.
 
 ---
 
@@ -36,6 +38,7 @@ Detectar problemas de usabilidad en la app con la que trabaja el equipo, antes d
 - **Se evaluó:** la app de la rama `frontend/diseno-kit` (kit enviado a Cata el 03-11), corriendo con datos simulados (`VITE_USAR_MOCKS=true`). "Hoy" es el 17-10-2025. Usuarios: `jefe` (Catalina Flores) y `empleado` (Cristóbal Silva, garzón).
   - Celular: 390 px de ancho. Computador: 1366 px.
   - Pantallas: Login · Jefe: Hoy, Planificador, Equipo, ficha de una persona y Solicitudes · Trabajador: Mis turnos (con "Pedir cambio"), Solicitudes y Bienestar · modo claro y oscuro.
+  - **AP-15 a AP-19** salen de revisar el código y los textos de `Autorizacion.tsx` (PR #34, ya en `main`), no de la rama `frontend/diseno-kit`. No tienen captura. Quedan sin evaluar el contraste, la lectura en 360 px y el modo oscuro de esa pantalla.
 - **No se evaluó:**
   - Las funciones que aún no existen (el reemplazo que acepta o rechaza, turnos extra y avisos). Esas pantallas se están diseñando aparte.
   - El backend real: con datos simulados, algunas reglas (como la de disponibilidad) todavía no se aplican.
@@ -68,10 +71,10 @@ Se recorrieron las tareas principales de cada perfil y se registró cada problem
 
 | Severidad | Cantidad |
 |---|---|
-| 3 · Mayor | 4 |
-| 2 · Menor | 7 |
+| 3 · Mayor | 6 |
+| 2 · Menor | 10 |
 | 1 · Cosmético | 3 |
-| **Total** | **14** |
+| **Total** | **19** |
 
 ### Detalle
 
@@ -91,6 +94,11 @@ Se recorrieron las tareas principales de cada perfil y se registró cada problem
 | AP-12 | H6 | Trabajador · ambos | En Bienestar, la columna "Cansancio" muestra "3 → 4" y solo se entiende leyendo la nota al pie. | 1 | Dividirla en dos columnas: "Al llegar" y "Al salir". | `app-mob_emp_mi-bienestar.png` |
 | AP-13 | H2 | Ambos · ambos | Textos técnicos: "texto borrador-v0", "Tests: Pendiente" (sin explicar qué tests) y "Horas extra (7 días): 0,6" (son 36 minutos). | 1 | "Versión del texto: borrador"; "Tests psicológicos: aún no disponibles"; "36 min" o "0,6 h". | `app-pc_jefe_ficha.png` |
 | AP-14 | H2 | Trabajador · ambos | "Todavía no pides cambios" suena poco natural. | 1 | "Todavía no has pedido cambios". | — |
+| AP-15 | Privacidad · H1 | Trabajador · ambos | En Mi bienestar, el texto para autorizar dice "tu jefe de turno verá solo tu nivel de fatiga y el motivo general", pero **no dice que la fatiga influye en los reemplazos**. Hoy `/sugerencias` deja al final a quien tiene fatiga alta, y el jefe ve el nivel junto a cada disponible. Al retirar sí se dice "no te favorece ni te perjudica en las sugerencias de turnos", lo que implica que quien autoriza sí queda afectado. La persona consiente sin conocer todo el uso de su dato. | 3 | Agregar: "Cuando propone reemplazos, la app también usa tu nivel de fatiga: si es alto, apareces al final de la lista." Confirmar con Diego (que describa `/sugerencias`), con Maxi (¿versión nueva de `version_texto`?) y con la cervecería y la revisión legal [PENDIENTE]. | — |
+| AP-16 | H2 | Trabajador · ambos | En la confirmación al retirar la autorización aparece la etiqueta interna **"Pendiente cervecería"**. Es una marca de trabajo del equipo: al trabajador no le dice nada y, en una pantalla de salud, genera desconfianza. | 3 | Cambiar por: "Todavía no está definido si los datos que ya se guardaron se borran o se conservan por un tiempo." No prometer "te avisaremos" mientras el equipo no se comprometa. | — |
+| AP-17 | H4 · H5 | Trabajador · ambos | Los botones de la confirmación son "Sí, retirar" (primario) y "Cancelar" (secundario). "Cancelar" no dice qué se cancela, y mantener la autorización queda como opción de segunda. | 2 | "Sí, retirar mi autorización" y "Mantener mi autorización", con el mismo peso visual. | — |
+| AP-18 | H2 | Trabajador · ambos | "Nadie podrá ver los datos ya guardados" es más fuerte que la realidad: no aclara si la propia persona los ve, y quien administra la base técnicamente podría. Hoy los datos quedan guardados y la app no los lee. | 2 | "La app no mostrará los datos que ya se guardaron." Sumar "La app dejará de usar tus datos de bienestar, también al sugerir reemplazos" y, si el equipo lo confirma, "Esto no cambia tus turnos". | — |
+| AP-19 | H1 · H9 | Trabajador · ambos | (1) Al tocar "Retirar mi autorización" el botón desaparece y el foco se pierde. (2) No está verificado que `Aviso` se anuncie solo (`role="status"`). (3) El error muestra `e.message` tal cual, y puede llegar algo técnico como "403". | 2 | Mover el foco a la pregunta de confirmación, confirmar `role="status"` en `Aviso` y usar siempre el texto fijo "No se pudo cambiar tu autorización. Inténtalo de nuevo." | — |
 
 ---
 
@@ -134,7 +142,8 @@ Se recorrieron las tareas principales de cada perfil y se registró cada problem
 1. ✅ Cata revisó los hallazgos (sección 9).
 2. Segunda evaluación independiente y unión de resultados.
 3. Con Manuel: conectar AP-03 y AP-04 (endpoints ya listos) antes de la prueba con usuarios, y AP-06 y AP-09. Con el equipo y la cervecería: qué pasa con los datos ya guardados al retirar la autorización (AP-04). Con el equipo: el texto de AP-05. AP-01 ya resuelto.
-4. Usar esta evaluación como comentario de revisión en el PR de `frontend/diseno-kit`, donde Cata figura como revisora.
+4. Con Manuel: textos y foco de `Autorizacion.tsx` (AP-16 a AP-19). Con Diego, Maxi y la cervecería: el texto de AP-15.
+5. Usar esta evaluación como comentario de revisión en el PR de `frontend/diseno-kit`, donde Cata figura como revisora.
 
 ## 9. Registro de revisión de Cata
 
@@ -154,8 +163,13 @@ Se recorrieron las tareas principales de cada perfil y se registró cada problem
 | AP-12 | Ajustado | Baja | Poner la explicación de la escala antes de la tabla o más destacada. |
 | AP-13 | Postergado | — | Los tests psicológicos aún no están definidos y los datos son estáticos; el texto se ajusta cuando existan. |
 | AP-14 | Confirmado | Baja | Cambio de texto simple. |
+| AP-15 | Nuevo, por revisar | Alta | El texto para autorizar no dice que la fatiga alta deja a la persona al final de las sugerencias de reemplazo. Hay que resolverlo antes de la prueba con usuarios. Confirmar con Diego que la frase describe `/sugerencias`, con Maxi si cuenta como versión nueva de `version_texto`, y con la cervecería y la revisión legal [PENDIENTE]. Severidad 3 por ahora. |
+| AP-16 | Nuevo, por revisar | Alta | Quitar "Pendiente cervecería" de lo que ve el empleado y reemplazarlo por un texto legible. Cambio de texto en `Autorizacion.tsx` (Manuel). |
+| AP-17 | Nuevo, por revisar | Media | Botones "Sí, retirar mi autorización" y "Mantener mi autorización", con el mismo peso visual. Manuel. |
+| AP-18 | Nuevo, por revisar | Media | Cambiar "Nadie podrá ver los datos ya guardados" por "La app no mostrará los datos que ya se guardaron". "Esto no cambia tus turnos" solo si el equipo lo confirma. Manuel, con Maxi y Diego. |
+| AP-19 | Nuevo, por revisar | Media | Mover el foco a la confirmación, verificar `role="status"` en `Aviso` y usar un mensaje de error fijo. Manuel. |
 
-**Resumen:** 4 confirmados, 3 ajustados, 2 pendientes de consulta, 1 en consideración, 1 postergado y 3 omitidos.
+**Resumen:** 4 confirmados, 3 ajustados, 2 pendientes de consulta, 1 en consideración, 1 postergado, 3 omitidos y 5 nuevos por revisar.
 
 ## Capturas
 
