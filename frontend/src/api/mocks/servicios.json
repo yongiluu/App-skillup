@@ -47,7 +47,7 @@
         "cocinero_linea": 0.036,
         "jefe_turno": 0.549
       },
-      "recomendacion": "Hay 27 programados para 23 y 3 ya avisaron que no vienen: alcanza si no faltan más de 1. Ojo: faltan cocinero de línea y jefe de turno (avisaron que no vienen); confirma quién cubre esos puestos."
+      "recomendacion": "Hay 27 programados para 23 y 3 ya avisaron que no vienen: alcanza si no faltan más de 1. Ojo: avisó el único jefe de turno, así que no queda ninguno; confirma quién cubre ese puesto."
     },
     {
       "fecha": "2025-10-17",
