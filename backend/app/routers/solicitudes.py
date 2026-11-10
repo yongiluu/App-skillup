@@ -53,6 +53,14 @@ def _validar_reemplazo(repo: Repositorio, reemplazo: str, solicitante: str, fech
         raise HTTPException(409, f"{repo.empleados[reemplazo]['nombre']} no está disponible: {motivo}")
 
 
+def _vista(u: Usuario, s: dict) -> dict:
+    """Lo que ve cada uno. El reemplazo propuesto (que no pidió el cambio) no ve el motivo de quien
+    pide (texto libre: puede traer datos de salud) ni quiénes rechazaron antes."""
+    if u.es_jefe or u.empleado_id == s["solicitante_id"]:
+        return s
+    return {**s, "motivo": None, "rechazaron": []}
+
+
 def _solicitud(repo: Repositorio, solicitud_id: int) -> dict:
     s = repo.obtener_solicitud(solicitud_id)
     if s is None:
@@ -68,9 +76,10 @@ def listar(
     u: Usuario = Depends(usuario_actual),
     repo: Repositorio = Depends(get_repo),
 ):
-    """El jefe de turno ve todas; un empleado ve las que pidió o en las que lo proponen como reemplazo."""
+    """El jefe de turno ve todas; un empleado ve las que pidió o en las que lo proponen como reemplazo.
+    Al reemplazo propuesto le llegan sin `motivo` y con `rechazaron` vacío (privacidad de quien pide)."""
     return [
-        s for s in repo.listar_solicitudes()
+        _vista(u, s) for s in repo.listar_solicitudes()
         if (estado is None or s["estado"] == estado.value)
         and (u.es_jefe or u.empleado_id in (s["solicitante_id"], s["reemplazo_id"]))
     ]
@@ -102,7 +111,7 @@ def responder(
     s = _solicitud(repo, solicitud_id)
     if s["reemplazo_id"] is None or u.empleado_id != s["reemplazo_id"]:
         raise HTTPException(403, "Solo la persona propuesta como reemplazo puede responder")
-    return repo.responder_reemplazo(solicitud_id, datos.acepta)
+    return _vista(u, repo.responder_reemplazo(solicitud_id, datos.acepta))
 
 
 @router.patch("/{solicitud_id}/reemplazo", response_model=SolicitudCambio, responses=ERRORES)

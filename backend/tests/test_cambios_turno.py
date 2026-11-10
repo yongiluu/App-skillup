@@ -100,8 +100,12 @@ def revisar_rechazo_y_otro_reemplazo(jefe, empleado, reemplazo):
     r = _responder(reemplazo, sid, False)
     assert r.status_code == 200
     assert r.json()["estado"] == "pendiente" and r.json()["respuesta_reemplazo"] == "rechazada"
-    assert [x["empleado_id"] for x in r.json()["rechazaron"]] == [REEMPLAZO]  # J2: queda registro
-    assert _responder(reemplazo, sid, False).json()["rechazaron"] == r.json()["rechazaron"]  # no se duplica
+    assert r.json()["rechazaron"] == []  # al reemplazo no se le muestra (privacidad)
+    rech = lambda: next(x for x in jefe.get("/solicitudes-cambio").json() if x["id"] == sid)["rechazaron"]  # noqa: E731
+    assert [x["empleado_id"] for x in rech()] == [REEMPLAZO]  # J2: queda registro (lo ven jefe y solicitante)
+    rechazos = rech()
+    _responder(reemplazo, sid, False)
+    assert rech() == rechazos  # no se duplica
     assert _resolver(jefe, sid, "aprobada").status_code == 409
 
     # quien pidió propone a otra persona
@@ -191,6 +195,40 @@ def reemplazo(client):  # `client` deja los mocks limpios antes
 @pytest.mark.parametrize("revisar", REVISIONES, ids=lambda f: f.__name__)
 def test_reglas_con_mocks(revisar, client, empleado, reemplazo):
     revisar(client, empleado, reemplazo)
+
+
+def test_reemplazo_no_ve_motivo_ni_rechazos(client, empleado, reemplazo):
+    """Privacidad: al reemplazo no le llega el motivo de quien pide ni quiénes rechazaron antes."""
+    r = empleado.post("/solicitudes-cambio", json={
+        "solicitante_id": SOLICITANTE, "fecha": HOY, "servicio": SERVICIO,
+        "reemplazo_id": OTRO_GARZON_LIBRE, "motivo": "Control médico"})
+    sid = r.json()["id"]
+    # otro rechaza antes (lo simula el jefe proponiendo y luego cambiando): se anota en rechazaron
+    client.patch(f"/solicitudes-cambio/{sid}/reemplazo", json={"reemplazo_id": REEMPLAZO})
+    assert _responder(reemplazo, sid, False).status_code == 200
+    client.patch(f"/solicitudes-cambio/{sid}/reemplazo", json={"reemplazo_id": OTRO_GARZON_LIBRE})
+    client.patch(f"/solicitudes-cambio/{sid}/reemplazo", json={"reemplazo_id": REEMPLAZO})
+    # quien pide y el jefe ven todo
+    for c in (empleado, client):
+        s = next(x for x in c.get("/solicitudes-cambio").json() if x["id"] == sid)
+        assert s["motivo"] == "Control médico" and [x["empleado_id"] for x in s["rechazaron"]] == [REEMPLAZO]
+    # el reemplazo no
+    s = next(x for x in reemplazo.get("/solicitudes-cambio").json() if x["id"] == sid)
+    assert s["motivo"] is None and s["rechazaron"] == []
+    r = _responder(reemplazo, sid, True)
+    assert r.status_code == 200 and r.json()["motivo"] is None and r.json()["rechazaron"] == []
+
+
+def test_el_reemplazo_puede_cambiar_su_respuesta(client, empleado, reemplazo):
+    """Mientras siga pendiente: rechazada → aceptada → rechazada. Resuelta, ya no."""
+    sid = _pedir(empleado, REEMPLAZO).json()["id"]
+    assert _responder(reemplazo, sid, False).json()["respuesta_reemplazo"] == "rechazada"
+    assert _responder(reemplazo, sid, True).json()["respuesta_reemplazo"] == "aceptada"
+    assert _responder(reemplazo, sid, False).json()["respuesta_reemplazo"] == "rechazada"
+    assert _responder(reemplazo, sid, True).json()["respuesta_reemplazo"] == "aceptada"
+    assert _resolver(client, sid, "aprobada").status_code == 200
+    r = _responder(reemplazo, sid, False)
+    assert r.status_code == 409 and r.json()["detail"] == "La solicitud ya está aprobada"
 
 
 def test_aceptar_sin_estar_disponible(client, empleado, reemplazo):
