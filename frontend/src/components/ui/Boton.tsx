@@ -1,9 +1,9 @@
-import type { ButtonHTMLAttributes } from 'react'
+import type { ComponentPropsWithRef } from 'react'
 import estilos from './Boton.module.css'
 
 type Variante = 'primario' | 'secundario' | 'fantasma'
 
-interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface Props extends ComponentPropsWithRef<'button'> {
   variante?: Variante
   anchoCompleto?: boolean
 }

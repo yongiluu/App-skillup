@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { SesionProvider } from '../auth/SesionContext'
 import App from '../App'
 import { getDisponibles } from '../api'
+import Autorizacion, { ERROR_AUTORIZACION } from '../components/bienestar/Autorizacion'
 
 function montar(ruta: string) {
   return render(
@@ -43,17 +44,31 @@ describe('AP-04: retirar la autorización de bienestar', () => {
     expect(await screen.findByRole('table')).toBeInTheDocument()
     await u.click(screen.getByRole('button', { name: 'Retirar mi autorización' }))
 
-    // Confirmación en la misma pantalla; cancelar no cambia nada
+    // Confirmación en la misma pantalla, con el foco en la pregunta (AP-19)
     const confirmar = screen.getByRole('group', { name: /Retirar tu autorización/ })
+    expect(screen.getByText('¿Retirar tu autorización?').closest('p')).toHaveFocus()
     expect(within(confirmar).getByText(/dejará de ver tu indicador/)).toBeInTheDocument()
-    await u.click(within(confirmar).getByRole('button', { name: 'Cancelar' }))
+    // AP-16 y AP-18: sin etiquetas internas y sin prometer más de lo que pasa
+    expect(within(confirmar).queryByText(/Pendiente/i)).not.toBeInTheDocument()
+    expect(within(confirmar).queryByText(/Nadie podrá ver/)).not.toBeInTheDocument()
+    expect(within(confirmar).getByText(/La app no mostrará los datos que ya se guardaron/)).toBeInTheDocument()
+    expect(within(confirmar).getByText(/también al sugerir reemplazos/)).toBeInTheDocument()
+
+    // AP-17: "Mantener mi autorización" no cambia nada y devuelve el foco al botón
+    await u.click(within(confirmar).getByRole('button', { name: 'Mantener mi autorización' }))
     expect(screen.queryByRole('group', { name: /Retirar tu autorización/ })).not.toBeInTheDocument()
     expect(screen.getByRole('table')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Retirar mi autorización' })).toHaveFocus()
 
     // Retirar: desaparecen los datos y queda "Sin indicador"
     await u.click(screen.getByRole('button', { name: 'Retirar mi autorización' }))
-    await u.click(screen.getByRole('button', { name: 'Sí, retirar' }))
-    expect(await screen.findByText(/Retiraste tu autorización/)).toBeInTheDocument()
+    await u.click(screen.getByRole('button', { name: 'Sí, retirar mi autorización' }))
+    // AP-19: el aviso se anuncia solo (role="status")
+    expect((await screen.findByText(/Retiraste tu autorización/)).closest('[role="status"]')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Tu autorización' })).toHaveFocus()
+    // Ya no aparece el botón para retirarla, ni siquiera mientras se recarga el bienestar
+    expect(screen.queryByRole('button', { name: 'Retirar mi autorización' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Autorizar el uso de mis datos' })).toBeInTheDocument()
     expect(await screen.findByText('Sin indicador')).toBeInTheDocument()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
 
@@ -61,5 +76,23 @@ describe('AP-04: retirar la autorización de bienestar', () => {
     await u.click(screen.getByRole('button', { name: 'Autorizar el uso de mis datos' }))
     expect(await screen.findByText(/Autorizaste de nuevo/)).toBeInTheDocument()
     expect(await screen.findByRole('button', { name: 'Retirar mi autorización' })).toBeInTheDocument()
+  })
+})
+
+describe('AP-19: si falla, un mensaje fijo y claro', () => {
+  it('no muestra el texto técnico de la API', async () => {
+    const u = userEvent.setup()
+    // En modo simulado, otra persona distinta a la de la sesión recibe 403
+    render(
+      <Autorizacion
+        empleadoId="RST_999"
+        consentimiento={{ otorgado: true, fecha: '2025-10-01', version_texto: 'borrador-v0' }}
+        alCambiar={() => {}}
+      />,
+    )
+    await u.click(screen.getByRole('button', { name: 'Retirar mi autorización' }))
+    await u.click(screen.getByRole('button', { name: 'Sí, retirar mi autorización' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(ERROR_AUTORIZACION)
+    expect(screen.queryByText(/Solo la propia persona/)).not.toBeInTheDocument()
   })
 })
