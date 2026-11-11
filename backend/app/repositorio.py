@@ -150,6 +150,25 @@ class RepositorioMock:
             self.consentimientos[empleado_id] = nuevo
             return nuevo
 
+    def escala_fatiga(self) -> tuple[int, int]:
+        """(mínimo, máximo) de la escala vigente: igual que sensible.escala_fatiga versión 1."""
+        return 1, 7
+
+    def guardar_encuesta_fatiga(self, empleado_id: str, fecha: date, momento: str, valor: int) -> dict:
+        """Guarda solo la columna respondida; si ya hay datos del reloj ese día, no los toca."""
+        with self._lock:
+            columna = f"encuesta_fatiga_{momento}"
+            f = fecha.isoformat()
+            dias = self._bienestar_por_empleado[empleado_id]
+            fila = next((b for b in dias if b["fecha"] == f), None)
+            if fila is None:
+                fila = {"empleado_id": empleado_id, "fecha": f, "pasos": None, "sueno_horas": None,
+                        "pulso_medio_bpm": None, "encuesta_fatiga_inicio": None, "encuesta_fatiga_fin": None}
+                dias.append(fila)
+                dias.sort(key=lambda b: b["fecha"])
+            fila[columna] = valor
+            return fila
+
     def ausencias_del_dia(self, fecha: date) -> list[dict]:
         """Ausencias del día con nombre, rol y las franjas en que la persona tenía turno."""
         f = fecha.isoformat()

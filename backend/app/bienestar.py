@@ -44,7 +44,9 @@ def _componentes(registros: list[dict], dias_seguidos: int, horas_extra_7d: floa
             _acotar((mean(pasos) - 9000) / 6000) if pasos else 0.0,  # > 15.000 pasos = 1
             _acotar((mean(pulso) - 78) / 15) if pulso else 0.0,  # > 93 bpm medio = 1
         )
-    c["autorreporte"] = _acotar((mean(r["encuesta_fatiga_fin"] for r in registros) - 3) / 3)  # 6–7 = 1
+    encuesta = [r["encuesta_fatiga_fin"] for r in registros if r["encuesta_fatiga_fin"] is not None]
+    if encuesta:  # vacía si la persona no respondió la encuesta de salida esos días
+        c["autorreporte"] = _acotar((mean(encuesta) - 3) / 3)  # 6–7 = 1
     # La jornada no es un dato de salud, pero suma a la fatiga.
     c["jornada"] = max(_acotar((dias_seguidos - 4) / 4), _acotar(horas_extra_7d / 6))
     return c

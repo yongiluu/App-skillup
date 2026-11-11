@@ -161,3 +161,86 @@ def test_solo_la_propia_persona_cambia_su_autorizacion(client, empleado):
     assert empleado.post("/empleados/RST_005/consentimiento", json={"acepta": False}).status_code == 403
     assert empleado.post("/empleados/RST_056/consentimiento", json={"acepta": "talvez"}).status_code == 422
     assert empleado.post("/empleados/RST_056/consentimiento", json={"acepta": False, "x": 1}).status_code == 422
+
+
+# ---------- encuesta de cansancio respondida por la persona ----------
+def _dia(empleado, fecha=HOY):
+    regs = empleado.get("/empleados/RST_056/bienestar", params={"desde": fecha, "hasta": fecha}).json()["registros"]
+    return regs[0] if regs else None
+
+
+def revisar_encuesta_fatiga(jefe, empleado):
+    """La usan también las pruebas con la base (tests/test_bd.py)."""
+    antes = _dia(empleado)
+    # responde la salida: solo cambia esa columna; el reloj y la llegada quedan igual
+    r = empleado.post("/empleados/RST_056/encuesta-fatiga", json={"momento": "fin", "valor": 6})
+    assert r.status_code == 200, r.text
+    assert r.json() == {**antes, "encuesta_fatiga_fin": 6}
+    assert _dia(empleado) == {**antes, "encuesta_fatiga_fin": 6}
+    # se puede corregir, y la llegada también
+    empleado.post("/empleados/RST_056/encuesta-fatiga", json={"momento": "inicio", "valor": 2, "fecha": HOY})
+    assert _dia(empleado) == {**antes, "encuesta_fatiga_inicio": 2, "encuesta_fatiga_fin": 6}
+    # el jefe nunca responde por otro, y no ve el dato crudo: solo el indicador
+    assert jefe.post("/empleados/RST_056/encuesta-fatiga", json={"momento": "fin", "valor": 1}).status_code == 403
+    assert not CRUDOS & _claves(jefe.get("/empleados/RST_056").json()["bienestar"])
+    # fuera de la escala vigente (1 a 7)
+    for v in (0, 8):
+        r = empleado.post("/empleados/RST_056/encuesta-fatiga", json={"momento": "fin", "valor": v})
+        assert r.status_code == 422 and r.json()["detail"] == "La respuesta debe estar entre 1 y 7"
+    # sin turno ese día, u otro día que no sea hoy
+    r = empleado.post("/empleados/RST_056/encuesta-fatiga", json={"momento": "fin", "valor": 3, "fecha": "2025-10-16"})
+    assert r.status_code == 409 and r.json()["detail"] == "Solo puedes responder la encuesta de tu turno de hoy"
+    # sin autorización vigente: 409 claro
+    assert empleado.post("/empleados/RST_056/consentimiento", json={"acepta": False}).status_code == 200
+    r = empleado.post("/empleados/RST_056/encuesta-fatiga", json={"momento": "fin", "valor": 3})
+    assert r.status_code == 409
+    assert r.json()["detail"] == "Para responder la encuesta tienes que autorizar el uso de tus datos de bienestar"
+
+
+def test_encuesta_fatiga(client, empleado):
+    revisar_encuesta_fatiga(client, empleado)
+
+
+def test_autorreporte_sin_respuestas():
+    """Si no respondió la encuesta de salida, el indicador se calcula sin ese componente."""
+    from app.bienestar import _componentes
+
+    base = {"sueno_horas": 7.5, "pasos": 8000, "pulso_medio_bpm": 70.0, "encuesta_fatiga_inicio": None}
+    sin = _componentes([{**base, "encuesta_fatiga_fin": None}] * 3, 1, 0)
+    assert "autorreporte" not in sin
+    con = _componentes([{**base, "encuesta_fatiga_fin": 7}, {**base, "encuesta_fatiga_fin": None}], 1, 0)
+    assert con["autorreporte"] == 1.0  # solo cuenta la respondida
+
+
+def test_encuesta_salida_del_cierre_de_ayer(monkeypatch, client, empleado):
+    """El cierre del viernes 17-10 termina a las 02:00 del sábado: la salida va con fecha 17-10."""
+    from app.config import get_settings
+
+    monkeypatch.setenv("MOCK_HOY", "2025-10-18")
+    get_settings.cache_clear()
+    try:
+        r = empleado.post("/empleados/RST_056/encuesta-fatiga", json={"momento": "fin", "valor": 5, "fecha": HOY})
+        assert r.status_code == 200 and r.json()["fecha"] == HOY and r.json()["encuesta_fatiga_fin"] == 5
+        # la llegada de ayer no (ese turno ya terminó)
+        r = empleado.post("/empleados/RST_056/encuesta-fatiga", json={"momento": "inicio", "valor": 5, "fecha": HOY})
+        assert r.status_code == 409
+    finally:
+        monkeypatch.delenv("MOCK_HOY")
+        get_settings.cache_clear()
+
+
+def test_encuesta_crea_el_dia_si_no_hay_datos_del_reloj(client, empleado):
+    repo = repo_mock()
+    repo._bienestar_por_empleado["RST_056"] = [b for b in repo._bienestar_por_empleado["RST_056"] if b["fecha"] != HOY]
+    r = empleado.post("/empleados/RST_056/encuesta-fatiga", json={"momento": "inicio", "valor": 4})
+    assert r.status_code == 200
+    assert r.json() == {"fecha": HOY, "pasos": None, "sueno_horas": None,
+                        "pulso_medio_bpm": None, "encuesta_fatiga_inicio": 4, "encuesta_fatiga_fin": None}
+    # el indicador se sigue calculando aunque falte la encuesta de salida ese día
+    assert client.get("/empleados/RST_056").json()["bienestar"]["estado"] == "ok"
+
+
+def test_encuesta_campos_y_tipos(client, empleado):
+    assert empleado.post("/empleados/RST_056/encuesta-fatiga", json={"momento": "medio", "valor": 3}).status_code == 422
+    assert empleado.post("/empleados/RST_056/encuesta-fatiga", json={"momento": "fin", "valor": 3, "x": 1}).status_code == 422
+    assert empleado.post("/empleados/RST_005/encuesta-fatiga", json={"momento": "fin", "valor": 3}).status_code == 403

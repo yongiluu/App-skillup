@@ -5,7 +5,18 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app import bienestar, logica
 from app.config import get_settings
 from app.repositorio import Repositorio, get_repo
-from app.schemas import BienestarPropio, Consentimiento, ConsentimientoIn, Empleado, EmpleadoFicha, Error, Rol, Turno
+from app.schemas import (
+    BienestarPropio,
+    Consentimiento,
+    ConsentimientoIn,
+    Empleado,
+    EmpleadoFicha,
+    EncuestaFatigaIn,
+    Error,
+    RegistroBienestar,
+    Rol,
+    Turno,
+)
 from app.seguridad import Usuario, exigir_propio_o_jefe, usuario_actual
 
 router = APIRouter(prefix="/empleados", tags=["empleados"], dependencies=[Depends(usuario_actual)])
@@ -79,6 +90,51 @@ def cambiar_consentimiento(
         repo, u.usuario, "consentimiento_otorgado" if datos.acepta else "consentimiento_retirado", empleado_id
     )
     return c
+
+
+SIN_AUTORIZACION = "Para responder la encuesta tienes que autorizar el uso de tus datos de bienestar"
+
+
+@router.post(
+    "/{empleado_id}/encuesta-fatiga", response_model=RegistroBienestar, responses={**PERMISOS, 409: {"model": Error}}
+)
+def responder_encuesta_fatiga(
+    empleado_id: str,
+    datos: EncuestaFatigaIn,
+    u: Usuario = Depends(usuario_actual),
+    repo: Repositorio = Depends(get_repo),
+):
+    """**Solo la propia persona** (el jefe nunca): responde la encuesta de cansancio al llegar
+    (`inicio`) o al salir (`fin`) de su turno. Escala vigente: 1 = totalmente alerta … 7 = agotado/a.
+
+    - `fecha` es la del **turno**, no la del reloj: la salida del cierre de viernes y sábado (02:00)
+      va con la fecha del día en que empezó. Solo se aceptan el turno de hoy y, para `fin`, el
+      cierre de ayer (que termina pasada la medianoche).
+    - Guarda solo esa respuesta: no toca los datos del reloj ni la otra respuesta del día. Se puede
+      corregir respondiendo de nuevo.
+    - 409 sin autorización vigente o sin turno ese día. 422 fuera de la escala.
+    - Devuelve el registro del día (datos propios)."""
+    if u.empleado_id != empleado_id:
+        raise HTTPException(403, "Solo la propia persona puede responder su encuesta de cansancio")
+    if empleado_id not in repo.empleados:
+        raise HTTPException(404, f"No existe el empleado {empleado_id}")
+    minimo, maximo = repo.escala_fatiga()
+    if not minimo <= datos.valor <= maximo:
+        raise HTTPException(422, f"La respuesta debe estar entre {minimo} y {maximo}")
+    c = repo.consentimiento_de(empleado_id)
+    if not (c and c["otorgado"]):
+        raise HTTPException(409, SIN_AUTORIZACION)
+    hoy = get_settings().mock_hoy
+    fecha = datos.fecha or hoy
+    franjas = {t["servicio"] for t in repo.turnos_de_empleado(empleado_id) if t["fecha"] == fecha.isoformat()}
+    cierre_de_ayer = fecha == hoy - timedelta(days=1) and datos.momento == "fin" and "23_cierre" in franjas
+    if fecha != hoy and not cierre_de_ayer:
+        raise HTTPException(409, "Solo puedes responder la encuesta de tu turno de hoy")
+    if not franjas:
+        raise HTTPException(409, f"No tienes turno el {fecha}")
+    registro = repo.guardar_encuesta_fatiga(empleado_id, fecha, datos.momento, datos.valor)
+    bienestar.registrar_acceso(repo, u.usuario, f"encuesta_fatiga_{datos.momento}", empleado_id)
+    return registro
 
 
 @router.get("/{empleado_id}/turnos", response_model=list[Turno], responses=PERMISOS)

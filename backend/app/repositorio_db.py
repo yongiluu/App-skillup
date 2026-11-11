@@ -537,6 +537,29 @@ class RepositorioDB:
 
         return self._cacheado(("bienestar", desde, hasta), cargar).get(empleado_id, [])
 
+    def escala_fatiga(self) -> tuple[int, int]:
+        f = self._una("select valor_min, valor_max from sensible.escala_fatiga where vigente")
+        return (f["valor_min"], f["valor_max"]) if f else (1, 7)
+
+    def guardar_encuesta_fatiga(self, empleado_id: str, fecha: date, momento: str, valor: int) -> dict:
+        """insert … on conflict do update de SOLO la columna respondida (no borra los datos del reloj).
+        La base rechaza si no hay consentimiento vigente o si el valor está fuera de la escala."""
+        columna = {"inicio": "encuesta_fatiga_inicio", "fin": "encuesta_fatiga_fin"}[momento]  # nunca texto del cliente
+        try:
+            f = self._una(
+                f"""insert into sensible.bienestar_diario (empleado_id, fecha, {columna}, escala_version)
+                    values (%s, %s, %s, (select version from sensible.escala_fatiga where vigente))
+                    on conflict (empleado_id, fecha) do update set {columna} = excluded.{columna}
+                    returning empleado_id, fecha, pasos, sueno_horas, pulso_medio_bpm,
+                              encuesta_fatiga_inicio, encuesta_fatiga_fin""",
+                (empleado_id, fecha, valor),
+            )
+        except errors.RaiseException as e:
+            raise ReglaNegocio(e.diag.message_primary or str(e)) from None
+        finally:
+            self._cache.clear()
+        return {**{k: _num(v) for k, v in f.items()}, "fecha": _iso(f["fecha"])}
+
     def registrar_acceso(self, usuario: str, accion: str, empleado_id: str | None) -> None:
         self._q(
             "insert into sensible.registro_acceso (usuario, accion, empleado_id) values (%s, %s, %s)",
