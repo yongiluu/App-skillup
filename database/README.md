@@ -11,7 +11,9 @@ database/
 ├── migrations/
 │   ├── 0001_esquema_inicial.sql   # crea todas las hojas (tablas) y sus reglas
 │   ├── 0002_cuenta_backend_y_login.sql  # etapa 3: cuenta del backend e intentos de login
-│   └── 0003_reemplazo_acepta_y_mover_turno.sql  # solicitudes: el reemplazo acepta y el turno se mueve
+│   ├── 0003_reemplazo_acepta_y_mover_turno.sql  # solicitudes: el reemplazo acepta y el turno se mueve
+│   ├── 0004_propuesto_en_y_rechazos.sql         # cuándo se propuso al reemplazo y quiénes rechazaron
+│   └── 0005_franjas_luthier.sql                 # franjas del horario de Luthier (sale 11_13, entra 23_cierre)
 ├── seed/                          # semilla: datos SIMULADOS para la demo
 │   ├── generar_semilla.py         # genera los 3 archivos SQL desde backend/app/mocks/
 │   ├── 01_datos_base.sql
@@ -33,7 +35,7 @@ Los nombres y valores coinciden con la API de Diego (`backend/app/schemas.py` y 
 - Bienestar en una sola hoja `bienestar_diario`, una fila por persona y día, con los mismos nombres de columnas que el backend (encuesta de fatiga en escala 1 a 7).
 - Eventos con varias franjas, impacto esperado y notas.
 
-Se probó cargando todos los datos de ejemplo del backend (80 empleados, 140 servicios, 2.773 turnos, 2.275 días de bienestar) y entran sin problemas.
+Se probó cargando todos los datos de ejemplo del backend (86 empleados, 140 servicios, 2.797 turnos, 2.485 días de bienestar) y entran sin problemas.
 
 ## Cómo crear la base desde cero (una sola vez)
 
@@ -45,11 +47,11 @@ Se probó cargando todos los datos de ejemplo del backend (80 empleados, 140 ser
 
 ## Cargar los datos simulados (semilla)
 
-Para la demo, la base se llena con los datos de ejemplo del backend (nombres ficticios): 80 empleados (simulación v2 de Diego), 140 servicios (2025-09-29 a 2025-11-02, "hoy" = 2025-10-17), 2.773 turnos, 65 consentimientos y 2.275 días de bienestar.
+Para la demo, la base se llena con los datos de ejemplo del backend (nombres ficticios): 86 empleados (simulación v3 de Diego, horario de Luthier), 140 servicios (2025-09-29 a 2025-11-02, "hoy" = 2025-10-17), 2.797 turnos, 71 consentimientos y 2.485 días de bienestar. Franjas: 13_15, 19_21, 21_23 y 23_cierre.
 
 1. En el **SQL Editor**, un *snippet* nuevo por archivo, en este orden: `seed/01_datos_base.sql`, `seed/02_turnos.sql` y `seed/03_bienestar.sql`. Cada uno se pega completo y se ejecuta con **Run**.
 2. Cada archivo se carga entero o no se carga nada. Si ya se había cargado, avisa y no duplica.
-3. Se carga sobre el esquema recién creado (`migrations/`). Para **recargarla** sobre una base que ya tiene datos, primero hay que vaciar las tablas de datos (sin borrar las tablas).
+3. Se carga sobre el esquema recién creado (`migrations/`). Para **recargarla** sobre una base que ya tiene datos, primero hay que vaciar las tablas de datos (sin borrar las tablas), incluida `solicitud_rechazo`.
 
 Decisiones (las mismas que `backend/scripts/cargar_mocks_en_bd.py`, por lo que ambos cargan exactamente lo mismo):
 - Si los mocks traen turnos repetidos (misma persona dos veces en un servicio), se omiten y queda el primero.
@@ -80,7 +82,7 @@ El backend sigue funcionando como antes hasta que Diego cambie su `DATABASE_URL`
 
 ## Solicitudes de cambio: el reemplazo acepta y el turno se mueve
 
-`migrations/0003_reemplazo_acepta_y_mover_turno.sql` (decidido por Maxi). **Se aplica y se fusiona junto con el cambio del backend**: con la `0003`, el backend actual no puede aprobar si el reemplazo no aceptó.
+`migrations/0003_reemplazo_acepta_y_mover_turno.sql` (decidido por Maxi). Ya está en `main` junto con su backend.
 
 1. El empleado pide el cambio y propone un reemplazo. `respuesta_reemplazo` queda en `pendiente`.
 2. El reemplazo responde `aceptada` o `rechazada` (se guarda `respondida_en`). Si rechaza, la solicitud sigue pendiente y se puede proponer a otra persona: al cambiar `reemplazo_id`, la respuesta vuelve a `pendiente`.
@@ -90,6 +92,14 @@ El backend sigue funcionando como antes hasta que Diego cambie su `DATABASE_URL`
 6. Solo puede haber una solicitud pendiente por persona y turno.
 
 La función `motivo_no_disponible(reemplazo, solicitante, fecha, franja)` devuelve el motivo en palabras (o vacío si está disponible), para que la app lo muestre antes de aceptar.
+
+**`migrations/0004_propuesto_en_y_rechazos.sql`** (borrador de Diego, revisado y probado por Maxi), para el boceto de Cata (J1 "Sin respuesta hace 3 h" y J2 "Ya dijo que no puede"):
+- `solicitud_cambio.propuesto_en`: se llena solo al proponer a alguien (al crear o al cambiar de reemplazo) y nadie lo cambia a mano.
+- Tabla `solicitud_rechazo` (solicitud, empleado y hora): se agrega una fila sola cada vez que un reemplazo rechaza. El backend solo puede leer y agregar, no modificar ni borrar.
+
+En Supabase se aplican en orden: primero `0003` y después `0004`.
+
+**`migrations/0005_franjas_luthier.sql`** (borrador de Diego, revisado y probado por Maxi): horario de Luthier. Sale la franja `11_13` (antes de abrir) y entra `23_cierre` (termina a la 01:00, o a las 02:00 viernes y sábado). Cambia las reglas de franja de `servicio`, `solicitud_cambio` y `evento`. Si queda alguna fila con `11_13`, falla sin cambiar nada: por eso se aplica con los datos vacíos y después se carga la semilla v3. [PENDIENTE CERVECERÍA]: horario del domingo.
 
 ## Las hojas, en simple
 
@@ -107,7 +117,8 @@ La función `motivo_no_disponible(reemplazo, solicitante, fecha, franja)` devuel
 | prediccion | Probabilidad de déficit (total y por rol), dotación predicha, recomendación y nivel de riesgo |
 | calendario_dia | Ventanas de pago, feriados, vísperas y fines de semana largos |
 | evento | Partidos, conciertos, promociones del local |
-| solicitud_cambio | Pedidos de cambio de turno, respuesta del reemplazo y resolución del jefe |
+| solicitud_cambio | Pedidos de cambio de turno, respuesta del reemplazo (y cuándo se propuso) y resolución del jefe |
+| solicitud_rechazo | Quiénes rechazaron ser reemplazo en cada solicitud |
 | configuracion | Valores ajustables (ej: máximo de días seguidos) |
 | intento_login | Intentos de entrar a la app (para el bloqueo tras 5 fallidos) |
 
