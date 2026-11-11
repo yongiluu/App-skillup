@@ -117,6 +117,12 @@
   font-size: var(--texto-md);
 }
 
+/* Reciben el foco por código (AP-19), igual que el título de cada página: no son controles. */
+.autorizacion h3:focus,
+.confirmar p:focus {
+  outline: none;
+}
+
 .confirmar {
   display: flex;
   flex-direction: column;
