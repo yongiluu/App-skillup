@@ -103,6 +103,7 @@ Todos exigen la cabecera `Authorization: Bearer <token>`, salvo `/auth/login` y 
 | `GET` | `/bienestar/fatiga?fecha=` | Jefe | **Nuevo.** Indicador de fatiga de cada persona: solo nivel y motivos |
 | `GET` | `/empleados/{id}/bienestar?desde=&hasta=` | **Solo la misma persona** | **Nuevo.** Datos crudos propios: pasos, sueño, pulso y encuesta. El jefe recibe `403` |
 | `POST` | `/empleados/{id}/consentimiento` | **Solo la misma persona** | **Nuevo (AP-04).** `{"acepta": false}` retira la autorización de bienestar; `{"acepta": true}` la vuelve a dar. Desde ese momento nadie ve su indicador (el jefe ve `sin_consentimiento`). No se borra el registro: se llena `revocado_en`. 409 si ya estaba así. Qué pasa con los datos ya guardados está [PENDIENTE CERVECERÍA / revisión legal] |
+| `POST` | `/empleados/{id}/encuesta-fatiga` | **Solo la misma persona** | **Nuevo.** `{"momento": "inicio"\|"fin", "valor": 1-7, "fecha": "YYYY-MM-DD"}`. Encuesta de cansancio al llegar o al salir del turno. `fecha` = la del **turno** (por defecto, hoy); la salida del cierre de ayer (termina a la 01:00 o 02:00) también se acepta. Guarda solo esa respuesta (no toca los datos del reloj) y se puede corregir. 409 sin autorización vigente o sin turno ese día; 422 fuera de la escala. Queda en `registro_acceso`. Devuelve el registro del día |
 | `GET` | `/bienestar/preguntas` | Todos | **Nuevo.** Preguntas propuestas para los tests (estado `pendiente`) |
 | `GET` | `/health` | Todos | Verifica que la API está arriba. No muestra datos |
 
@@ -156,6 +157,7 @@ Los datos son **simulados** y solo incluyen las variables activas de la matriz: 
 | Nadie | Diagnósticos ni datos de quien no dio consentimiento |
 
 - **Consentimiento:** cada persona tiene un registro simulado (`otorgado`, `fecha`, `version_texto`). 15 de las 86 no consintieron (por ejemplo, `RST_011`). Para ellas el estado es `sin_consentimiento` y no existen datos de bienestar, ni siquiera guardados.
+- **Encuesta de cansancio:** la responde la propia persona con `POST /empleados/{id}/encuesta-fatiga`. En `RegistroBienestar`, `encuesta_fatiga_inicio` y `encuesta_fatiga_fin` pueden venir en `null` (no respondió). Si un día no hay respuesta de salida, el autorreporte se calcula con los días que sí la tienen.
 - **Indicador v0** (`app/bienestar.py`): se calcula con los últimos 3 días. Cada componente va de 0 a 1:
   - descanso: menos de 5,5 h de sueño promedio = 1;
   - carga física: más de 15.000 pasos o pulso medio sobre 93 = 1;

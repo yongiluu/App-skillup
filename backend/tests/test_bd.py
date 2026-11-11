@@ -189,6 +189,34 @@ def test_retirar_autorizacion_en_bd(modo_bd):
         _recrear_base()
 
 
+def test_encuesta_fatiga_en_bd(modo_bd):
+    """Encuesta con la base: upsert solo de la columna respondida, auditoría, y día nuevo sin reloj."""
+    from tests.test_bienestar import revisar_encuesta_fatiga
+
+    _recrear_base()
+    limitador.limpiar()
+    try:
+        revisar_encuesta_fatiga(_cliente("jefe"), _cliente("empleado"))
+        with psycopg.connect(URL) as con:
+            acciones = [f[0] for f in con.execute(
+                "select accion from sensible.registro_acceso where empleado_id = 'RST_056' "
+                "and accion like 'encuesta_fatiga_%' order by id").fetchall()]
+            fila = con.execute(
+                "select pasos, encuesta_fatiga_inicio, encuesta_fatiga_fin, escala_version "
+                "from sensible.bienestar_diario where empleado_id = 'RST_056' and fecha = %s", (HOY,)).fetchone()
+        assert acciones == ["encuesta_fatiga_fin", "encuesta_fatiga_inicio"]
+        assert fila[0] is not None and fila[1:] == (2, 6, 1)  # el reloj no se tocó
+        # día sin datos del reloj: se crea la fila solo con la encuesta
+        _recrear_base()
+        limitador.limpiar()
+        with psycopg.connect(URL) as con:
+            con.execute("delete from sensible.bienestar_diario where empleado_id = 'RST_056' and fecha = %s", (HOY,))
+        r = _cliente("empleado").post("/empleados/RST_056/encuesta-fatiga", json={"momento": "inicio", "valor": 4})
+        assert r.status_code == 200 and r.json()["pasos"] is None and r.json()["encuesta_fatiga_inicio"] == 4
+    finally:
+        _recrear_base()
+
+
 # ---------- escrituras ----------
 def test_crear_evento_en_bd(jefe_bd):
     r = jefe_bd.post("/eventos", json={"fecha": "2025-10-25", "nombre": "Tocata", "tipo": "tocata", "servicios": ["21_23"]})

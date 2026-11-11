@@ -174,6 +174,16 @@ class ConsentimientoIn(Entrada):
     acepta: bool = Field(description="true = autorizo compartir mis datos de bienestar; false = retiro la autorización")
 
 
+class EncuestaFatigaIn(Entrada):
+    momento: Literal["inicio", "fin"] = Field(description="inicio = al llegar al turno; fin = al salir")
+    valor: int = Field(description="Escala vigente: 1 = totalmente alerta … 7 = agotado/a")
+    fecha: date | None = Field(
+        default=None,
+        description="Fecha del TURNO (no la del reloj). El cierre de viernes y sábado termina a las 02:00: "
+        "la encuesta de salida va con la fecha del día en que empezó el turno. Por defecto, MOCK_HOY.",
+    )
+
+
 class IndicadorFatiga(BaseModel):
     """Lo único que ve el jefe de turno: nivel y motivos generales, nunca los datos crudos."""
 
@@ -223,8 +233,8 @@ class RegistroBienestar(BaseModel):
     pasos: int | None = Field(description="null = el reloj no tuvo buena señal ese día")
     sueno_horas: float | None
     pulso_medio_bpm: float | None
-    encuesta_fatiga_inicio: int = Field(ge=1, le=7, description="1 = totalmente alerta, 7 = agotado/a")
-    encuesta_fatiga_fin: int = Field(ge=1, le=7)
+    encuesta_fatiga_inicio: int | None = Field(ge=1, le=7, description="1 = totalmente alerta, 7 = agotado/a; null = no respondió")
+    encuesta_fatiga_fin: int | None = Field(ge=1, le=7, description="null = no respondió")
 
 
 class BienestarPropio(Bienestar):

@@ -109,6 +109,7 @@ Todos los endpoints, salvo `/auth/login` y `/health`, exigen la cabecera `Author
 | `GET` | `/bienestar/fatiga?fecha=` | Indicador de fatiga del equipo: solo nivel y motivo general (jefe de turno) |
 | `GET` | `/empleados/{id}/bienestar` | Datos de bienestar propios: solo la misma persona |
 | `POST` | `/empleados/{id}/consentimiento` | Dar o retirar la autorización de bienestar: solo la misma persona |
+| `POST` | `/empleados/{id}/encuesta-fatiga` | Responder la encuesta de cansancio (llegada o salida del turno): solo la misma persona |
 | `GET` | `/bienestar/preguntas` | Preguntas propuestas para los tests (pendiente) |
 
 Ejemplo de respuesta de `GET /servicios` (se muestra 1 de los 4 servicios del día):
